@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": { 
+    "layer0": "everpotion:item/lingering_base",
+    "layer1": "everpotion:item/lingering_case"
+  }
+}

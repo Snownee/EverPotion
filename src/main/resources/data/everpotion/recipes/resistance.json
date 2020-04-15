@@ -1,0 +1,18 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "potion",
+    "nbt": {
+      "Potion": "minecraft:turtle_master"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "resistance",
+    "duration": 60
+  }
+}

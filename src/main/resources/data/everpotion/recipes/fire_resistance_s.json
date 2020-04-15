@@ -1,0 +1,19 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "splash_potion",
+    "nbt": {
+      "Potion": "minecraft:fire_resistance"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "fire_resistance",
+    "duration": 90,
+    "type": "splash"
+  }
+}

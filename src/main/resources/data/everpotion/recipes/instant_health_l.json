@@ -1,0 +1,18 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "lingering_potion",
+    "nbt": {
+      "Potion": "minecraft:healing"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "instant_health",
+    "type": "lingering"
+  }
+}

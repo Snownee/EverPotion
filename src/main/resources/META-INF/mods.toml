@@ -1,14 +1,14 @@
 modLoader="javafml"
 loaderVersion="[31,)"
 [[mods]]
-modId="modname"
+modId="everpotion"
 version="${file.jarVersion}"
-displayName="ModName"
+displayName="EverPotion"
 authors="Snownee"
-displayURL="https://minecraft.curseforge.com/projects/modname"
+displayURL="https://minecraft.curseforge.com/projects/everpotion"
 description=""
 
-[[dependencies.modname]]
+[[dependencies.everpotion]]
     modId="kiwi"
     mandatory=true
     versionRange="[2.7, 2.11)"

@@ -1,0 +1,19 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "lingering_potion",
+    "nbt": {
+      "Potion": "minecraft:strength"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "strength",
+    "duration": 60,
+    "type": "lingering"
+  }
+}

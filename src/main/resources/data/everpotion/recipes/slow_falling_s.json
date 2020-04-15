@@ -1,0 +1,19 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "splash_potion",
+    "nbt": {
+      "Potion": "minecraft:slow_falling"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "slow_falling",
+    "duration": 30,
+    "type": "splash"
+  }
+}

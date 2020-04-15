@@ -1,0 +1,20 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "lingering_potion",
+    "nbt": {
+      "Potion": "minecraft:strong_leaping"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "jump_boost",
+    "duration": 30,
+    "amplifier": 1,
+    "type": "lingering"
+  }
+}

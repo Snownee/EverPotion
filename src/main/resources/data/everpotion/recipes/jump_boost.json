@@ -1,0 +1,19 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "potion",
+    "nbt": {
+      "Potion": "minecraft:strong_leaping"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "jump_boost",
+    "duration": 30,
+    "amplifier": 1
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "potion",
+    "nbt": {
+      "Potion": "minecraft:strength"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "strength",
+    "duration": 60
+  }
+}

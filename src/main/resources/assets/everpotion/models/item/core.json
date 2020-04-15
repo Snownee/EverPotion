@@ -1,0 +1,10 @@
+{
+    "parent": "item/generated",
+    "textures": {
+    },
+    "overrides": [
+        { "predicate": { "type": 0 }, "model": "everpotion:item/normal" },
+        { "predicate": { "type": 1 }, "model": "everpotion:item/splash" },
+        { "predicate": { "type": 2 }, "model": "everpotion:item/lingering" }
+    ]
+}

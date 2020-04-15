@@ -1,0 +1,7 @@
+{
+  "parent": "item/generated",
+  "textures": { 
+    "layer0": "everpotion:item/splash_base",
+    "layer1": "everpotion:item/splash_case"
+  }
+}

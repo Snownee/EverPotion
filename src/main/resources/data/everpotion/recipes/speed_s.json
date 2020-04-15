@@ -1,0 +1,20 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "splash_potion",
+    "nbt": {
+      "Potion": "minecraft:swiftness"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "speed",
+    "duration": 30,
+    "amplifier": 1,
+    "type": "splash"
+  }
+}
