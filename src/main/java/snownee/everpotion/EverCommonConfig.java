@@ -20,7 +20,7 @@ public final class EverCommonConfig {
     // effects
     public static float durationFactor = 1;
     public static boolean ambient = true;
-    public static boolean showParticles = false;
+    public static boolean showParticles = true;
     public static boolean showIcon = true;
 
     private static IntValue maxSlotsVal;

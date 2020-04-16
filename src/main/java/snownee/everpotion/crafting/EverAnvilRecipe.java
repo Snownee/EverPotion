@@ -16,6 +16,7 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import snownee.everpotion.CoreModule;
+import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
 import snownee.kiwi.crafting.Recipe;
 
@@ -25,7 +26,7 @@ public class EverAnvilRecipe extends Recipe<AnvilContext> {
     private final Ingredient right;
     private final int cost;
     private final int materialCost;
-    public final ItemStack output;
+    private final ItemStack output;
 
     public EverAnvilRecipe(ResourceLocation id, Ingredient left, Ingredient right, int cost, int materialCost, ItemStack output) {
         super(id);
@@ -46,6 +47,14 @@ public class EverAnvilRecipe extends Recipe<AnvilContext> {
         inv.cost = cost;
         inv.materialCost = materialCost;
         return getRecipeOutput();
+    }
+
+    public Ingredient getLeft() {
+        return left;
+    }
+
+    public Ingredient getRight() {
+        return right;
     }
 
     @Override
@@ -79,7 +88,7 @@ public class EverAnvilRecipe extends Recipe<AnvilContext> {
                 int amplifier = JSONUtils.getInt(outputObj, "amplifier", 0);
                 EffectInstance effectInstance = null;
                 if (effect != null) {
-                    effectInstance = new EffectInstance(effect, duration, amplifier);
+                    effectInstance = new EffectInstance(effect, duration, amplifier, EverCommonConfig.ambient, EverCommonConfig.showParticles, EverCommonConfig.showIcon);
                 }
                 PotionType type = PotionType.parse(JSONUtils.getString(outputObj, "type", "normal"));
                 float charge = JSONUtils.getFloat(outputObj, "charge", 1);
