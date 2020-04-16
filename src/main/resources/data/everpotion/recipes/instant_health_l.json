@@ -13,6 +13,7 @@
   "cost": 12,
   "output": {
     "effect": "instant_health",
+    "amplifier": 1,
     "type": "lingering"
   }
 }

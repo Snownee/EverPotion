@@ -2,6 +2,7 @@ package snownee.everpotion.plugin;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
@@ -9,11 +10,14 @@ import com.google.common.collect.ImmutableList;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.VanillaRecipeCategoryUid;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.registration.IRecipeRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.plugins.vanilla.anvil.AnvilRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.crafting.CraftingModule;
 import snownee.everpotion.crafting.EverAnvilRecipe;
@@ -27,6 +31,13 @@ public class JEIPlugin implements IModPlugin {
     @Override
     public ResourceLocation getPluginUid() {
         return UID;
+    }
+
+    @Override
+    public void registerItemSubtypes(ISubtypeRegistration registration) {
+        ISubtypeInterpreter interpreter = stack -> Objects.toString(stack.getTag());
+        registration.registerSubtypeInterpreter(CoreModule.CORE, interpreter);
+        registration.registerSubtypeInterpreter(CoreModule.UNLOCK_SLOT, interpreter);
     }
 
     @Override

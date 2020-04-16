@@ -12,6 +12,7 @@
   },
   "cost": 8,
   "output": {
+    "amplifier": 1,
     "effect": "instant_health"
   }
 }

@@ -112,14 +112,14 @@ public class UnlockSlotItem extends ModItem {
     public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.isInGroup(group)) {
             ItemStack stack = new ItemStack(this);
+            NBTHelper data = NBTHelper.of(stack);
             for (int i = 0; i < 2; i++) {
                 items.add(stack.copy());
-                NBTHelper data = NBTHelper.of(stack);
                 for (int j = 1; j <= 4; j++) {
                     data.setInt("Tier", j);
                     items.add(stack.copy());
                 }
-                stack.setTag(null);
+                stack.getTag().keySet().clear();
                 data.setBoolean("Force", true);
             }
         }
