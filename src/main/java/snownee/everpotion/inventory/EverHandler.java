@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -21,11 +22,13 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.kiwi.util.NBTHelper;
 
@@ -88,6 +91,9 @@ public class EverHandler extends ItemStackHandler {
     public void copyFrom(EverHandler that) {
         this.setSlots(that.getSlots());
         this.stacks = that.stacks;
+        for (int i = 0; i < 4; i++) {
+            onContentsChanged(i);
+        }
     }
 
     public void tick() {
@@ -178,9 +184,11 @@ public class EverHandler extends ItemStackHandler {
             effect = CoreItem.getEffectInstance(stack);
             type = CoreItem.getPotionType(stack);
             if (effect != null) {
-                color = effect.getPotion().getLiquidColor();
+                int color = effect.getPotion().getLiquidColor();
+                Vector3f hsv = ClientHandler.RGBtoHSV(color);
+                this.color = MathHelper.hsvToRGB(hsv.getX() / 360, hsv.getY(), 1);
             } else {
-                color = 3694022;
+                color = 4749311; // 3694022;
             }
         }
     }

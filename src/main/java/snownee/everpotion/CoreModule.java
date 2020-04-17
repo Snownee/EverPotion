@@ -16,9 +16,13 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
@@ -29,7 +33,7 @@ import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
-import snownee.everpotion.container.EverContainer;
+import snownee.everpotion.container.PlaceContainer;
 import snownee.everpotion.inventory.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
@@ -39,6 +43,8 @@ import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.network.NetworkChannel;
+import snownee.kiwi.schedule.Scheduler;
+import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
 @KiwiModule
 @KiwiModule.Subscriber
@@ -49,7 +55,7 @@ public class CoreModule extends AbstractModule {
 
     public static final UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
 
-    public static final ContainerType<EverContainer> MAIN = new ContainerType<>(EverContainer::new);
+    public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
 
     public CoreModule() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -104,7 +110,16 @@ public class CoreModule extends AbstractModule {
 
     @SubscribeEvent
     protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        sync((ServerPlayerEntity) event.getPlayer());
+        if (event.getEntity().world.isRemote) {
+            return;
+        }
+        //        Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
+        //            if (t >= 10) {
+        //                sync((ServerPlayerEntity) event.getPlayer());
+        //                return true;
+        //            }
+        //            return false;
+        //        }));
     }
 
     public static void sync(ServerPlayerEntity player) {
@@ -114,5 +129,10 @@ public class CoreModule extends AbstractModule {
     @SubscribeEvent
     public void tickPlayer(TickEvent.PlayerTickEvent event) {
         event.player.getCapability(EverCapabilities.HANDLER).ifPresent(EverHandler::tick);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onLivingHurt(LivingHurtEvent event) {
+
     }
 }

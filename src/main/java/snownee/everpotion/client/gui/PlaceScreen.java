@@ -6,13 +6,14 @@ import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import snownee.everpotion.container.EverContainer;
+import snownee.everpotion.EverCommonConfig;
+import snownee.everpotion.container.PlaceContainer;
 
-public class PlaceScreen extends ContainerScreen<EverContainer> {
+public class PlaceScreen extends ContainerScreen<PlaceContainer> {
 
     private static final ResourceLocation HOPPER_GUI_TEXTURE = new ResourceLocation("textures/gui/container/hopper.png");
 
-    public PlaceScreen(EverContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
+    public PlaceScreen(PlaceContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
         super(screenContainer, inv, titleIn);
         this.passEvents = false;
         this.ySize = 133;
@@ -44,6 +45,14 @@ public class PlaceScreen extends ContainerScreen<EverContainer> {
         int i = (this.width - this.xSize) / 2;
         int j = (this.height - this.ySize) / 2;
         this.blit(i, j, 0, 0, this.xSize, this.ySize);
+        int slots = container.getSlots();
+        int xOffset = 2 - EverCommonConfig.maxSlots / 2;
+        int xStart = guiLeft + 43 + xOffset * 18;
+        if (xOffset > 0) {
+            fill(guiLeft + 43, guiTop + 19, xStart, guiTop + 39, 0xffc6c6c6);
+        }
+        xStart += slots * 18;
+        fill(xStart, guiTop + 19, guiLeft + 133, guiTop + 39, 0xffc6c6c6);
     }
 
 }

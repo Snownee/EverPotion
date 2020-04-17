@@ -12,10 +12,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.everpotion.CoreModule;
+import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.gui.UseScreen;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
@@ -73,7 +76,7 @@ public final class ClientHandler {
         if (mc.player == null || mc.currentScreen != null) {
             return;
         }
-        if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown()) {
+        if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown() && mc.player.getCapability(EverCapabilities.HANDLER).isPresent()) {
             if (mc.player.isCrouching()) {
                 new COpenContainerPacket().send();
             } else if (event.getModifiers() == 0) {
@@ -82,6 +85,15 @@ public final class ClientHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void renderOverlay(RenderGameOverlayEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {
+            event.setCanceled(true);
+        }
+    }
+
+    // TODO remove
     /**
      * @return h: 0-360 s: 0-1 v: 0-255
      */

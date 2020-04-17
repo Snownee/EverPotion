@@ -10,15 +10,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import snownee.everpotion.CoreModule;
+import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.inventory.EverHandler;
 import snownee.kiwi.inventory.InvHandlerWrapper;
 import snownee.kiwi.inventory.container.ModSlot;
 
-public class EverContainer extends Container {
+public class PlaceContainer extends Container {
     private final EverHandler handler;
 
-    public EverContainer(int id, PlayerInventory playerInventory) {
+    public PlaceContainer(int id, PlayerInventory playerInventory) {
         super(CoreModule.MAIN, id);
         PlayerEntity player = playerInventory.player;
         handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
@@ -28,8 +29,10 @@ public class EverContainer extends Container {
         }
         InvHandlerWrapper inventory = new InvHandlerWrapper(handler);
 
+        int xOffset = 2 - EverCommonConfig.maxSlots / 2;
+        int xStart = 44 + xOffset * 18;
         for (int j = 0; j < handler.getSlots(); ++j) {
-            this.addSlot(new ModSlot(inventory, j, 44 + j * 18, 20));
+            this.addSlot(new ModSlot(inventory, j, xStart + j * 18, 20));
         }
 
         for (int l = 0; l < 3; ++l) {
@@ -76,6 +79,10 @@ public class EverContainer extends Container {
         if (!playerIn.world.isRemote) {
             CoreModule.sync((ServerPlayerEntity) playerIn);
         }
+    }
+
+    public int getSlots() {
+        return handler.getSlots();
     }
 
     @Override
