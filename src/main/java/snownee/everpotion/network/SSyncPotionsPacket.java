@@ -7,7 +7,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 import snownee.everpotion.cap.EverCapabilities;
-import snownee.everpotion.inventory.EverHandler;
+import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.network.Packet;
 
 public class SSyncPotionsPacket extends Packet {
@@ -41,7 +41,12 @@ public class SSyncPotionsPacket extends Packet {
             handler.setSlots(slots);
             for (int i = 0; i < slots; i++) {
                 handler.setStackInSlot(i, buf.readItemStack());
+                float progress = buf.readFloat();
+                if (handler.caches[i] != null) {
+                    handler.caches[i].progress = progress;
+                }
             }
+            handler.chargeIndex = buf.readByte();
             return new SSyncPotionsPacket(handler);
         }
 
@@ -51,7 +56,9 @@ public class SSyncPotionsPacket extends Packet {
             buf.writeByte(slots);
             for (int i = 0; i < slots; i++) {
                 buf.writeItemStack(pkt.handler.getStackInSlot(i));
+                buf.writeFloat(pkt.handler.caches[i] == null ? 0 : pkt.handler.caches[i].progress);
             }
+            buf.writeByte(pkt.handler.chargeIndex);
         }
 
         @Override

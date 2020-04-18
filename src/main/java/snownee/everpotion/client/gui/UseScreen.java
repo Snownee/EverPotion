@@ -14,16 +14,18 @@ import net.minecraft.client.renderer.texture.PotionSpriteUploader;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
-import snownee.everpotion.inventory.EverHandler;
-import snownee.everpotion.inventory.EverHandler.Cache;
-import snownee.everpotion.network.CDrinkPacket;
+import snownee.everpotion.client.ClientHandler;
+import snownee.everpotion.handler.EverHandler;
+import snownee.everpotion.handler.EverHandler.Cache;
 
 public class UseScreen extends Screen {
 
@@ -33,12 +35,14 @@ public class UseScreen extends Screen {
     private final String[] names = new String[4];
     private boolean closing;
     private float openTick;
-    private int drinkIndex = -1;
-    private float drinkTick;
     private int clickIndex = -1;
+    private float drinkTick;
+
+    private KeyBinding[] keyBindsHotbar;
 
     public UseScreen() {
         super(TITLE);
+
     }
 
     @Override
@@ -48,11 +52,7 @@ public class UseScreen extends Screen {
             return;
         }
         handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
-    }
-
-    private static void drink(int index) {
-        new CDrinkPacket(index).send();
-        Minecraft.getInstance().displayGuiScreen(null);
+        keyBindsHotbar = minecraft.gameSettings.keyBindsHotbar;
     }
 
     @Override
@@ -74,6 +74,13 @@ public class UseScreen extends Screen {
             yCenter += 20;
         }
 
+        if (!closing && (drinkTick > 0 || handler.drinkIndex != -1)) {
+            drinkTick += pTicks;
+            if (drinkTick > EverCommonConfig.drinkDelay) {
+                onClose();
+            }
+        }
+
         float offset = 35 + openTick * 25;
         Matrix4f matrix = TransformationMatrix.identity().getMatrix();
         if (EverCommonConfig.maxSlots == 1) {
@@ -91,18 +98,25 @@ public class UseScreen extends Screen {
             drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 2, pTicks);
             drawButton(matrix, xCenter, yCenter + offset, mouseX, mouseY, 3, pTicks);
         }
+        if (clickIndex < 0) {
+            int range = EverCommonConfig.maxSlots == 1 ? 60 : 120;
+            boolean out = Math.abs(mouseX - xCenter) + Math.abs(mouseY - yCenter) > range;
+            clickIndex = out ? -2 : -1;
+        }
 
         RenderSystem.disableBlend();
 
         super.render(mouseX, mouseY, pTicks);
     }
 
+    @SuppressWarnings("null")
     private void drawButton(Matrix4f matrix, float xCenter, float yCenter, int mouseX, int mouseY, int index, float pTicks) {
         Cache cache = handler.caches[index];
         float a = .5F * openTick;
 
         float hd = 40;
-        boolean hover = cache != null && openTick == 1 && Math.abs(mouseX - xCenter) + Math.abs(mouseY - yCenter) < hd + 10;
+        boolean hover = !closing && cache != null && openTick == 1 && Math.abs(mouseX - xCenter) + Math.abs(mouseY - yCenter) < hd + 10;
+        hover = hover && (handler.drinkIndex == index || handler.drinkIndex == -1);
         if (hover) {
             clickIndex = index;
         } else if (clickIndex == index) {
@@ -171,6 +185,22 @@ public class UseScreen extends Screen {
         buffer.pos(matrix, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
         tessellator.draw();
 
+        if (handler.drinkIndex == index) {
+            float h = hd * drinkTick * 2 / EverCommonConfig.drinkDelay - hd;
+            float ia = .2f;
+            buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
+            buffer.pos(matrix, xCenter + hd - Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
+            if (h > 0) {
+                buffer.pos(matrix, xCenter + hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
+            }
+            buffer.pos(matrix, xCenter, yCenter + hd, 0.0F).color(1, 1, 1, ia).endVertex();
+            if (h > 0) {
+                buffer.pos(matrix, xCenter - hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
+            }
+            buffer.pos(matrix, xCenter - hd + Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
+            tessellator.draw();
+        }
+
         float hdshadow;
         if (hover) {
             a = .3f * openTick;
@@ -218,10 +248,17 @@ public class UseScreen extends Screen {
         RenderSystem.color4f(1, 1, 1, openTick);
         int textAlpha = (int) (openTick * 255);
         int textColor = textAlpha << 24 | 0xffffff;
+
+        String name = names[index];
+        if (cache != null && cache.progress < EverCommonConfig.refillTime) {
+            float percent = 100 * cache.progress / EverCommonConfig.refillTime;
+            name = (int) percent + "%";
+        }
+
         if (cache == null) {
             RenderSystem.translatef(xCenter, yCenter - 3, 0);
             RenderSystem.scalef(0.75f, 0.75f, 0.75f);
-            drawCenteredString(font, names[index], 0, 0, textColor);
+            drawCenteredString(font, name, 0, 0, textColor);
         } else if (cache.effect != null) {
             PotionSpriteUploader potionspriteuploader = this.minecraft.getPotionSpriteUploader();
             TextureAtlasSprite sprite = potionspriteuploader.getSprite(cache.effect.getPotion());
@@ -245,12 +282,11 @@ public class UseScreen extends Screen {
 
             RenderSystem.translatef(xCenter, yCenter + 10, 0);
             RenderSystem.scalef(0.75f, 0.75f, 0.75f);
-            drawCenteredString(font, names[index], 0, 0, textColor);
+            drawCenteredString(font, name, 0, 0, textColor);
         } else {
-            RenderSystem.pushMatrix();
             RenderSystem.translatef(xCenter, yCenter - 3, 0);
             RenderSystem.scalef(0.75f, 0.75f, 0.75f);
-            drawCenteredString(font, names[index], 0, 0, textColor);
+            drawCenteredString(font, name, 0, 0, textColor);
         }
         RenderSystem.popMatrix();
     }
@@ -278,14 +314,41 @@ public class UseScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-        // TODO Auto-generated method stub
-        return super.mouseClicked(p_mouseClicked_1_, p_mouseClicked_3_, p_mouseClicked_5_);
+        if (clickIndex == -2) {
+            onClose();
+            return true;
+        }
+        if (closing || clickIndex == -1) {
+            return false;
+        }
+        if (!handler.canDrink(clickIndex)) {
+            return false;
+        }
+        scales[clickIndex] = 0.25f;
+        handler.startDrinking(clickIndex);
+        return true;
     }
 
     @Override
-    public boolean keyPressed(int p_keyPressed_1_, int p_keyPressed_2_, int p_keyPressed_3_) {
-        // TODO Auto-generated method stub
-        return super.keyPressed(p_keyPressed_1_, p_keyPressed_2_, p_keyPressed_3_);
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
+        if (closing || handler.drinkIndex != -1) {
+            return false;
+        }
+        for (int i = 0; i < handler.getSlots(); i++) {
+            if (handler.canDrink(i) && keyBindsHotbar[i].getKey().getKeyCode() == key) {
+                scales[i] = 1;
+                handler.startDrinking(i);
+                return true;
+            }
+        }
+        if (ClientHandler.kbUse.getKeyModifier().isActive(null) && ClientHandler.kbUse.getKey().getKeyCode() == key) {
+            if (ClientHandler.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
+                return false;
+            }
+            onClose();
+            return true;
+        }
+        return super.keyPressed(key, scanCode, modifiers);
     }
 
     @Override

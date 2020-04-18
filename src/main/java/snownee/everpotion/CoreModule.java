@@ -1,5 +1,6 @@
 package snownee.everpotion;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,13 +17,11 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
@@ -33,8 +32,9 @@ import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
+import snownee.everpotion.client.gui.UseScreen;
 import snownee.everpotion.container.PlaceContainer;
-import snownee.everpotion.inventory.EverHandler;
+import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.network.CDrinkPacket;
@@ -43,8 +43,6 @@ import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.network.NetworkChannel;
-import snownee.kiwi.schedule.Scheduler;
-import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
 @KiwiModule
 @KiwiModule.Subscriber
@@ -104,7 +102,7 @@ public class CoreModule extends AbstractModule {
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
         if (event.getObject() instanceof PlayerEntity) {
-            event.addCapability(HANDLER_ID, new EverCapabilityProvider(new EverHandler()));
+            event.addCapability(HANDLER_ID, new EverCapabilityProvider(new EverHandler((PlayerEntity) event.getObject())));
         }
     }
 
@@ -128,11 +126,20 @@ public class CoreModule extends AbstractModule {
 
     @SubscribeEvent
     public void tickPlayer(TickEvent.PlayerTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            return;
+        }
         event.player.getCapability(EverCapabilities.HANDLER).ifPresent(EverHandler::tick);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onLivingHurt(LivingHurtEvent event) {
-
+        event.getEntity().getCapability(EverCapabilities.HANDLER).ifPresent(EverHandler::stopDrinking);
+        if (event.getEntity().world.isRemote) {
+            if (Minecraft.getInstance().currentScreen instanceof UseScreen) {
+                Minecraft.getInstance().displayGuiScreen(null);
+            }
+        }
+        // TODO
     }
 }

@@ -12,7 +12,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
-import snownee.everpotion.inventory.EverHandler;
+import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.inventory.InvHandlerWrapper;
 import snownee.kiwi.inventory.container.ModSlot;
 

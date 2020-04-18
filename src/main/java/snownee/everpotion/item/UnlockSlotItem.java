@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
-import snownee.everpotion.inventory.EverHandler;
+import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 

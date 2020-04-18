@@ -14,6 +14,7 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -42,7 +43,7 @@ public final class ClientHandler {
                 }
                 Vector3f hsv = RGBtoHSV(rgb);
                 hsv.mul(1, .75f, 1);
-                return MathHelper.hsvToRGB(hsv.getX() / 360, hsv.getY(), hsv.getZ() / 255);
+                return MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), hsv.getZ());
             }
             return -1;
         }, CoreModule.CORE);
@@ -68,7 +69,7 @@ public final class ClientHandler {
         }, CoreModule.UNLOCK_SLOT);
     }
 
-    public static final KeyBinding kbUse = new KeyBinding("keybind.everpotion.use", GLFW.GLFW_KEY_Z, "gui.everpotion.keygroup");
+    public static final KeyBinding kbUse = new KeyBinding("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
 
     @SubscribeEvent
     public static void onKeyInput(KeyInputEvent event) {
@@ -79,7 +80,10 @@ public final class ClientHandler {
         if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown() && mc.player.getCapability(EverCapabilities.HANDLER).isPresent()) {
             if (mc.player.isCrouching()) {
                 new COpenContainerPacket().send();
-            } else if (event.getModifiers() == 0) {
+            } else if (kbUse.getKeyModifier().isActive(null)) {
+                if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {
+                    return;
+                }
                 mc.displayGuiScreen(new UseScreen());
             }
         }
@@ -120,10 +124,10 @@ public final class ClientHandler {
             h = 2 + (b - r) / delta; // between cyan & yellow
         else
             h = 4 + (r - g) / delta; // between magenta & cyan
-        h *= 60; // degrees
+        h /= 6; // degrees
         if (h < 0)
-            h += 360;
-        return new Vector3f(h, s, v);
+            h += 1;
+        return new Vector3f(h, s, v / 255);
     }
 
 }

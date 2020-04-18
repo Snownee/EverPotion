@@ -6,7 +6,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import snownee.everpotion.inventory.EverHandler;
+import snownee.everpotion.handler.EverHandler;
 
 public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT> {
 
@@ -14,6 +14,9 @@ public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializ
 
     public EverCapabilityProvider(EverHandler handler) {
         this.handler = LazyOptional.of(() -> handler);
+        this.handler.addListener($ -> {
+            $.ifPresent(EverHandler::invalidate);
+        });
     }
 
     @Override

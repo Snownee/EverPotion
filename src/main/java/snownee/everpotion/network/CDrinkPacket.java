@@ -34,7 +34,7 @@ public class CDrinkPacket extends ClientPacket {
                 ServerPlayerEntity sender = ctx.get().getSender();
                 sender.getCapability(EverCapabilities.HANDLER).ifPresent(hander -> {
                     if (hander.canDrink(pkt.index)) {
-                        hander.drink(sender, pkt.index);
+                        hander.startDrinking(pkt.index);
                     }
                 });
             });

@@ -1,4 +1,4 @@
-package snownee.everpotion.inventory;
+package snownee.everpotion.handler;
 
 import java.util.List;
 
@@ -30,16 +30,25 @@ import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.item.CoreItem;
+import snownee.everpotion.network.CDrinkPacket;
 import snownee.kiwi.util.NBTHelper;
 
 public class EverHandler extends ItemStackHandler {
 
+    private PlayerEntity owner;
     private int slots;
     public final Cache[] caches = new Cache[4];
-    private int chargingSlot = -1;
+    public int chargeIndex = -1;
+    public int drinkIndex = -1;
+    public int drinkTick;
 
     public EverHandler() {
+        this(null);
+    }
+
+    public EverHandler(PlayerEntity owner) {
         super(4);
+        this.owner = owner;
     }
 
     @Override
@@ -51,23 +60,58 @@ public class EverHandler extends ItemStackHandler {
     protected void onContentsChanged(int slot) {
         ItemStack stack = getStackInSlot(slot);
         if (stack.getItem() == CoreModule.CORE) {
+            if (caches[slot] != null && caches[slot].matches(stack)) {
+                return;
+            }
             caches[slot] = new Cache(stack);
         } else {
             caches[slot] = null;
         }
+        if (chargeIndex == -1 || slot == chargeIndex) {
+            updateCharge();
+        }
+    }
+
+    private void updateCharge() {
+        for (int i = 0; i < caches.length; i++) {
+            if (caches[i] == null) {
+                continue;
+            }
+            if (caches[i].progress < 100) {
+                chargeIndex = i;
+                return;
+            }
+        }
+        chargeIndex = -1;
     }
 
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT tag = super.serializeNBT();
         tag.putInt("Slots", slots);
+        for (int i = 0; i < caches.length; i++) {
+            if (caches[i] == null) {
+                continue;
+            }
+            tag.putFloat("Progress" + i, caches[i].progress);
+        }
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        slots = NBTHelper.of(nbt).getInt("Slots", EverCommonConfig.beginnerSlots);
+        NBTHelper data = NBTHelper.of(nbt);
+        slots = data.getInt("Slots", EverCommonConfig.beginnerSlots);
         super.deserializeNBT(nbt);
+        for (int i = 0; i < slots; i++) {
+            onContentsChanged(i);
+        }
+        for (int i = 0; i < caches.length; i++) {
+            if (caches[i] == null) {
+                continue;
+            }
+            this.caches[i].progress = data.getFloat("Progress" + i);
+        }
     }
 
     public void setSlots(int slots) {
@@ -91,67 +135,109 @@ public class EverHandler extends ItemStackHandler {
     public void copyFrom(EverHandler that) {
         this.setSlots(that.getSlots());
         this.stacks = that.stacks;
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < caches.length; i++) {
             onContentsChanged(i);
+            if (caches[i] != null && that.caches[i] != null) {
+                this.caches[i].progress = that.caches[i].progress;
+            }
         }
+        this.chargeIndex = that.chargeIndex;
     }
 
     public void tick() {
-
+        if (chargeIndex != -1) {
+            Cache cache = caches[chargeIndex];
+            cache.progress = MathHelper.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
+            if (cache.progress == EverCommonConfig.refillTime) {
+                updateCharge();
+            }
+            if (!owner.world.isRemote) {
+                CoreModule.sync((ServerPlayerEntity) owner);
+            }
+        }
+        if (drinkIndex != -1) {
+            if (++drinkTick >= EverCommonConfig.drinkDelay) {
+                drink(drinkIndex);
+                stopDrinking();
+                if (chargeIndex == -1) {
+                    updateCharge();
+                }
+            }
+        }
     }
 
-    public void drink(ServerPlayerEntity player, int slot) {
+    public void startDrinking(int slot) {
+        drinkIndex = slot;
+        if (owner.world.isRemote) {
+            new CDrinkPacket(slot).send();
+        }
+    }
+
+    public void stopDrinking() {
+        drinkIndex = -1;
+        drinkTick = 0;
+    }
+
+    public void invalidate() {
+        owner = null;
+    }
+
+    private void drink(int slot) {
         Cache cache = caches[slot];
+        cache.progress = 0;
+        if (owner.world.isRemote) {
+            return;
+        }
         PotionType type = cache.type;
         if (cache.effect == null && type != PotionType.NORMAL) {
             type = PotionType.SPLASH;
-            BlockPos pos = player.getPosition();
-            this.extinguishFires(player.world, pos, Direction.DOWN);
-            this.extinguishFires(player.world, pos.up(), Direction.DOWN);
+            BlockPos pos = owner.getPosition();
+            this.extinguishFires(owner.world, pos, Direction.DOWN);
+            this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
 
             for (Direction direction : Direction.Plane.HORIZONTAL) {
-                this.extinguishFires(player.world, pos.offset(direction), direction);
+                this.extinguishFires(owner.world, pos.offset(direction), direction);
             }
         }
 
         if (type == PotionType.NORMAL) {
-            doEffect(cache.effect, player, player);
+            doEffect(cache.effect, owner);
         } else if (type == PotionType.SPLASH) {
-            AxisAlignedBB axisalignedbb = new AxisAlignedBB(player.getPosition()).grow(4.0D, 2.0D, 4.0D);
-            List<LivingEntity> list = player.world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
+            AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner.getPosition()).grow(4.0D, 2.0D, 4.0D);
+            List<LivingEntity> list = owner.world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
             if (!list.isEmpty()) {
                 for (LivingEntity livingentity : list) {
-                    double d0 = player.getDistanceSq(livingentity);
+                    double d0 = owner.getDistanceSq(livingentity);
                     if (d0 < 16.0D) {
-                        doEffect(cache.effect, player, livingentity);
+                        doEffect(cache.effect, livingentity);
                     }
                 }
             }
         } else { // PotionEntity.makeAreaOfEffectCloud
-            AreaEffectCloudEntity areaeffectcloudentity = new AreaEffectCloudEntity(player.world, player.getPosX(), player.getPosY(), player.getPosZ());
-            areaeffectcloudentity.setOwner(player);
+            AreaEffectCloudEntity areaeffectcloudentity = new AreaEffectCloudEntity(owner.world, owner.getPosX(), owner.getPosY(), owner.getPosZ());
+            areaeffectcloudentity.setOwner(owner);
             areaeffectcloudentity.setRadius(3.0F);
             areaeffectcloudentity.setRadiusOnUse(-0.5F);
             areaeffectcloudentity.setWaitTime(10);
             areaeffectcloudentity.setRadiusPerTick(-areaeffectcloudentity.getRadius() / areaeffectcloudentity.getDuration());
             areaeffectcloudentity.addEffect(new EffectInstance(cache.effect));
 
-            player.world.addEntity(areaeffectcloudentity);
+            owner.world.addEntity(areaeffectcloudentity);
         }
         if (type != PotionType.NORMAL) {
             int i = (cache.effect != null && cache.effect.getPotion().isInstant()) ? 2007 : 2002;
-            player.world.playEvent(i, player.getPosition(), cache.color);
+            owner.world.playEvent(i, owner.getPosition(), cache.color);
         }
     }
 
-    private static void doEffect(EffectInstance effect, PlayerEntity caster, LivingEntity entity) {
+    private void doEffect(EffectInstance effect, LivingEntity entity) {
         if (effect == null) {
             entity.extinguish();
             if (PotionEntity.WATER_SENSITIVE.test(entity)) {
-                entity.attackEntityFrom(DamageSource.causeIndirectMagicDamage(entity, caster), 1.0F);
+                entity.attackEntityFrom(DamageSource.causeIndirectMagicDamage(entity, owner), 1.0F);
             }
         } else {
-            entity.addPotionEffect(effect);
+            entity.addPotionEffect(new EffectInstance(effect));
         }
     }
 
@@ -170,26 +256,34 @@ public class EverHandler extends ItemStackHandler {
         if (slot < 0 || slot >= slots) {
             return false;
         }
-        return caches[slot] != null && caches[slot].progress >= 100;
+        return owner != null && drinkIndex == -1 && caches[slot] != null && caches[slot].progress >= EverCommonConfig.maxSlots;
     }
 
     public static final class Cache {
         @Nullable
         public final EffectInstance effect;
         public final PotionType type;
-        public float progress = 100;
+        public float progress;
         public final int color;
+        public final ItemStack stack;
+        public final float speed;
 
         private Cache(ItemStack stack) {
+            this.stack = stack;
             effect = CoreItem.getEffectInstance(stack);
             type = CoreItem.getPotionType(stack);
+            speed = CoreItem.getChargeModifier(stack);
             if (effect != null) {
                 int color = effect.getPotion().getLiquidColor();
                 Vector3f hsv = ClientHandler.RGBtoHSV(color);
-                this.color = MathHelper.hsvToRGB(hsv.getX() / 360, hsv.getY(), 1);
+                this.color = MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), 1);
             } else {
                 color = 4749311; // 3694022;
             }
+        }
+
+        private boolean matches(ItemStack stack) {
+            return ItemStack.areItemStacksEqual(this.stack, stack);
         }
     }
 
