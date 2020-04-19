@@ -28,9 +28,9 @@ import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.network.CDrinkPacket;
+import snownee.kiwi.util.MathUtil;
 import snownee.kiwi.util.NBTHelper;
 
 public class EverHandler extends ItemStackHandler {
@@ -41,6 +41,7 @@ public class EverHandler extends ItemStackHandler {
     public int chargeIndex = -1;
     public int drinkIndex = -1;
     public int drinkTick;
+    public float acceleration;
 
     public EverHandler() {
         this(null);
@@ -142,12 +143,14 @@ public class EverHandler extends ItemStackHandler {
             }
         }
         this.chargeIndex = that.chargeIndex;
+        this.acceleration = that.acceleration;
     }
 
     public void tick() {
         if (chargeIndex != -1) {
             Cache cache = caches[chargeIndex];
-            cache.progress = MathHelper.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
+            cache.progress = MathHelper.clamp(cache.progress + cache.speed + acceleration, 0, EverCommonConfig.refillTime);
+            acceleration = Math.max(0, acceleration - 0.1f);
             if (cache.progress == EverCommonConfig.refillTime) {
                 updateCharge();
             }
@@ -256,7 +259,7 @@ public class EverHandler extends ItemStackHandler {
         if (slot < 0 || slot >= slots) {
             return false;
         }
-        return owner != null && drinkIndex == -1 && caches[slot] != null && caches[slot].progress >= EverCommonConfig.maxSlots;
+        return owner != null && drinkIndex == -1 && caches[slot] != null && caches[slot].progress >= EverCommonConfig.refillTime;
     }
 
     public static final class Cache {
@@ -275,7 +278,7 @@ public class EverHandler extends ItemStackHandler {
             speed = CoreItem.getChargeModifier(stack);
             if (effect != null) {
                 int color = effect.getPotion().getLiquidColor();
-                Vector3f hsv = ClientHandler.RGBtoHSV(color);
+                Vector3f hsv = MathUtil.RGBtoHSV(color);
                 this.color = MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), 1);
             } else {
                 color = 4749311; // 3694022;
@@ -285,6 +288,10 @@ public class EverHandler extends ItemStackHandler {
         private boolean matches(ItemStack stack) {
             return ItemStack.areItemStacksEqual(this.stack, stack);
         }
+    }
+
+    public void accelerate(float f) {
+        acceleration = Math.min(acceleration + f, 2);
     }
 
 }

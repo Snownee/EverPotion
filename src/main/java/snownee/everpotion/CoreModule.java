@@ -3,6 +3,7 @@ package snownee.everpotion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.ContainerType;
@@ -17,11 +18,14 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
@@ -43,6 +47,8 @@ import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.network.NetworkChannel;
+import snownee.kiwi.schedule.Scheduler;
+import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
 @KiwiModule
 @KiwiModule.Subscriber
@@ -111,13 +117,13 @@ public class CoreModule extends AbstractModule {
         if (event.getEntity().world.isRemote) {
             return;
         }
-        //        Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
-        //            if (t >= 10) {
-        //                sync((ServerPlayerEntity) event.getPlayer());
-        //                return true;
-        //            }
-        //            return false;
-        //        }));
+        Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
+            if (t >= 5) {
+                sync((ServerPlayerEntity) event.getPlayer());
+                return true;
+            }
+            return false;
+        }));
     }
 
     public static void sync(ServerPlayerEntity player) {
@@ -140,6 +146,26 @@ public class CoreModule extends AbstractModule {
                 Minecraft.getInstance().displayGuiScreen(null);
             }
         }
-        // TODO
+
+        Entity source = event.getSource().getTrueSource();
+        if (source != null && EverCommonConfig.damageAcceleration > 0) {
+            source.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
+                handler.accelerate(.05f * event.getAmount() * EverCommonConfig.damageAcceleration);
+            });
+        }
     }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void tempLoot(LivingDeathEvent event) {
+        if (EverCommonConfig.mobDropUnlockItem == 0 || event.getEntity().world.isRemote) {
+            return;
+        }
+        Entity source = event.getSource().getTrueSource();
+        if (source instanceof PlayerEntity && event.getEntity() instanceof MobEntity) {
+            if (event.getEntityLiving().getRNG().nextFloat() < EverCommonConfig.mobDropUnlockItem) {
+                event.getEntityLiving().entityDropItem(UNLOCK_SLOT);
+            }
+        }
+    }
+
 }

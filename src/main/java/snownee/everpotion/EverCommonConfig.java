@@ -15,6 +15,7 @@ public final class EverCommonConfig {
 
     public static int drinkDelay = 20;
     public static int refillTime = 2400;
+    public static float damageAcceleration = 1;
 
     // slots
     public static int maxSlots = 3;
@@ -26,8 +27,11 @@ public final class EverCommonConfig {
     public static boolean showParticles = true;
     public static boolean showIcon = true;
 
+    public static float mobDropUnlockItem = 0.005f;
+
     private static IntValue drinkDelayVal;
     private static IntValue refillTimeVal;
+    private static DoubleValue damageAccelerationVal;
 
     private static IntValue maxSlotsVal;
     private static IntValue beginnerSlotsVal;
@@ -37,6 +41,8 @@ public final class EverCommonConfig {
     private static BooleanValue showParticlesVal;
     private static BooleanValue showIconVal;
 
+    private static DoubleValue mobDropUnlockItemVal;
+
     static {
         spec = new ForgeConfigSpec.Builder().configure(EverCommonConfig::new).getRight();
     }
@@ -44,6 +50,7 @@ public final class EverCommonConfig {
     private EverCommonConfig(ForgeConfigSpec.Builder builder) {
         drinkDelayVal = builder.defineInRange("drinkDelay", drinkDelay, 5, 100000);
         refillTimeVal = builder.defineInRange("refillTime", refillTime, 5, 100000);
+        damageAccelerationVal = builder.comment("Damaging mobs can speed up refilling").defineInRange("damageAcceleration", damageAcceleration, 0, 10);
 
         builder.push("slots");
         maxSlotsVal = builder.defineInRange("maxSlots", maxSlots, 1, 4);
@@ -54,17 +61,22 @@ public final class EverCommonConfig {
         ambientVal = builder.define("ambient", ambient);
         showParticlesVal = builder.define("showParticles", showParticles);
         showIconVal = builder.define("showIcon", showIcon);
+
+        builder.pop().push("temp");
+        mobDropUnlockItemVal = builder.defineInRange("mobDropUnlockItem", mobDropUnlockItem, 0, 1);
     }
 
     public static void refresh() {
         drinkDelay = drinkDelayVal.get();
         refillTime = refillTimeVal.get();
+        damageAcceleration = damageAccelerationVal.get().floatValue();
         maxSlots = maxSlotsVal.get();
         beginnerSlots = beginnerSlotsVal.get();
         durationFactor = durationFactorVal.get().floatValue();
         ambient = ambientVal.get();
         showParticles = showParticlesVal.get();
         showIcon = showIconVal.get();
+        mobDropUnlockItem = mobDropUnlockItemVal.get().floatValue();
     }
 
     @SubscribeEvent

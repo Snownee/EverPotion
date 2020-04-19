@@ -15,7 +15,7 @@ apply plugin: 'maven-publish'
 
 version = "${version_major}.${version_minor}.${version_patch}"
 group = "snownee"
-archivesBaseName = "ModName-${minecraft_version}"
+archivesBaseName = "EverPotion-${minecraft_version}"
 
 if (System.getenv().BUILD_NUMBER != null) {
     // Maven version scheme uses dot to separate things

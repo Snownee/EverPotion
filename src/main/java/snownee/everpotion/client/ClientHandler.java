@@ -24,6 +24,7 @@ import snownee.everpotion.client.gui.UseScreen;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.network.COpenContainerPacket;
+import snownee.kiwi.util.MathUtil;
 
 @OnlyIn(Dist.CLIENT)
 @EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
@@ -41,7 +42,7 @@ public final class ClientHandler {
                 } else {
                     rgb = 3694022;
                 }
-                Vector3f hsv = RGBtoHSV(rgb);
+                Vector3f hsv = MathUtil.RGBtoHSV(rgb);
                 hsv.mul(1, .75f, 1);
                 return MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), hsv.getZ());
             }
@@ -95,39 +96,6 @@ public final class ClientHandler {
         if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {
             event.setCanceled(true);
         }
-    }
-
-    // TODO remove
-    /**
-     * @return h: 0-360 s: 0-1 v: 0-255
-     */
-    public static Vector3f RGBtoHSV(int rgb) {
-        int r = (rgb >> 16) & 255;
-        int g = (rgb >> 8) & 255;
-        int b = rgb & 255;
-        int max = Math.max(r, Math.max(g, b));
-        int min = Math.min(r, Math.min(g, b));
-        float v = max;
-        float delta = max - min;
-        float h, s;
-        if (max != 0)
-            s = delta / max; // s
-        else {
-            // r = g = b = 0        // s = 0, v is undefined
-            s = 0;
-            h = -1;
-            return new Vector3f(h, s, 0 /*Float.NaN*/);
-        }
-        if (r == max)
-            h = (g - b) / delta; // between yellow & magenta
-        else if (g == max)
-            h = 2 + (b - r) / delta; // between cyan & yellow
-        else
-            h = 4 + (r - g) / delta; // between magenta & cyan
-        h /= 6; // degrees
-        if (h < 0)
-            h += 1;
-        return new Vector3f(h, s, v / 255);
     }
 
 }
