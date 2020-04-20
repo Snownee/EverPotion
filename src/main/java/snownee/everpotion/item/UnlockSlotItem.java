@@ -12,6 +12,8 @@ import net.minecraft.item.Rarity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
@@ -65,6 +67,7 @@ public class UnlockSlotItem extends ModItem {
         handler.setSlots(tier);
         // TODO more fancy effects!
         stack.shrink(1);
+        worldIn.playSound(null, playerIn.getPosition(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
         CoreModule.sync((ServerPlayerEntity) playerIn);
         return ActionResult.resultConsume(stack);
     }

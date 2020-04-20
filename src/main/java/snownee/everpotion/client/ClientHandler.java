@@ -8,6 +8,8 @@ import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ChatType;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
@@ -21,6 +23,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.gui.UseScreen;
+import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.network.COpenContainerPacket;
@@ -78,8 +81,16 @@ public final class ClientHandler {
         if (mc.player == null || mc.currentScreen != null) {
             return;
         }
-        if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown() && mc.player.getCapability(EverCapabilities.HANDLER).isPresent()) {
+        if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown()) {
+            EverHandler handler = mc.player.getCapability(EverCapabilities.HANDLER).orElse(null);
+            if (handler == null) {
+                return;
+            }
             if (mc.player.isCrouching()) {
+                if (handler.getSlots() == 0) {
+                    mc.ingameGUI.addChatMessage(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"));
+                    return;
+                }
                 new COpenContainerPacket().send();
             } else if (kbUse.getKeyModifier().isActive(null)) {
                 if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {

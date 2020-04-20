@@ -14,6 +14,7 @@
 "msg.everpotion.tooLow": "You have unlocked the tiered slot!",
 "msg.everpotion.tooHigh": "You must unlock previous slots first!",
 "msg.everpotion.noHandler": "You don't have ability to use EverPotion!",
+"msg.everpotion.noSlots": "You don't have any slots!",
 
 "container.everpotion.main": "Change Cores",
 
