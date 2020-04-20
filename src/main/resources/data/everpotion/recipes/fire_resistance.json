@@ -13,6 +13,7 @@
   "cost": 8,
   "output": {
     "effect": "fire_resistance",
-    "duration": 90
+    "duration": 90,
+    "charge": 0.8
   }
 }

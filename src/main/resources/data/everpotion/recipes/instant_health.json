@@ -13,6 +13,7 @@
   "cost": 8,
   "output": {
     "amplifier": 1,
-    "effect": "instant_health"
+    "effect": "instant_health",
+    "charge": 0.9
   }
 }

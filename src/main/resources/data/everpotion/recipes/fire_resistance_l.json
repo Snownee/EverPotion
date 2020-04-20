@@ -14,6 +14,7 @@
   "output": {
     "effect": "fire_resistance",
     "duration": 90,
-    "type": "lingering"
+    "type": "lingering",
+    "charge": 0.8
   }
 }
