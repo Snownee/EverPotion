@@ -47,6 +47,7 @@ public class SSyncPotionsPacket extends Packet {
                 }
             }
             handler.chargeIndex = buf.readByte();
+            handler.acceleration = buf.readFloat();
             return new SSyncPotionsPacket(handler);
         }
 
@@ -59,6 +60,7 @@ public class SSyncPotionsPacket extends Packet {
                 buf.writeFloat(pkt.handler.caches[i] == null ? 0 : pkt.handler.caches[i].progress);
             }
             buf.writeByte(pkt.handler.chargeIndex);
+            buf.writeFloat(pkt.handler.acceleration);
         }
 
         @Override

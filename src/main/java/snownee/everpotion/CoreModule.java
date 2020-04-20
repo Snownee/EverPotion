@@ -1,8 +1,11 @@
 package snownee.everpotion;
 
-import net.minecraft.client.Minecraft;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -19,8 +22,9 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -31,18 +35,20 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
-import snownee.everpotion.client.gui.UseScreen;
 import snownee.everpotion.container.PlaceContainer;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.network.CDrinkPacket;
 import snownee.everpotion.network.COpenContainerPacket;
+import snownee.everpotion.network.SCancelPacket;
 import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
@@ -65,10 +71,10 @@ public class CoreModule extends AbstractModule {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, EverCommonConfig.spec);
         modEventBus.register(EverCommonConfig.class);
-        // if (FMLEnvironment.dist.isClient()) {
-        //     ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ModNameClientConfig.spec);
-        //     modEventBus.register(ModNameClientConfig.class);
-        // }
+        if (FMLEnvironment.dist.isClient()) {
+            ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, EverClientConfig.spec);
+            modEventBus.register(EverClientConfig.class);
+        }
     }
 
     @Override
@@ -76,6 +82,7 @@ public class CoreModule extends AbstractModule {
         NetworkChannel.register(CDrinkPacket.class, new CDrinkPacket.Handler());
         NetworkChannel.register(COpenContainerPacket.class, new COpenContainerPacket.Handler());
         NetworkChannel.register(SSyncPotionsPacket.class, new SSyncPotionsPacket.Handler());
+        NetworkChannel.register(SCancelPacket.class, new SCancelPacket.Handler());
     }
 
     @Override
@@ -103,6 +110,12 @@ public class CoreModule extends AbstractModule {
         MinecraftForge.EVENT_BUS.register(ClientHandler.class);
     }
 
+    @Override
+    protected void serverInit(FMLServerStartingEvent event) {
+        LiteralArgumentBuilder<CommandSource> builder = EverCommand.init(event.getCommandDispatcher());
+        event.getCommandDispatcher().register(builder);
+    }
+
     public static final ResourceLocation HANDLER_ID = new ResourceLocation(EverPotion.MODID, "handler");
 
     @SubscribeEvent
@@ -113,17 +126,20 @@ public class CoreModule extends AbstractModule {
     }
 
     @SubscribeEvent
-    protected void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity().world.isRemote) {
+    protected void onPlayerJoinWorld(EntityJoinWorldEvent event) {
+        Entity entity = event.getEntity();
+        if (entity.world.isRemote) {
             return;
         }
-        Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
-            if (t >= 5) {
-                sync((ServerPlayerEntity) event.getPlayer());
-                return true;
-            }
-            return false;
-        }));
+        if (entity instanceof ServerPlayerEntity) {
+            Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
+                if (t >= 5) {
+                    sync((ServerPlayerEntity) entity);
+                    return true;
+                }
+                return false;
+            }));
+        }
     }
 
     public static void sync(ServerPlayerEntity player) {
@@ -138,20 +154,37 @@ public class CoreModule extends AbstractModule {
         event.player.getCapability(EverCapabilities.HANDLER).ifPresent(EverHandler::tick);
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onLivingHurt(LivingHurtEvent event) {
-        event.getEntity().getCapability(EverCapabilities.HANDLER).ifPresent(EverHandler::stopDrinking);
+    @SubscribeEvent
+    public void onLivingDamage(LivingDamageEvent event) {
         if (event.getEntity().world.isRemote) {
-            if (Minecraft.getInstance().currentScreen instanceof UseScreen) {
-                Minecraft.getInstance().displayGuiScreen(null);
-            }
+            return;
         }
+        LivingEntity living = event.getEntityLiving();
+        living.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
+            handler.stopDrinking();
+            if (living instanceof ServerPlayerEntity) {
+                new SCancelPacket().send((ServerPlayerEntity) living);
+
+            }
+        });
 
         Entity source = event.getSource().getTrueSource();
-        if (source != null && EverCommonConfig.damageAcceleration > 0) {
+        if (source instanceof ServerPlayerEntity && EverCommonConfig.damageAcceleration > 0) {
             source.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
                 handler.accelerate(.05f * event.getAmount() * EverCommonConfig.damageAcceleration);
+                if (source.world.rand.nextBoolean()) {
+                    sync((ServerPlayerEntity) source);
+                }
             });
+        }
+    }
+
+    @SubscribeEvent
+    public void onPlayerClone(PlayerEvent.Clone event) {
+        EverHandler newHandler = event.getPlayer().getCapability(EverCapabilities.HANDLER).orElse(null);
+        EverHandler oldHandler = event.getOriginal().getCapability(EverCapabilities.HANDLER).orElse(null);
+        if (newHandler != null && oldHandler != null) {
+            newHandler.copyFrom(oldHandler);
         }
     }
 

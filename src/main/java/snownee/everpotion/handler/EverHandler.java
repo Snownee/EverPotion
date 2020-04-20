@@ -78,7 +78,7 @@ public class EverHandler extends ItemStackHandler {
             if (caches[i] == null) {
                 continue;
             }
-            if (caches[i].progress < 100) {
+            if (caches[i].progress < EverCommonConfig.refillTime) {
                 chargeIndex = i;
                 return;
             }
@@ -147,15 +147,18 @@ public class EverHandler extends ItemStackHandler {
     }
 
     public void tick() {
+        acceleration = Math.max(0, acceleration - 0.005f);
         if (chargeIndex != -1) {
             Cache cache = caches[chargeIndex];
-            cache.progress = MathHelper.clamp(cache.progress + cache.speed + acceleration, 0, EverCommonConfig.refillTime);
-            acceleration = Math.max(0, acceleration - 0.1f);
+            cache.progress = MathHelper.clamp(cache.progress + cache.speed * acceleration, 0, EverCommonConfig.refillTime);
+            if (EverCommonConfig.naturallyRefill) {
+                cache.progress = MathHelper.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
+            }
             if (cache.progress == EverCommonConfig.refillTime) {
                 updateCharge();
-            }
-            if (!owner.world.isRemote) {
-                CoreModule.sync((ServerPlayerEntity) owner);
+                if (!owner.world.isRemote) {
+                    CoreModule.sync((ServerPlayerEntity) owner);
+                }
             }
         }
         if (drinkIndex != -1) {
@@ -292,6 +295,17 @@ public class EverHandler extends ItemStackHandler {
 
     public void accelerate(float f) {
         acceleration = Math.min(acceleration + f, 2);
+    }
+
+    public void refill() {
+        chargeIndex = -1;
+        for (int i = 0; i < caches.length; i++) {
+            if (caches[i] == null) {
+                continue;
+            }
+            caches[i].progress = EverCommonConfig.refillTime;
+        }
+        CoreModule.sync((ServerPlayerEntity) owner);
     }
 
 }

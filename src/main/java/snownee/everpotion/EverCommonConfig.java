@@ -15,6 +15,7 @@ public final class EverCommonConfig {
 
     public static int drinkDelay = 20;
     public static int refillTime = 2400;
+    public static boolean naturallyRefill = true;
     public static float damageAcceleration = 1;
 
     // slots
@@ -31,6 +32,7 @@ public final class EverCommonConfig {
 
     private static IntValue drinkDelayVal;
     private static IntValue refillTimeVal;
+    private static BooleanValue naturallyRefillVal;
     private static DoubleValue damageAccelerationVal;
 
     private static IntValue maxSlotsVal;
@@ -50,6 +52,7 @@ public final class EverCommonConfig {
     private EverCommonConfig(ForgeConfigSpec.Builder builder) {
         drinkDelayVal = builder.defineInRange("drinkDelay", drinkDelay, 5, 100000);
         refillTimeVal = builder.defineInRange("refillTime", refillTime, 5, 100000);
+        naturallyRefillVal = builder.define("naturallyRefill", naturallyRefill);
         damageAccelerationVal = builder.comment("Damaging mobs can speed up refilling").defineInRange("damageAcceleration", damageAcceleration, 0, 10);
 
         builder.push("slots");
@@ -69,6 +72,7 @@ public final class EverCommonConfig {
     public static void refresh() {
         drinkDelay = drinkDelayVal.get();
         refillTime = refillTimeVal.get();
+        naturallyRefill = naturallyRefillVal.get();
         damageAcceleration = damageAccelerationVal.get().floatValue();
         maxSlots = maxSlotsVal.get();
         beginnerSlots = beginnerSlotsVal.get();
