@@ -11,6 +11,6 @@ description=""
 [[dependencies.everpotion]]
     modId="kiwi"
     mandatory=true
-    versionRange="[2.7, 2.11)"
+    versionRange="[2.7.1, 2.11)"
     ordering="BEFORE"
     side="BOTH"
