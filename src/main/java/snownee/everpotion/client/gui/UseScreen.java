@@ -20,6 +20,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.client.model.animation.Animation;
 import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
@@ -61,7 +62,9 @@ public class UseScreen extends Screen {
             return;
         }
 
-        openTick += closing ? -pTicks * .4f : pTicks * .2f;
+        float aTicks = Animation.getWorldTime(minecraft.world, pTicks) * 0.005f;
+
+        openTick += closing ? -aTicks * .4f : aTicks * .2f;
         if (closing && openTick <= 0) {
             Minecraft.getInstance().displayGuiScreen(null);
             return;
@@ -75,7 +78,7 @@ public class UseScreen extends Screen {
         }
 
         if (!closing && (drinkTick > 0 || handler.drinkIndex != -1)) {
-            drinkTick += pTicks;
+            drinkTick += aTicks;
             if (drinkTick > EverCommonConfig.drinkDelay) {
                 onClose();
             }
@@ -84,19 +87,19 @@ public class UseScreen extends Screen {
         float offset = 35 + openTick * 25;
         Matrix4f matrix = TransformationMatrix.identity().getMatrix();
         if (EverCommonConfig.maxSlots == 1) {
-            drawButton(matrix, xCenter, yCenter, mouseX, mouseY, 0, pTicks);
+            drawButton(matrix, xCenter, yCenter, mouseX, mouseY, 0, aTicks);
         } else if (EverCommonConfig.maxSlots == 2) {
-            drawButton(matrix, xCenter - offset, yCenter, mouseX, mouseY, 0, pTicks);
-            drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 1, pTicks);
+            drawButton(matrix, xCenter - offset, yCenter, mouseX, mouseY, 0, aTicks);
+            drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 1, aTicks);
         } else if (EverCommonConfig.maxSlots == 3) {
-            drawButton(matrix, xCenter - offset, yCenter, mouseX, mouseY, 0, pTicks);
-            drawButton(matrix, xCenter, yCenter - offset, mouseX, mouseY, 1, pTicks);
-            drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 2, pTicks);
+            drawButton(matrix, xCenter - offset, yCenter, mouseX, mouseY, 0, aTicks);
+            drawButton(matrix, xCenter, yCenter - offset, mouseX, mouseY, 1, aTicks);
+            drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 2, aTicks);
         } else if (EverCommonConfig.maxSlots == 4) {
-            drawButton(matrix, xCenter - offset, yCenter, mouseX, mouseY, 0, pTicks);
-            drawButton(matrix, xCenter, yCenter - offset, mouseX, mouseY, 1, pTicks);
-            drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 2, pTicks);
-            drawButton(matrix, xCenter, yCenter + offset, mouseX, mouseY, 3, pTicks);
+            drawButton(matrix, xCenter - offset, yCenter, mouseX, mouseY, 0, aTicks);
+            drawButton(matrix, xCenter, yCenter - offset, mouseX, mouseY, 1, aTicks);
+            drawButton(matrix, xCenter + offset, yCenter, mouseX, mouseY, 2, aTicks);
+            drawButton(matrix, xCenter, yCenter + offset, mouseX, mouseY, 3, aTicks);
         }
         if (clickIndex < 0) {
             int range = EverCommonConfig.maxSlots == 1 ? 60 : 120;
