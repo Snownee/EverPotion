@@ -6,6 +6,10 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import snownee.everpotion.handler.EverHandler;
 
 public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT> {
@@ -19,9 +23,10 @@ public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializ
         });
     }
 
+    @Nonnull
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        return cap == EverCapabilities.HANDLER ? handler.cast() : null;
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap,@Nullable Direction side) {
+        return EverCapabilities.HANDLER.orEmpty(cap, handler);
     }
 
     @Override
