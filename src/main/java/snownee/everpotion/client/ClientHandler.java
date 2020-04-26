@@ -78,7 +78,7 @@ public final class ClientHandler {
     @SubscribeEvent
     public static void onKeyInput(KeyInputEvent event) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.currentScreen != null) {
+        if (mc.player == null || mc.currentScreen != null || mc.player.isSpectator()) {
             return;
         }
         if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown()) {
