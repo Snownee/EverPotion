@@ -19,6 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -120,7 +121,7 @@ public class CoreModule extends AbstractModule {
 
     @SubscribeEvent
     public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof PlayerEntity) {
+        if (event.getObject() instanceof PlayerEntity && !(event.getObject() instanceof FakePlayer)) {
             event.addCapability(HANDLER_ID, new EverCapabilityProvider(new EverHandler((PlayerEntity) event.getObject())));
         }
     }
@@ -131,7 +132,7 @@ public class CoreModule extends AbstractModule {
         if (entity.world.isRemote) {
             return;
         }
-        if (entity instanceof ServerPlayerEntity) {
+        if (entity instanceof ServerPlayerEntity && !(entity instanceof FakePlayer)) {
             Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
                 if (t >= 5) {
                     sync((ServerPlayerEntity) entity);
@@ -143,6 +144,9 @@ public class CoreModule extends AbstractModule {
     }
 
     public static void sync(ServerPlayerEntity player) {
+        if (player instanceof FakePlayer) {
+            return;
+        }
         new SSyncPotionsPacket(player).send();
     }
 
