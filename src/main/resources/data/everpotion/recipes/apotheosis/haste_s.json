@@ -1,0 +1,23 @@
+{
+  "condition": [{
+    "type": "forge:mod_loaded",
+    "modid": "apotheosis"
+  }],
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "splash_potion",
+    "nbt": {
+      "Potion": "apotheosis:haste"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "haste",
+    "duration": 60,
+    "type": "splash"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "condition": [{
+    "type": "forge:mod_loaded",
+    "modid": "quark"
+  }],
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "splash_potion",
+    "nbt": {
+      "Potion": "quark:danger_sight"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "quark:danger_sight",
+    "duration": 30,
+    "type": "splash"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "condition": [{
+    "type": "forge:mod_loaded",
+    "modid": "apotheosis"
+  }],
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "potion",
+    "nbt": {
+      "Potion": "apotheosis:absorption"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "absorption",
+    "duration": 30,
+    "amplifier": 1
+  }
+}

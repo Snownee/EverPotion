@@ -1,0 +1,23 @@
+{
+  "condition": [{
+    "type": "forge:mod_loaded",
+    "modid": "quark"
+  }],
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "lingering_potion",
+    "nbt": {
+      "Potion": "quark:resilience"
+    }
+  },
+  "right": {
+    "tag": "forge:ender_pearls"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "quark:resilience",
+    "duration": 40,
+    "type": "lingering"
+  }
+}
