@@ -97,7 +97,7 @@ public class PlaceContainer extends Container {
 
         @Override
         public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity player) {
-            return CoreModule.MAIN.create(windowId, playerInventory);
+            return new PlaceContainer(windowId, playerInventory);
         }
 
         @Override
