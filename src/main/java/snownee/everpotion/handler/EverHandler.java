@@ -243,7 +243,11 @@ public class EverHandler extends ItemStackHandler {
                 entity.attackEntityFrom(DamageSource.causeIndirectMagicDamage(entity, owner), 1.0F);
             }
         } else {
-            entity.addPotionEffect(new EffectInstance(effect));
+            if (effect.getPotion().isInstant()) {
+                effect.getPotion().affectEntity(entity, owner, entity, effect.getAmplifier(), 1.0D);
+            } else {
+                entity.addPotionEffect(new EffectInstance(effect));
+            }
         }
     }
 
