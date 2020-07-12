@@ -4,11 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -18,11 +15,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
 import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
@@ -197,7 +196,7 @@ public class EverHandler extends ItemStackHandler {
         PotionType type = cache.type;
         if (cache.effect == null && type != PotionType.NORMAL) {
             type = PotionType.SPLASH;
-            BlockPos pos = owner.getPosition();
+            BlockPos pos = owner./*getPosition*/func_233580_cy_();
             this.extinguishFires(owner.world, pos, Direction.DOWN);
             this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
 
@@ -209,7 +208,7 @@ public class EverHandler extends ItemStackHandler {
         if (type == PotionType.NORMAL) {
             doEffect(cache.effect, owner);
         } else if (type == PotionType.SPLASH) {
-            AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner.getPosition()).grow(4.0D, 2.0D, 4.0D);
+            AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner./*getPosition*/func_233580_cy_()).grow(4.0D, 2.0D, 4.0D);
             List<LivingEntity> list = owner.world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
             if (!list.isEmpty()) {
                 for (LivingEntity livingentity : list) {
@@ -232,7 +231,7 @@ public class EverHandler extends ItemStackHandler {
         }
         if (type != PotionType.NORMAL) {
             int i = (cache.effect != null && cache.effect.getPotion().isInstant()) ? 2007 : 2002;
-            owner.world.playEvent(i, owner.getPosition(), cache.color);
+            owner.world.playEvent(i, owner./*getPosition*/func_233580_cy_(), cache.color);
         }
     }
 
@@ -251,14 +250,15 @@ public class EverHandler extends ItemStackHandler {
         }
     }
 
-    private void extinguishFires(World world, BlockPos pos, Direction direction) {
+    // Copied from PotionEntity
+    private void extinguishFires(World world, BlockPos pos, Direction p_184542_2_) {
         BlockState blockstate = world.getBlockState(pos);
-        Block block = blockstate.getBlock();
-        if (block == Blocks.FIRE) {
-            world.extinguishFire(null, pos.offset(direction), direction.getOpposite());
-        } else if (block == Blocks.CAMPFIRE && blockstate.get(CampfireBlock.LIT)) {
-            world.playEvent(null, 1009, pos, 0);
-            world.setBlockState(pos, blockstate.with(CampfireBlock.LIT, Boolean.FALSE));
+        if (blockstate.func_235714_a_(BlockTags.field_232872_am_)) {
+            world.removeBlock(pos, false);
+        } else if (CampfireBlock.func_226915_i_(blockstate)) {
+            world.playEvent((PlayerEntity) null, 1009, pos, 0);
+            CampfireBlock.func_235475_c_(world, pos, blockstate);
+            world.setBlockState(pos, blockstate.with(CampfireBlock.LIT, Boolean.valueOf(false)));
         }
     }
 

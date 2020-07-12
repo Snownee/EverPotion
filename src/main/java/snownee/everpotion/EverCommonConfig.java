@@ -1,91 +1,41 @@
 package snownee.everpotion;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import snownee.kiwi.config.KiwiConfig;
+import snownee.kiwi.config.KiwiConfig.Comment;
+import snownee.kiwi.config.KiwiConfig.Path;
+import snownee.kiwi.config.KiwiConfig.Range;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
-import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
-import net.minecraftforge.common.ForgeConfigSpec.IntValue;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.ModConfig;
-
+@KiwiConfig
 public final class EverCommonConfig {
 
-    public static final ForgeConfigSpec spec;
-
+    @Range(min = 5)
     public static int drinkDelay = 20;
+    @Range(min = 5)
     public static int refillTime = 2400;
     public static boolean naturallyRefill = true;
-    public static float damageAcceleration = 1;
+    @Range(min = 0, max = 10)
+    @Comment("Damaging mobs can speed up refilling")
+    public static double damageAcceleration = 1;
 
-    // slots
+    @Path("slots.maxSlots")
+    @Range(min = 1, max = 4)
     public static int maxSlots = 3;
+    @Path("slots.beginnerSlots")
+    @Range(min = 0, max = 4)
     public static int beginnerSlots = 0;
 
-    // effects
-    public static float durationFactor = 1;
+    @Path("effects.durationFactor")
+    @Range(min = 0, max = 100)
+    public static double durationFactor = 1;
+    @Path("effects.ambient")
     public static boolean ambient = true;
+    @Path("effects.showParticles")
     public static boolean showParticles = true;
+    @Path("effects.showIcon")
     public static boolean showIcon = true;
 
-    public static float mobDropUnlockItem = 0.005f;
+    @Path("temp.mobDropUnlockItem")
+    @Range(min = 0, max = 1)
+    public static double mobDropUnlockItem = 0.005;
 
-    private static IntValue drinkDelayVal;
-    private static IntValue refillTimeVal;
-    private static BooleanValue naturallyRefillVal;
-    private static DoubleValue damageAccelerationVal;
-
-    private static IntValue maxSlotsVal;
-    private static IntValue beginnerSlotsVal;
-
-    private static DoubleValue durationFactorVal;
-    private static BooleanValue ambientVal;
-    private static BooleanValue showParticlesVal;
-    private static BooleanValue showIconVal;
-
-    private static DoubleValue mobDropUnlockItemVal;
-
-    static {
-        spec = new ForgeConfigSpec.Builder().configure(EverCommonConfig::new).getRight();
-    }
-
-    private EverCommonConfig(ForgeConfigSpec.Builder builder) {
-        drinkDelayVal = builder.defineInRange("drinkDelay", drinkDelay, 5, 100000);
-        refillTimeVal = builder.defineInRange("refillTime", refillTime, 5, 100000);
-        naturallyRefillVal = builder.define("naturallyRefill", naturallyRefill);
-        damageAccelerationVal = builder.comment("Damaging mobs can speed up refilling").defineInRange("damageAcceleration", damageAcceleration, 0, 10);
-
-        builder.push("slots");
-        maxSlotsVal = builder.defineInRange("maxSlots", maxSlots, 1, 4);
-        beginnerSlotsVal = builder.defineInRange("beginnerSlots", beginnerSlots, 0, 4);
-
-        builder.pop().push("effects");
-        durationFactorVal = builder.defineInRange("durationFactor", durationFactor, 0, 100);
-        ambientVal = builder.define("ambient", ambient);
-        showParticlesVal = builder.define("showParticles", showParticles);
-        showIconVal = builder.define("showIcon", showIcon);
-
-        builder.pop().push("temp");
-        mobDropUnlockItemVal = builder.defineInRange("mobDropUnlockItem", mobDropUnlockItem, 0, 1);
-    }
-
-    public static void refresh() {
-        drinkDelay = drinkDelayVal.get();
-        refillTime = refillTimeVal.get();
-        naturallyRefill = naturallyRefillVal.get();
-        damageAcceleration = damageAccelerationVal.get().floatValue();
-        maxSlots = maxSlotsVal.get();
-        beginnerSlots = beginnerSlotsVal.get();
-        durationFactor = durationFactorVal.get().floatValue();
-        ambient = ambientVal.get();
-        showParticles = showParticlesVal.get();
-        showIcon = showIconVal.get();
-        mobDropUnlockItem = mobDropUnlockItemVal.get().floatValue();
-    }
-
-    @SubscribeEvent
-    public static void onFileChange(ModConfig.Reloading event) {
-        ((CommentedFileConfig) event.getConfig().getConfigData()).load();
-        refresh();
-    }
 }

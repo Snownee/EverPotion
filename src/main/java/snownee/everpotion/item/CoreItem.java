@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -20,6 +19,7 @@ import net.minecraft.potion.EffectUtils;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -36,13 +36,8 @@ import snownee.kiwi.util.NBTHelper;
 
 public class CoreItem extends ModItem {
 
-    private static final IItemPropertyGetter TYPE_GETTER = (stack, world, entity) -> {
-        return getPotionType(stack).ordinal();
-    };
-
     public CoreItem() {
         super(new Item.Properties().maxStackSize(1));
-        addPropertyOverride(new ResourceLocation("type"), TYPE_GETTER);
     }
 
     @Override
@@ -50,21 +45,21 @@ public class CoreItem extends ModItem {
     public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         EffectInstance effectinstance = getEffectInstance(stack);
         if (effectinstance != null) {
-            ITextComponent itextcomponent = new TranslationTextComponent(effectinstance.getEffectName());
+            TextComponent itextcomponent = new TranslationTextComponent(effectinstance.getEffectName());
             Effect effect = effectinstance.getPotion();
             if (effectinstance.getAmplifier() > 0) {
-                itextcomponent.appendText(" ").appendSibling(new TranslationTextComponent("potion.potency." + effectinstance.getAmplifier()));
+                itextcomponent./*appendText*/func_240702_b_(" ")./*appendSibling*/func_230529_a_(new TranslationTextComponent("potion.potency." + effectinstance.getAmplifier()));
             }
             if (effectinstance.getDuration() > 20) {
-                itextcomponent.appendText(" (").appendText(EffectUtils.getPotionDurationString(effectinstance, EverCommonConfig.durationFactor)).appendText(")");
+                itextcomponent./*appendText*/func_240702_b_(" (")./*appendText*/func_240702_b_(EffectUtils.getPotionDurationString(effectinstance, (float) EverCommonConfig.durationFactor))./*appendText*/func_240702_b_(")");
             }
-            tooltip.add(itextcomponent.applyTextStyle(effect.getEffectType().getColor()));
+            tooltip.add(itextcomponent./*applyTextStyle*/func_240701_a_(effect.getEffectType().getColor()));
         } else {
-            tooltip.add((new TranslationTextComponent("effect.none")).applyTextStyle(TextFormatting.GRAY));
+            tooltip.add((new TranslationTextComponent("effect.none"))./*applyTextStyle*/func_240701_a_(TextFormatting.GRAY));
         }
         PotionType type = getPotionType(stack);
         if (type != PotionType.NORMAL) {
-            tooltip.add(new TranslationTextComponent("tip.everpotion.potionType." + type.toString()).applyTextStyle(TextFormatting.GRAY));
+            tooltip.add(new TranslationTextComponent("tip.everpotion.potionType." + type.toString())./*applyTextStyle*/func_240701_a_(TextFormatting.GRAY));
         }
         super.addInformation(stack, worldIn, tooltip, flagIn);
     }

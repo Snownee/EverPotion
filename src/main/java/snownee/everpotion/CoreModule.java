@@ -10,6 +10,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
@@ -28,17 +29,12 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
@@ -68,16 +64,6 @@ public class CoreModule extends AbstractModule {
 
     public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
 
-    public CoreModule() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, EverCommonConfig.spec);
-        modEventBus.register(EverCommonConfig.class);
-        if (FMLEnvironment.dist.isClient()) {
-            ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, EverClientConfig.spec);
-            modEventBus.register(EverClientConfig.class);
-        }
-    }
-
     @Override
     protected void preInit() {
         NetworkChannel.register(CDrinkPacket.class, new CDrinkPacket.Handler());
@@ -88,8 +74,6 @@ public class CoreModule extends AbstractModule {
 
     @Override
     protected void init(FMLCommonSetupEvent event) {
-        EverCommonConfig.refresh();
-
         CapabilityManager.INSTANCE.register(EverHandler.class, new Capability.IStorage<EverHandler>() {
 
             @Override
@@ -109,6 +93,9 @@ public class CoreModule extends AbstractModule {
         ClientRegistry.registerKeyBinding(ClientHandler.kbUse);
         ScreenManager.registerFactory(MAIN, PlaceScreen::new);
         MinecraftForge.EVENT_BUS.register(ClientHandler.class);
+        ItemModelsProperties.func_239418_a_(CORE, new ResourceLocation("type"), (stack, world, entity) -> {
+            return CoreItem.getPotionType(stack).ordinal();
+        });
     }
 
     @Override
@@ -175,7 +162,7 @@ public class CoreModule extends AbstractModule {
         Entity source = event.getSource().getTrueSource();
         if (source instanceof ServerPlayerEntity && EverCommonConfig.damageAcceleration > 0) {
             source.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
-                handler.accelerate(.05f * event.getAmount() * EverCommonConfig.damageAcceleration);
+                handler.accelerate(.05f * event.getAmount() * (float) EverCommonConfig.damageAcceleration);
                 if (source.world.rand.nextBoolean()) {
                     sync((ServerPlayerEntity) source);
                 }

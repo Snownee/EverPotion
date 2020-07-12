@@ -3,11 +3,12 @@ package snownee.everpotion.client;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
@@ -88,7 +89,7 @@ public final class ClientHandler {
             }
             if (mc.player.isCrouching()) {
                 if (handler.getSlots() == 0) {
-                    mc.ingameGUI.addChatMessage(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"));
+                    mc.ingameGUI./*addChatMessage*/func_238450_a_(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"), Util.field_240973_b_);
                     return;
                 }
                 new COpenContainerPacket().send();

@@ -15,7 +15,7 @@ import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.Name;
 
-@KiwiModule(name = "crafting")
+@KiwiModule("crafting")
 @KiwiModule.Optional
 @KiwiModule.Subscriber
 public class CraftingModule extends AbstractModule {

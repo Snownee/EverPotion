@@ -12,7 +12,7 @@
     }
   },
   "right": {
-    "tag": "forge:ender_pearls"
+    "tag": "everpotion:ingredient"
   },
   "cost": 10,
   "output": {
