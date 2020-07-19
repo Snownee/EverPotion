@@ -44,16 +44,16 @@ public class UseScreen extends Screen {
     }
 
     @Override
-    protected void /*init*/ func_231160_c_() {
-        if (field_230706_i_.player == null) {
+    protected void init() {
+        if (minecraft.player == null) {
             return;
         }
-        handler = field_230706_i_.player.getCapability(EverCapabilities.HANDLER).orElse(null);
-        keyBindsHotbar = field_230706_i_.gameSettings.keyBindsHotbar;
+        handler = minecraft.player.getCapability(EverCapabilities.HANDLER).orElse(null);
+        keyBindsHotbar = minecraft.gameSettings.keyBindsHotbar;
     }
 
     @Override
-    public void /*render*/ func_230430_a_(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
+    public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
         if (handler == null) {
             return;
         }
@@ -65,8 +65,8 @@ public class UseScreen extends Screen {
         }
         openTick = MathHelper.clamp(openTick, 0, 1);
 
-        float xCenter = /*width*/field_230708_k_ / 2f;
-        float yCenter = /*height*/field_230709_l_ / 2f;
+        float xCenter = width / 2f;
+        float yCenter = height / 2f;
         if (EverCommonConfig.maxSlots == 3) {
             yCenter += 20;
         }
@@ -74,7 +74,7 @@ public class UseScreen extends Screen {
         if (!closing && (drinkTick > 0 || handler.drinkIndex != -1)) {
             drinkTick += pTicks;
             if (drinkTick > EverCommonConfig.drinkDelay) {
-                /*onClose*/func_231175_as__();
+                onClose();
             }
         }
 
@@ -102,7 +102,7 @@ public class UseScreen extends Screen {
 
         RenderSystem.disableBlend();
 
-        super./*render*/func_230430_a_(matrix, mouseX, mouseY, pTicks);
+        super.render(matrix, mouseX, mouseY, pTicks);
     }
 
     @SuppressWarnings("null")
@@ -255,13 +255,13 @@ public class UseScreen extends Screen {
         if (cache == null) {
             matrix.translate(xCenter, yCenter - 3, 0);
             matrix.scale(0.75f, 0.75f, 0.75f);
-            /*drawCenteredString*/func_238471_a_(matrix, /*font*/field_230712_o_, name, 0, 0, textColor);
+            drawCenteredString(matrix, font, name, 0, 0, textColor);
         } else if (cache.effect != null) {
-            PotionSpriteUploader potionspriteuploader = this.field_230706_i_.getPotionSpriteUploader();
+            PotionSpriteUploader potionspriteuploader = this.minecraft.getPotionSpriteUploader();
             TextureAtlasSprite sprite = potionspriteuploader.getSprite(cache.effect.getPotion());
             sprite.getAtlasTexture().bindTexture();
 
-            /*blit*/func_238470_a_(matrix, (int) xCenter - 12, (int) yCenter - 18, this./*getBlitOffset*/func_230927_p_(), 24, 24, sprite);
+            blit(matrix, (int) xCenter - 12, (int) yCenter - 18, this.getBlitOffset(), 24, 24, sprite);
 
             float yCenter2 = yCenter - 6 * (1 + 0.125f * scales[index]);
             float halfwidth = 12 + 1.5f * scales[index];
@@ -279,11 +279,11 @@ public class UseScreen extends Screen {
 
             matrix.translate(xCenter, yCenter + 10, 0);
             matrix.scale(0.75f, 0.75f, 0.75f);
-            /*drawCenteredString*/func_238471_a_(matrix, /*font*/field_230712_o_, name, 0, 0, textColor);
+            drawCenteredString(matrix, font, name, 0, 0, textColor);
         } else {
             matrix.translate(xCenter, yCenter - 3, 0);
             matrix.scale(0.75f, 0.75f, 0.75f);
-            /*drawCenteredString*/func_238471_a_(matrix, /*font*/field_230712_o_, name, 0, 0, textColor);
+            drawCenteredString(matrix, font, name, 0, 0, textColor);
         }
         matrix.pop();
     }
@@ -310,9 +310,9 @@ public class UseScreen extends Screen {
     }
 
     @Override
-    public boolean /*mouseClicked*/ func_231044_a_(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
+    public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
         if (clickIndex == -2) {
-            /*onClose*/func_231175_as__();
+            onClose();
             return true;
         }
         if (closing || clickIndex == -1) {
@@ -327,7 +327,7 @@ public class UseScreen extends Screen {
     }
 
     @Override
-    public boolean /*keyPressed*/ func_231046_a_(int key, int scanCode, int modifiers) {
+    public boolean keyPressed(int key, int scanCode, int modifiers) {
         if (closing || handler.drinkIndex != -1) {
             return false;
         }
@@ -342,19 +342,19 @@ public class UseScreen extends Screen {
             if (ClientHandler.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
                 return false;
             }
-            /*onClose*/func_231175_as__();
+            onClose();
             return true;
         }
-        return super./*keyPressed*/func_231046_a_(key, scanCode, modifiers);
+        return super.keyPressed(key, scanCode, modifiers);
     }
 
     @Override
-    public void /*onClose*/ func_231175_as__() {
+    public void onClose() {
         closing = true;
     }
 
     @Override
-    public boolean /*isPauseScreen*/ func_231177_au__() {
+    public boolean isPauseScreen() {
         return false;
     }
 

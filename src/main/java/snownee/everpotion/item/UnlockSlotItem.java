@@ -74,7 +74,7 @@ public class UnlockSlotItem extends ModItem {
     }
 
     private static void sendMsg(ServerPlayerEntity player, String translationKey) {
-        player./*sendMessage*/func_241151_a_(new TranslationTextComponent("msg.everpotion." + translationKey), ChatType.GAME_INFO, Util.field_240973_b_);
+        player./*sendMessage*/func_241151_a_(new TranslationTextComponent("msg.everpotion." + translationKey), ChatType.GAME_INFO, Util.DUMMY_UUID);
     }
 
     @Override

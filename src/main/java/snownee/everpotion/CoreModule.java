@@ -22,6 +22,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -34,7 +35,6 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
@@ -98,10 +98,10 @@ public class CoreModule extends AbstractModule {
         });
     }
 
-    @Override
-    protected void serverInit(FMLServerStartingEvent event) {
-        LiteralArgumentBuilder<CommandSource> builder = EverCommand.init(event.getCommandDispatcher());
-        event.getCommandDispatcher().register(builder);
+    @SubscribeEvent
+    protected void onCommandsRegister(RegisterCommandsEvent event) {
+        LiteralArgumentBuilder<CommandSource> builder = EverCommand.init(event.getDispatcher());
+        event.getDispatcher().register(builder);
     }
 
     public static final ResourceLocation HANDLER_ID = new ResourceLocation(EverPotion.MODID, "handler");

@@ -253,7 +253,7 @@ public class EverHandler extends ItemStackHandler {
     // Copied from PotionEntity
     private void extinguishFires(World world, BlockPos pos, Direction p_184542_2_) {
         BlockState blockstate = world.getBlockState(pos);
-        if (blockstate.func_235714_a_(BlockTags.field_232872_am_)) {
+        if (blockstate.isIn(BlockTags.FIRE)) {
             world.removeBlock(pos, false);
         } else if (CampfireBlock.func_226915_i_(blockstate)) {
             world.playEvent((PlayerEntity) null, 1009, pos, 0);

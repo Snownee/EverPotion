@@ -89,7 +89,7 @@ public final class ClientHandler {
             }
             if (mc.player.isCrouching()) {
                 if (handler.getSlots() == 0) {
-                    mc.ingameGUI./*addChatMessage*/func_238450_a_(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"), Util.field_240973_b_);
+                    mc.ingameGUI./*addChatMessage*/func_238450_a_(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"), Util.DUMMY_UUID);
                     return;
                 }
                 new COpenContainerPacket().send();

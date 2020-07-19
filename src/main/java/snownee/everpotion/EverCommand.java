@@ -22,7 +22,7 @@ public class EverCommand {
         /* off */
         builder
         .then(Commands
-                .literal("refill")
+                .literal("fill")
                 .requires(ctx -> ctx.hasPermissionLevel(2))
                 .executes(ctx-> refill(ctx, Collections.singleton(ctx.getSource().asPlayer())))
                 .then(Commands
