@@ -68,7 +68,7 @@ public class UnlockSlotItem extends ModItem {
         handler.setSlots(tier);
         // TODO more fancy effects!
         stack.shrink(1);
-        worldIn.playSound(null, playerIn./*getPosition*/func_233580_cy_(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
+        worldIn.playSound(null, playerIn.getPosition(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
         CoreModule.sync((ServerPlayerEntity) playerIn);
         return ActionResult.resultConsume(stack);
     }
@@ -80,7 +80,7 @@ public class UnlockSlotItem extends ModItem {
     @Override
     public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
         if (NBTHelper.of(stack).getBoolean("Force")) {
-            tooltip.add(new TranslationTextComponent("tip.everpotion.force")./*applyTextStyle*/func_240701_a_(TextFormatting.RED));
+            tooltip.add(new TranslationTextComponent("tip.everpotion.force").mergeStyle(TextFormatting.RED));
         }
         super.addInformation(stack, worldIn, tooltip, flagIn);
     }

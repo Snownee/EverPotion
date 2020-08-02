@@ -196,7 +196,7 @@ public class EverHandler extends ItemStackHandler {
         PotionType type = cache.type;
         if (cache.effect == null && type != PotionType.NORMAL) {
             type = PotionType.SPLASH;
-            BlockPos pos = owner./*getPosition*/func_233580_cy_();
+            BlockPos pos = owner.getPosition();
             this.extinguishFires(owner.world, pos, Direction.DOWN);
             this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
 
@@ -208,7 +208,7 @@ public class EverHandler extends ItemStackHandler {
         if (type == PotionType.NORMAL) {
             doEffect(cache.effect, owner);
         } else if (type == PotionType.SPLASH) {
-            AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner./*getPosition*/func_233580_cy_()).grow(4.0D, 2.0D, 4.0D);
+            AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner.getPosition()).grow(4.0D, 2.0D, 4.0D);
             List<LivingEntity> list = owner.world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
             if (!list.isEmpty()) {
                 for (LivingEntity livingentity : list) {
@@ -231,7 +231,7 @@ public class EverHandler extends ItemStackHandler {
         }
         if (type != PotionType.NORMAL) {
             int i = (cache.effect != null && cache.effect.getPotion().isInstant()) ? 2007 : 2002;
-            owner.world.playEvent(i, owner./*getPosition*/func_233580_cy_(), cache.color);
+            owner.world.playEvent(i, owner.getPosition(), cache.color);
         }
     }
 
@@ -255,9 +255,9 @@ public class EverHandler extends ItemStackHandler {
         BlockState blockstate = world.getBlockState(pos);
         if (blockstate.isIn(BlockTags.FIRE)) {
             world.removeBlock(pos, false);
-        } else if (CampfireBlock.func_226915_i_(blockstate)) {
+        } else if (CampfireBlock.isLit(blockstate)) {
             world.playEvent((PlayerEntity) null, 1009, pos, 0);
-            CampfireBlock.func_235475_c_(world, pos, blockstate);
+            CampfireBlock.extinguish(world, pos, blockstate);
             world.setBlockState(pos, blockstate.with(CampfireBlock.LIT, Boolean.valueOf(false)));
         }
     }

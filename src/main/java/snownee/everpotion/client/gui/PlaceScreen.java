@@ -19,7 +19,7 @@ public class PlaceScreen extends ContainerScreen<PlaceContainer> {
         super(screenContainer, inv, titleIn);
         this.passEvents = false;
         this.ySize = 133;
-        this.field_238745_s_ = this.ySize - 94;
+        this.playerInventoryTitleY = this.ySize - 94;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class PlaceScreen extends ContainerScreen<PlaceContainer> {
      * Draws the background layer of this container (behind the items).
      */
     @Override
-    protected void /*drawGuiContainerBackgroundLayer*/ func_230450_a_(MatrixStack matrix, float partialTicks, int mouseX, int mouseY) {
+    protected void drawGuiContainerBackgroundLayer(MatrixStack matrix, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.minecraft.getTextureManager().bindTexture(HOPPER_GUI_TEXTURE);
         int i = (this.width - this.xSize) / 2;

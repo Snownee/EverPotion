@@ -18,9 +18,6 @@ import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.settings.KeyModifier;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.gui.UseScreen;
@@ -31,10 +28,8 @@ import snownee.everpotion.network.COpenContainerPacket;
 import snownee.kiwi.util.MathUtil;
 
 @OnlyIn(Dist.CLIENT)
-@EventBusSubscriber(bus = Bus.MOD, value = Dist.CLIENT)
 public final class ClientHandler {
 
-    @SubscribeEvent
     public static void onItemColorsInit(ColorHandlerEvent.Item event) {
         ItemColors colors = event.getItemColors();
         colors.register((stack, i) -> {
@@ -76,7 +71,6 @@ public final class ClientHandler {
 
     public static final KeyBinding kbUse = new KeyBinding("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
 
-    @SubscribeEvent
     public static void onKeyInput(KeyInputEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.currentScreen != null || mc.player.isSpectator()) {
@@ -102,7 +96,6 @@ public final class ClientHandler {
         }
     }
 
-    @SubscribeEvent
     public static void renderOverlay(RenderGameOverlayEvent event) {
         Minecraft mc = Minecraft.getInstance();
         if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {

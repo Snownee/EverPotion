@@ -6,11 +6,8 @@ import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.event.AnvilUpdateEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.Name;
@@ -28,21 +25,15 @@ public class CraftingModule extends AbstractModule {
 
     public static MinecraftServer SERVER;
 
-    public CraftingModule() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        modEventBus.addListener(this::serverStopped);
-    }
-
     @Override
     protected void serverInit(FMLServerStartingEvent event) {
         SERVER = event.getServer();
     }
 
-    protected void serverStopped(FMLServerStoppedEvent event) {
+    public void serverStopped(FMLServerStoppedEvent event) {
         SERVER = null;
     }
 
-    @SubscribeEvent
     public void onAnvilCrafting(AnvilUpdateEvent event) {
         if (SERVER == null) {
             return;

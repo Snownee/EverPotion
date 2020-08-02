@@ -35,6 +35,8 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
@@ -64,6 +66,12 @@ public class CoreModule extends AbstractModule {
 
     public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
 
+    public CoreModule() {
+        if (FMLEnvironment.dist.isClient()) {
+            FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientHandler::onItemColorsInit);
+        }
+    }
+
     @Override
     protected void preInit() {
         NetworkChannel.register(CDrinkPacket.class, new CDrinkPacket.Handler());
@@ -92,7 +100,8 @@ public class CoreModule extends AbstractModule {
     protected void clientInit(FMLClientSetupEvent event) {
         ClientRegistry.registerKeyBinding(ClientHandler.kbUse);
         ScreenManager.registerFactory(MAIN, PlaceScreen::new);
-        MinecraftForge.EVENT_BUS.register(ClientHandler.class);
+        MinecraftForge.EVENT_BUS.addListener(ClientHandler::renderOverlay);
+        MinecraftForge.EVENT_BUS.addListener(ClientHandler::onKeyInput);
         ItemModelsProperties.func_239418_a_(CORE, new ResourceLocation("type"), (stack, world, entity) -> {
             return CoreItem.getPotionType(stack).ordinal();
         });

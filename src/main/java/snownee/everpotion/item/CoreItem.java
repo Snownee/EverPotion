@@ -48,18 +48,18 @@ public class CoreItem extends ModItem {
             TextComponent itextcomponent = new TranslationTextComponent(effectinstance.getEffectName());
             Effect effect = effectinstance.getPotion();
             if (effectinstance.getAmplifier() > 0) {
-                itextcomponent./*appendText*/func_240702_b_(" ")./*appendSibling*/func_230529_a_(new TranslationTextComponent("potion.potency." + effectinstance.getAmplifier()));
+                itextcomponent.appendString(" ").append(new TranslationTextComponent("potion.potency." + effectinstance.getAmplifier()));
             }
             if (effectinstance.getDuration() > 20) {
-                itextcomponent./*appendText*/func_240702_b_(" (")./*appendText*/func_240702_b_(EffectUtils.getPotionDurationString(effectinstance, (float) EverCommonConfig.durationFactor))./*appendText*/func_240702_b_(")");
+                itextcomponent.appendString(" (").appendString(EffectUtils.getPotionDurationString(effectinstance, (float) EverCommonConfig.durationFactor)).appendString(")");
             }
-            tooltip.add(itextcomponent./*applyTextStyle*/func_240701_a_(effect.getEffectType().getColor()));
+            tooltip.add(itextcomponent.mergeStyle(effect.getEffectType().getColor()));
         } else {
-            tooltip.add((new TranslationTextComponent("effect.none"))./*applyTextStyle*/func_240701_a_(TextFormatting.GRAY));
+            tooltip.add((new TranslationTextComponent("effect.none")).mergeStyle(TextFormatting.GRAY));
         }
         PotionType type = getPotionType(stack);
         if (type != PotionType.NORMAL) {
-            tooltip.add(new TranslationTextComponent("tip.everpotion.potionType." + type.toString())./*applyTextStyle*/func_240701_a_(TextFormatting.GRAY));
+            tooltip.add(new TranslationTextComponent("tip.everpotion.potionType." + type.toString()).mergeStyle(TextFormatting.GRAY));
         }
         super.addInformation(stack, worldIn, tooltip, flagIn);
     }
