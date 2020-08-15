@@ -116,6 +116,8 @@ public class EverHandler extends ItemStackHandler {
 
     public void setSlots(int slots) {
         this.slots = slots;
+        drinkIndex = -1;
+        updateCharge();
     }
 
     @Override
@@ -149,6 +151,10 @@ public class EverHandler extends ItemStackHandler {
         acceleration = Math.max(0, acceleration - 0.005f);
         if (chargeIndex != -1) {
             Cache cache = caches[chargeIndex];
+            if (cache == null) {
+                updateCharge();
+                return;
+            }
             cache.progress = MathHelper.clamp(cache.progress + cache.speed * acceleration, 0, EverCommonConfig.refillTime);
             if (EverCommonConfig.naturallyRefill) {
                 cache.progress = MathHelper.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
