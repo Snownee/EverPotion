@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -17,6 +18,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.EffectUtils;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -29,6 +32,7 @@ import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
+import snownee.everpotion.container.PlaceContainer;
 import snownee.everpotion.crafting.CraftingModule;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.item.ModItem;
@@ -125,6 +129,14 @@ public class CoreItem extends ModItem {
                 /* on */
             }
         }
+    }
+
+    @Override
+    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+        if (!worldIn.isRemote) {
+            playerIn.openContainer(PlaceContainer.ContainerProvider.INSTANCE);
+        }
+        return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
     }
 
 }
