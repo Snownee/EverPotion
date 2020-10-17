@@ -1,0 +1,24 @@
+{
+"item.everpotion.core": "Núcleo de Poção Eternal",
+"item.everpotion.unlock_slot": "Desbloqueio de Slot",
+"item.everpotion.unlock_slot.1": "Desbloqueio de Slot Nível 1",
+"item.everpotion.unlock_slot.2": "Desbloqueio de Slot Nível 2",
+"item.everpotion.unlock_slot.3": "Desbloqueio de Slot Nível 3",
+"item.everpotion.unlock_slot.4": "Desbloqueio de Slot Nível 4",
+
+"tip.everpotion.potionType.lingering": "Prolongada",
+"tip.everpotion.potionType.splash": "Arremessável",
+"tip.everpotion.force": "Aplicação Forçada",
+
+"msg.everpotion.maxLevel": "Você desbloqueou todos os slots!",
+"msg.everpotion.tooLow": "Você desbloqueou um slot nivelado!",
+"msg.everpotion.tooHigh": "Você deve desbloquear os slots anteriores primeiro!",
+"msg.everpotion.noHandler": "Você não tem habilidade para usar Poção Eternal!",
+"msg.everpotion.noSlots": "Você não tem slots!",
+
+"container.everpotion.main": "Mudificar Núcleos",
+
+"gui.everpotion.keygroup": "Poção Eternal",
+
+"keybind.everpotion.use": "Abrir"
+}
