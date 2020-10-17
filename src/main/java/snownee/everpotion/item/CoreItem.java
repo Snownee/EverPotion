@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -17,6 +19,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.EffectUtils;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
@@ -28,6 +31,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.EverPotion;
@@ -102,28 +106,42 @@ public class CoreItem extends ModItem {
 
     @Override
     public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            if (Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting")) && CraftingModule.SERVER != null) {
-                RecipeManager manager = CraftingModule.SERVER.getRecipeManager();
-                /* off */
-                items.addAll(manager.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
-                        .map(IRecipe::getRecipeOutput)
-                        .filter(s -> s.getItem() == CoreModule.CORE)
-                        .sorted((a, b) -> {
-                            String effectA = Objects.toString(getEffect(a));
-                            String effectB = Objects.toString(getEffect(b));
-                            int i = effectA.compareTo(effectB);
-                            if (i != 0) {
-                                return i;
-                            }
-                            PotionType typeA = getPotionType(a);
-                            PotionType typeB = getPotionType(b);
-                            return typeA.compareTo(typeB);
-                        })
-                        .collect(Collectors.toList()));
-                /* on */
+        if (!this.isInGroup(group)) {
+            return;
+        }
+        if (!Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting"))) {
+            return;
+        }
+        RecipeManager manager = null;
+        MinecraftServer server = Kiwi.getServer();
+        if (server != null) {
+            manager = server.getRecipeManager();
+        } else if (FMLEnvironment.dist.isClient()) {
+            ClientPlayNetHandler connection = Minecraft.getInstance().getConnection();
+            if (connection != null) {
+                manager = connection.getRecipeManager();
             }
         }
+        if (manager == null) {
+            return;
+        }
+        /* off */
+        items.addAll(manager.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
+                .map(IRecipe::getRecipeOutput)
+                .filter(s -> s.getItem() == CoreModule.CORE)
+                .sorted((a, b) -> {
+                    String effectA = Objects.toString(getEffect(a));
+                    String effectB = Objects.toString(getEffect(b));
+                    int i = effectA.compareTo(effectB);
+                    if (i != 0) {
+                        return i;
+                    }
+                    PotionType typeA = getPotionType(a);
+                    PotionType typeB = getPotionType(b);
+                    return typeA.compareTo(typeB);
+                })
+                .collect(Collectors.toList()));
+        /* on */
     }
 
     @Override
