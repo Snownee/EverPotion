@@ -107,28 +107,33 @@ public class CoreItem extends ModItem {
 
     @Override
     public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            if (Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting")) && CraftingModule.SERVER != null) {
-                RecipeManager manager = CraftingModule.SERVER.getRecipeManager();
-                /* off */
-                items.addAll(manager.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
-                        .map(IRecipe::getRecipeOutput)
-                        .filter(s -> s.getItem() == CoreModule.CORE)
-                        .sorted((a, b) -> {
-                            String effectA = Objects.toString(getEffect(a));
-                            String effectB = Objects.toString(getEffect(b));
-                            int i = effectA.compareTo(effectB);
-                            if (i != 0) {
-                                return i;
-                            }
-                            PotionType typeA = getPotionType(a);
-                            PotionType typeB = getPotionType(b);
-                            return typeA.compareTo(typeB);
-                        })
-                        .collect(Collectors.toList()));
-                /* on */
-            }
+        if (!this.isInGroup(group)) {
+            return;
         }
+        if (!Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting"))) {
+            return;
+        }
+        RecipeManager manager = CraftingModule.getRecipeManager();
+        if (manager == null) {
+            return;
+        }
+        /* off */
+        items.addAll(manager.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
+                .map(IRecipe::getRecipeOutput)
+                .filter(s -> s.getItem() == CoreModule.CORE)
+                .sorted((a, b) -> {
+                    String effectA = Objects.toString(getEffect(a));
+                    String effectB = Objects.toString(getEffect(b));
+                    int i = effectA.compareTo(effectB);
+                    if (i != 0) {
+                        return i;
+                    }
+                    PotionType typeA = getPotionType(a);
+                    PotionType typeB = getPotionType(b);
+                    return typeA.compareTo(typeB);
+                })
+                .collect(Collectors.toList()));
+        /* on */
     }
 
     @Override
