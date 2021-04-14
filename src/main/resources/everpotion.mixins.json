@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "snownee.everpotion.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "mixins.everpotion.refmap.json",
+  "mixins": [
+    "MixinArrowItem"
+  ],
+  "client": [
+    "MixinItemRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

@@ -63,7 +63,7 @@ public class CoreItem extends ModItem {
         }
         PotionType type = getPotionType(stack);
         if (type != PotionType.NORMAL) {
-            tooltip.add(new TranslationTextComponent("tip.everpotion.potionType." + type.toString()).mergeStyle(TextFormatting.GRAY));
+            tooltip.add(new TranslationTextComponent(type.getDescKey()).mergeStyle(TextFormatting.GRAY));
         }
         super.addInformation(stack, worldIn, tooltip, flagIn);
     }

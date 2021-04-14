@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CampfireBlock;
-import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -27,6 +27,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
+import snownee.everpotion.entity.EverArrowEntity;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.network.CDrinkPacket;
 import snownee.kiwi.util.MathUtil;
@@ -39,6 +40,7 @@ public class EverHandler extends ItemStackHandler {
     public final Cache[] caches = new Cache[4];
     public int chargeIndex = -1;
     public int drinkIndex = -1;
+    public int tipIndex = -1;
     public int drinkTick;
     public float acceleration;
 
@@ -70,10 +72,13 @@ public class EverHandler extends ItemStackHandler {
         if (chargeIndex == -1 || slot == chargeIndex) {
             updateCharge();
         }
+        if (slot == tipIndex) {
+            tipIndex = -1;
+        }
     }
 
     private void updateCharge() {
-        for (int i = 0; i < caches.length; i++) {
+        for (int i = 0; i < slots; i++) {
             if (caches[i] == null) {
                 continue;
             }
@@ -95,6 +100,7 @@ public class EverHandler extends ItemStackHandler {
             }
             tag.putFloat("Progress" + i, caches[i].progress);
         }
+        tag.putInt("Tip", tipIndex);
         return tag;
     }
 
@@ -112,11 +118,13 @@ public class EverHandler extends ItemStackHandler {
             }
             this.caches[i].progress = data.getFloat("Progress" + i);
         }
+        tipIndex = data.getInt("Tip", -1);
     }
 
     public void setSlots(int slots) {
         this.slots = slots;
         drinkIndex = -1;
+        tipIndex = -1;
         updateCharge();
     }
 
@@ -135,8 +143,8 @@ public class EverHandler extends ItemStackHandler {
     }
 
     public void copyFrom(EverHandler that) {
-        this.setSlots(that.getSlots());
-        this.stacks = that.stacks;
+        slots = that.slots;
+        stacks = that.stacks;
         for (int i = 0; i < caches.length; i++) {
             onContentsChanged(i);
             if (caches[i] != null && that.caches[i] != null) {
@@ -144,6 +152,7 @@ public class EverHandler extends ItemStackHandler {
             }
         }
         this.chargeIndex = that.chargeIndex;
+        this.tipIndex = that.tipIndex;
         this.acceleration = that.acceleration;
     }
 
@@ -167,8 +176,16 @@ public class EverHandler extends ItemStackHandler {
             }
         }
         if (drinkIndex != -1) {
+            Cache cache = caches[drinkIndex];
+            if (cache == null) {
+                return;
+            }
+            if (cache.type == PotionType.LINGERING) {
+                drinkTick = 0;
+                return;
+            }
             if (++drinkTick >= EverCommonConfig.drinkDelay) {
-                drink(drinkIndex);
+                use(drinkIndex);
                 stopDrinking();
                 if (chargeIndex == -1) {
                     updateCharge();
@@ -178,7 +195,16 @@ public class EverHandler extends ItemStackHandler {
     }
 
     public void startDrinking(int slot) {
-        drinkIndex = slot;
+        Cache cache = caches[slot];
+        if (cache.type == PotionType.LINGERING) {
+            if (tipIndex == slot) {
+                tipIndex = -1;
+            } else {
+                tipIndex = slot;
+            }
+        } else {
+            drinkIndex = slot;
+        }
         if (owner.world.isRemote) {
             new CDrinkPacket(slot).send();
         }
@@ -193,27 +219,26 @@ public class EverHandler extends ItemStackHandler {
         owner = null;
     }
 
-    private void drink(int slot) {
+    private void use(int slot) {
         Cache cache = caches[slot];
         cache.progress = 0;
         if (owner.world.isRemote) {
             return;
         }
+
         PotionType type = cache.type;
-        if (cache.effect == null && type != PotionType.NORMAL) {
-            type = PotionType.SPLASH;
-            BlockPos pos = owner.getPosition();
-            this.extinguishFires(owner.world, pos, Direction.DOWN);
-            this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
-
-            for (Direction direction : Direction.Plane.HORIZONTAL) {
-                this.extinguishFires(owner.world, pos.offset(direction), direction);
-            }
-        }
-
         if (type == PotionType.NORMAL) {
             doEffect(cache.effect, owner);
         } else if (type == PotionType.SPLASH) {
+            if (cache.effect == null) {
+                BlockPos pos = owner.getPosition();
+                this.extinguishFires(owner.world, pos, Direction.DOWN);
+                this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
+
+                for (Direction direction : Direction.Plane.HORIZONTAL) {
+                    this.extinguishFires(owner.world, pos.offset(direction), direction);
+                }
+            }
             AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner.getPosition()).grow(4.0D, 2.0D, 4.0D);
             List<LivingEntity> list = owner.world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
             if (!list.isEmpty()) {
@@ -224,18 +249,6 @@ public class EverHandler extends ItemStackHandler {
                     }
                 }
             }
-        } else { // PotionEntity.makeAreaOfEffectCloud
-            AreaEffectCloudEntity areaeffectcloudentity = new AreaEffectCloudEntity(owner.world, owner.getPosX(), owner.getPosY(), owner.getPosZ());
-            areaeffectcloudentity.setOwner(owner);
-            areaeffectcloudentity.setRadius(3.0F);
-            areaeffectcloudentity.setRadiusOnUse(-0.5F);
-            areaeffectcloudentity.setWaitTime(10);
-            areaeffectcloudentity.setRadiusPerTick(-areaeffectcloudentity.getRadius() / areaeffectcloudentity.getDuration());
-            areaeffectcloudentity.addEffect(new EffectInstance(cache.effect));
-
-            owner.world.addEntity(areaeffectcloudentity);
-        }
-        if (type != PotionType.NORMAL) {
             int i = (cache.effect != null && cache.effect.getPotion().isInstant()) ? 2007 : 2002;
             owner.world.playEvent(i, owner.getPosition(), cache.color);
         }
@@ -268,11 +281,31 @@ public class EverHandler extends ItemStackHandler {
         }
     }
 
-    public boolean canDrink(int slot) {
+    public boolean canUseSlot(int slot, boolean selectOnly) {
         if (slot < 0 || slot >= slots) {
             return false;
         }
-        return owner != null && drinkIndex == -1 && caches[slot] != null && caches[slot].progress >= EverCommonConfig.refillTime;
+        if (owner != null && drinkIndex == -1 && caches[slot] != null) {
+            Cache cache = caches[slot];
+            if (cache.type == PotionType.LINGERING) {
+                return selectOnly || cache.progress >= EverCommonConfig.tipArrowTimeCost;
+            } else {
+                return cache.progress >= EverCommonConfig.refillTime;
+            }
+        }
+        return false;
+    }
+
+    public AbstractArrowEntity tryTipArrow(World worldIn, ItemStack stack) {
+        if (!worldIn.isRemote && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
+            EverArrowEntity arrow = new EverArrowEntity(worldIn, owner);
+            arrow.addEffect(caches[tipIndex].effect);
+            caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
+            updateCharge();
+            CoreModule.sync((ServerPlayerEntity) owner);
+            return arrow;
+        }
+        return null;
     }
 
     public static final class Cache {
@@ -307,13 +340,13 @@ public class EverHandler extends ItemStackHandler {
         acceleration = Math.min(acceleration + f, 2);
     }
 
-    public void refill() {
+    public void setAll(int time) {
         chargeIndex = -1;
         for (int i = 0; i < caches.length; i++) {
             if (caches[i] == null) {
                 continue;
             }
-            caches[i].progress = EverCommonConfig.refillTime;
+            caches[i].progress = time;
         }
         CoreModule.sync((ServerPlayerEntity) owner);
     }

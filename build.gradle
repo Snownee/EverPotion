@@ -3,9 +3,11 @@ buildscript {
         maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
         mavenCentral()
+        maven { url='https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -85,6 +87,12 @@ repositories {
         name = "jei"
         url = "https://dvs1.progwml6.com/files/maven"
     }
+    maven {
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
+    }
+    maven {
+        url = "https://www.cursemaven.com"
+    }
 }
 
 dependencies {
@@ -93,9 +101,15 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-    compile fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
+    //compileOnly fg.deobf("mezz.jei:jei-1.16.2:7.3.2.25:api")
+    compile fg.deobf("mezz.jei:jei-1.16.2:7.3.2.25")
+
+    compile 'org.spongepowered:mixin:0.8-SNAPSHOT'
 	
-    compile files("Kiwi-${minecraft_version}-${kiwi_version}-deobf.jar")
+    //compile files("Kiwi-${minecraft_version}-${kiwi_version}-deobf.jar")
+
+    implementation fg.deobf("curse.maven:kiwi-303657:3273567")
+    implementation fg.deobf("curse.maven:jade-324717:3238316")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -108,7 +122,8 @@ jar {
         attributes([
             "Implementation-Title": project.name,
             "Implementation-Version": "${version}",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+            "MixinConfigs": "everpotion.mixins.json"
         ])
     }
 }
@@ -133,4 +148,10 @@ publishing {
             url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+    add sourceSets.main, "mixins.everpotion.refmap.json"
 }

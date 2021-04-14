@@ -2,9 +2,13 @@ package snownee.everpotion;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +18,7 @@ import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -42,6 +47,7 @@ import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
 import snownee.everpotion.container.PlaceContainer;
+import snownee.everpotion.entity.EverArrowEntity;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
@@ -63,6 +69,8 @@ public class CoreModule extends AbstractModule {
     public static final CoreItem CORE = new CoreItem();
 
     public static final UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
+
+    public static final EntityType<EverArrowEntity> ARROW = EntityType.Builder.<EverArrowEntity>create(EverArrowEntity::new, EntityClassification.MISC).size(0.5F, 0.5F).func_233606_a_(4).func_233608_b_(20).build("arrow");
 
     public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
 
@@ -90,7 +98,8 @@ public class CoreModule extends AbstractModule {
             }
 
             @Override
-            public void readNBT(Capability<EverHandler> capability, EverHandler instance, Direction side, INBT nbt) {}
+            public void readNBT(Capability<EverHandler> capability, EverHandler instance, Direction side, INBT nbt) {
+            }
 
         }, EverHandler::new);
     }
@@ -105,7 +114,10 @@ public class CoreModule extends AbstractModule {
         ItemModelsProperties.func_239418_a_(CORE, new ResourceLocation("type"), (stack, world, entity) -> {
             return CoreItem.getPotionType(stack).ordinal();
         });
+        EntityRendererManager manager = Minecraft.getInstance().getRenderManager();
+        manager.renderers.put(ARROW, manager.renderers.get(EntityType.ARROW));
     }
+
 
     @SubscribeEvent
     protected void onCommandsRegister(RegisterCommandsEvent event) {
@@ -157,6 +169,9 @@ public class CoreModule extends AbstractModule {
     @SubscribeEvent
     public void onLivingDamage(LivingDamageEvent event) {
         if (event.getEntity().world.isRemote) {
+            return;
+        }
+        if (!(event.getSource() instanceof EntityDamageSource)) {
             return;
         }
         LivingEntity living = event.getEntityLiving();

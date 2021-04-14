@@ -12,6 +12,8 @@ public final class EverCommonConfig {
     public static int drinkDelay = 20;
     @Range(min = 5)
     public static int refillTime = 2400;
+    @Range(min = 5)
+    public static int tipArrowTimeCost = 300;
     public static boolean naturallyRefill = true;
     @Range(min = 0, max = 10)
     @Comment("Damaging mobs can speed up refilling")

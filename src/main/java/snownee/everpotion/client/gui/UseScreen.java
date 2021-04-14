@@ -21,6 +21,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.EverCommonConfig;
+import snownee.everpotion.PotionType;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.handler.EverHandler;
@@ -74,7 +75,7 @@ public class UseScreen extends Screen {
         if (!closing && (drinkTick > 0 || handler.drinkIndex != -1)) {
             drinkTick += pTicks;
             if (drinkTick > EverCommonConfig.drinkDelay) {
-                onClose();
+                closeScreen();
             }
         }
 
@@ -148,11 +149,15 @@ public class UseScreen extends Screen {
         tessellator.draw();
 
         a = .75f * openTick;
-        if (hover) {
+        if (hover || handler.tipIndex == index) {
             int color = cache.color;
-            r = Math.max(.1F, (color >> 16 & 255) / 255.0F * scales[index]);
-            g = Math.max(.1F, (color >> 8 & 255) / 255.0F * scales[index]);
-            b = Math.max(.1F, (color & 255) / 255.0F * scales[index]);
+            float scale = scales[index];
+            if (handler.tipIndex == index) {
+                scale = Math.max(scale, .75f);
+            }
+            r = Math.max(.1F, (color >> 16 & 255) / 255.0F * scale);
+            g = Math.max(.1F, (color >> 8 & 255) / 255.0F * scale);
+            b = Math.max(.1F, (color & 255) / 255.0F * scale);
         }
 
         float hdborder = hd + 3;
@@ -183,7 +188,7 @@ public class UseScreen extends Screen {
         tessellator.draw();
 
         if (handler.drinkIndex == index) {
-            float h = hd * drinkTick * 2 / EverCommonConfig.drinkDelay - hd;
+            float h = hd * 2 * drinkTick / EverCommonConfig.drinkDelay - hd;
             float ia = .2f;
             buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
             buffer.pos(matrix4f, xCenter - hd + Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
@@ -246,7 +251,12 @@ public class UseScreen extends Screen {
         int textAlpha = (int) (openTick * 255);
         int textColor = textAlpha << 24 | 0xffffff;
 
-        String name = names[index];
+        String name;
+        if (hover && cache.type != PotionType.NORMAL) {
+            name = I18n.format(cache.type.getDescKey());
+        } else {
+            name = names[index];
+        }
         if (cache != null && cache.progress < EverCommonConfig.refillTime) {
             float percent = 100 * cache.progress / EverCommonConfig.refillTime;
             name = (int) percent + "%";
@@ -260,8 +270,6 @@ public class UseScreen extends Screen {
             PotionSpriteUploader potionspriteuploader = this.minecraft.getPotionSpriteUploader();
             TextureAtlasSprite sprite = potionspriteuploader.getSprite(cache.effect.getPotion());
             sprite.getAtlasTexture().bindTexture();
-
-            blit(matrix, (int) xCenter - 12, (int) yCenter - 18, this.getBlitOffset(), 24, 24, sprite);
 
             float yCenter2 = yCenter - 6 * (1 + 0.125f * scales[index]);
             float halfwidth = 12 + 1.5f * scales[index];
@@ -297,7 +305,7 @@ public class UseScreen extends Screen {
             if (i < handler.getSlots()) {
                 names[i] = "";
             } else {
-                names[i] = TextFormatting.GRAY + "Locked";
+                names[i] = TextFormatting.GRAY + I18n.format("msg.everpotion.locked");
             }
         } else if (cache.effect == null) {
             names[i] = I18n.format("effect.none");
@@ -311,18 +319,21 @@ public class UseScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
-        if (clickIndex == -2) {
-            onClose();
+        if (clickIndex == -2) { // click outside of main area
+            closeScreen();
             return true;
         }
         if (closing || clickIndex == -1) {
             return false;
         }
-        if (!handler.canDrink(clickIndex)) {
+        if (!handler.canUseSlot(clickIndex, true)) {
             return false;
         }
         scales[clickIndex] = 0.25f;
         handler.startDrinking(clickIndex);
+        if (handler.drinkIndex == -1) {
+            closeScreen();
+        }
         return true;
     }
 
@@ -332,9 +343,13 @@ public class UseScreen extends Screen {
             return false;
         }
         for (int i = 0; i < handler.getSlots(); i++) {
-            if (handler.canDrink(i) && keyBindsHotbar[i].getKey().getKeyCode() == key) {
+            if (handler.canUseSlot(i, true) && keyBindsHotbar[i].getKey().getKeyCode() == key) {
+                clickIndex = i;
                 scales[i] = 1;
-                handler.startDrinking(i);
+                handler.startDrinking(clickIndex);
+                if (handler.drinkIndex == -1) {
+                    closeScreen();
+                }
                 return true;
             }
         }
@@ -342,14 +357,14 @@ public class UseScreen extends Screen {
             if (ClientHandler.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
                 return false;
             }
-            onClose();
+            closeScreen();
             return true;
         }
         return super.keyPressed(key, scanCode, modifiers);
     }
 
     @Override
-    public void onClose() {
+    public void closeScreen() {
         closing = true;
     }
 

@@ -47,9 +47,7 @@ public final class ClientHandler {
             }
             return -1;
         }, CoreModule.CORE);
-        colors.register((stack, i) ->
-
-        {
+        colors.register((stack, i) -> {
             if (i == 1) {
                 int tier = UnlockSlotItem.getTier(stack);
                 switch (tier) {
