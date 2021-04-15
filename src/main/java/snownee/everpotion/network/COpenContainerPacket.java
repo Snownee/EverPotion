@@ -9,24 +9,25 @@ import snownee.kiwi.network.ClientPacket;
 
 public class COpenContainerPacket extends ClientPacket {
 
-    public static class Handler extends PacketHandler<COpenContainerPacket> {
+	public static class Handler extends PacketHandler<COpenContainerPacket> {
 
-        @Override
-        public COpenContainerPacket decode(PacketBuffer buf) {
-            return new COpenContainerPacket();
-        }
+		@Override
+		public COpenContainerPacket decode(PacketBuffer buf) {
+			return new COpenContainerPacket();
+		}
 
-        @Override
-        public void encode(COpenContainerPacket pkt, PacketBuffer buf) {}
+		@Override
+		public void encode(COpenContainerPacket pkt, PacketBuffer buf) {
+		}
 
-        @Override
-        public void handle(COpenContainerPacket pkt, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                ctx.get().getSender().openContainer(PlaceContainer.ContainerProvider.INSTANCE);
-            });
-            ctx.get().setPacketHandled(true);
-        }
+		@Override
+		public void handle(COpenContainerPacket pkt, Supplier<Context> ctx) {
+			ctx.get().enqueueWork(() -> {
+				ctx.get().getSender().openContainer(PlaceContainer.ContainerProvider.INSTANCE);
+			});
+			ctx.get().setPacketHandled(true);
+		}
 
-    }
+	}
 
 }

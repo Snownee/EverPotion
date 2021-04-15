@@ -10,37 +10,37 @@ import snownee.kiwi.network.ClientPacket;
 
 public class CDrinkPacket extends ClientPacket {
 
-    private final int index;
+	private final int index;
 
-    public CDrinkPacket(int index) {
-        this.index = index;
-    }
+	public CDrinkPacket(int index) {
+		this.index = index;
+	}
 
-    public static class Handler extends PacketHandler<CDrinkPacket> {
+	public static class Handler extends PacketHandler<CDrinkPacket> {
 
-        @Override
-        public CDrinkPacket decode(PacketBuffer buf) {
-            return new CDrinkPacket(buf.readByte());
-        }
+		@Override
+		public CDrinkPacket decode(PacketBuffer buf) {
+			return new CDrinkPacket(buf.readByte());
+		}
 
-        @Override
-        public void encode(CDrinkPacket pkt, PacketBuffer buf) {
-            buf.writeByte(pkt.index);
-        }
+		@Override
+		public void encode(CDrinkPacket pkt, PacketBuffer buf) {
+			buf.writeByte(pkt.index);
+		}
 
-        @Override
-        public void handle(CDrinkPacket pkt, Supplier<Context> ctx) {
-            ctx.get().enqueueWork(() -> {
-                ServerPlayerEntity sender = ctx.get().getSender();
-                sender.getCapability(EverCapabilities.HANDLER).ifPresent(hander -> {
-                    if (hander.canUseSlot(pkt.index, true)) {
-                        hander.startDrinking(pkt.index);
-                    }
-                });
-            });
-            ctx.get().setPacketHandled(true);
-        }
+		@Override
+		public void handle(CDrinkPacket pkt, Supplier<Context> ctx) {
+			ctx.get().enqueueWork(() -> {
+				ServerPlayerEntity sender = ctx.get().getSender();
+				sender.getCapability(EverCapabilities.HANDLER).ifPresent(hander -> {
+					if (hander.canUseSlot(pkt.index, true)) {
+						hander.startDrinking(pkt.index);
+					}
+				});
+			});
+			ctx.get().setPacketHandled(true);
+		}
 
-    }
+	}
 
 }

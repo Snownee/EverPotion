@@ -1,0 +1,18 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:splash_potion",
+    "nbt": "{Potion:\"minecraft:long_invisibility\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "invisibility",
+    "duration": 96,
+    "type": "splash",
+    "charge": 0.8
+  }
+}

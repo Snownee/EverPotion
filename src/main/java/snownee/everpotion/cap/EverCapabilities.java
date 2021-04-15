@@ -6,7 +6,7 @@ import snownee.everpotion.handler.EverHandler;
 
 public final class EverCapabilities {
 
-    @CapabilityInject(EverHandler.class)
-    public static Capability<EverHandler> HANDLER = null;
+	@CapabilityInject(EverHandler.class)
+	public static Capability<EverHandler> HANDLER = null;
 
 }

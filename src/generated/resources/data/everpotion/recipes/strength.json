@@ -1,0 +1,17 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:potion",
+    "nbt": "{Potion:\"minecraft:long_strength\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 8,
+  "output": {
+    "effect": "strength",
+    "duration": 96,
+    "type": "normal"
+  }
+}

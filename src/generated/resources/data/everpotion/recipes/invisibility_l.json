@@ -1,0 +1,18 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:lingering_potion",
+    "nbt": "{Potion:\"minecraft:long_invisibility\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "invisibility",
+    "duration": 96,
+    "type": "lingering",
+    "charge": 0.8
+  }
+}

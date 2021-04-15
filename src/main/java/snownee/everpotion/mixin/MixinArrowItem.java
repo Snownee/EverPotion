@@ -18,39 +18,39 @@ import snownee.everpotion.handler.EverHandler;
 @Mixin(ArrowItem.class)
 public abstract class MixinArrowItem /*extends Item*/ {
 
-    //    public MixinArrowItem(Properties properties) {
-    //        super(properties);
-    //    }
+	//    public MixinArrowItem(Properties properties) {
+	//        super(properties);
+	//    }
 
-    @Inject(at = @At("HEAD"), method = "createArrow", cancellable = true)
-    public void everpotion_createArrow(World worldIn, ItemStack stack, LivingEntity shooter, CallbackInfoReturnable<AbstractArrowEntity> info) {
-        if (stack.getItem() != Items.ARROW) {
-            return;
-        }
-        LazyOptional<EverHandler> optional = shooter.getCapability(EverCapabilities.HANDLER);
+	@Inject(at = @At("HEAD"), method = "createArrow", cancellable = true)
+	public void everpotion_createArrow(World worldIn, ItemStack stack, LivingEntity shooter, CallbackInfoReturnable<AbstractArrowEntity> info) {
+		if (stack.getItem() != Items.ARROW) {
+			return;
+		}
+		LazyOptional<EverHandler> optional = shooter.getCapability(EverCapabilities.HANDLER);
 
-        optional.ifPresent($ -> {
-            AbstractArrowEntity arrow = $.tryTipArrow(worldIn, stack);
-            if (arrow != null) {
-                info.setReturnValue(arrow);
-            }
-        });
-    }
+		optional.ifPresent($ -> {
+			AbstractArrowEntity arrow = $.tryTipArrow(worldIn, stack);
+			if (arrow != null) {
+				info.setReturnValue(arrow);
+			}
+		});
+	}
 
-    //    @Override
-    //    public boolean hasEffect(ItemStack stack) {
-    //        if (stack.getItem() != Items.ARROW)
-    //            return false;
-    //        if (!FMLEnvironment.dist.isClient())
-    //            return false;
-    //        ClientPlayerEntity player = Minecraft.getInstance().player;
-    //        if (player == null)
-    //            return false;
-    //        LazyOptional<EverHandler> optional = player.getCapability(EverCapabilities.HANDLER);
-    //        if (!optional.isPresent())
-    //            return false;
-    //        EverHandler handler = optional.orElse(null);
-    //        return handler.canUseSlot(handler.tipIndex, false);
-    //    }
+	//    @Override
+	//    public boolean hasEffect(ItemStack stack) {
+	//        if (stack.getItem() != Items.ARROW)
+	//            return false;
+	//        if (!FMLEnvironment.dist.isClient())
+	//            return false;
+	//        ClientPlayerEntity player = Minecraft.getInstance().player;
+	//        if (player == null)
+	//            return false;
+	//        LazyOptional<EverHandler> optional = player.getCapability(EverCapabilities.HANDLER);
+	//        if (!optional.isPresent())
+	//            return false;
+	//        EverHandler handler = optional.orElse(null);
+	//        return handler.canUseSlot(handler.tipIndex, false);
+	//    }
 
 }

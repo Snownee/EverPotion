@@ -11,29 +11,30 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class EverArrowEntity extends ArrowEntity {
 
-    public EverArrowEntity(EntityType<? extends ArrowEntity> type, World worldIn) {
-        super(type, worldIn);
-    }
+	public EverArrowEntity(EntityType<? extends ArrowEntity> type, World worldIn) {
+		super(type, worldIn);
+	}
 
-    public EverArrowEntity(World worldIn, LivingEntity shooter) {
-        super(worldIn, shooter);
-    }
+	public EverArrowEntity(World worldIn, LivingEntity shooter) {
+		super(worldIn, shooter);
+	}
 
-    public EverArrowEntity(World worldIn, double x, double y, double z) {
-        super(worldIn, x, y, z);
-    }
+	public EverArrowEntity(World worldIn, double x, double y, double z) {
+		super(worldIn, x, y, z);
+	}
 
-    @Override
-    public void setPotionEffect(ItemStack stack) {}
+	@Override
+	public void setPotionEffect(ItemStack stack) {
+	}
 
-    @Override
-    protected ItemStack getArrowStack() {
-        return new ItemStack(Items.ARROW);
-    }
+	@Override
+	protected ItemStack getArrowStack() {
+		return new ItemStack(Items.ARROW);
+	}
 
-    @Override
-    public IPacket<?> createSpawnPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
+	@Override
+	public IPacket<?> createSpawnPacket() {
+		return NetworkHooks.getEntitySpawningPacket(this);
+	}
 
 }

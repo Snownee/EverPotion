@@ -1,0 +1,16 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:splash_potion",
+    "nbt": "{Potion:\"minecraft:harming\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "instant_damage",
+    "type": "splash"
+  }
+}

@@ -16,10 +16,10 @@ import snownee.everpotion.handler.EverHandler;
 
 public class EverCommand {
 
-    public static LiteralArgumentBuilder<CommandSource> init(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralArgumentBuilder<CommandSource> builder = Commands.literal(EverPotion.MODID);
+	public static LiteralArgumentBuilder<CommandSource> init(CommandDispatcher<CommandSource> dispatcher) {
+		LiteralArgumentBuilder<CommandSource> builder = Commands.literal(EverPotion.MODID);
 
-        /* off */
+		/* off */
         builder
         .then(Commands
                 .literal("fill")
@@ -42,18 +42,18 @@ public class EverCommand {
         );
         /* on */
 
-        return builder;
-    }
+		return builder;
+	}
 
-    private static int setAll(CommandContext<CommandSource> source, Collection<ServerPlayerEntity> players, int time) {
-        int i = 0;
-        for (ServerPlayerEntity player : players) {
-            EverHandler handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
-            if (handler != null) {
-                handler.setAll(time);
-                ++i;
-            }
-        }
-        return i;
-    }
+	private static int setAll(CommandContext<CommandSource> source, Collection<ServerPlayerEntity> players, int time) {
+		int i = 0;
+		for (ServerPlayerEntity player : players) {
+			EverHandler handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
+			if (handler != null) {
+				handler.setAll(time);
+				++i;
+			}
+		}
+		return i;
+	}
 }

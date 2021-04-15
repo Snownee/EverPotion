@@ -1,0 +1,17 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:splash_potion",
+    "nbt": "{Potion:\"minecraft:turtle_master\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "resistance",
+    "duration": 60,
+    "type": "splash"
+  }
+}

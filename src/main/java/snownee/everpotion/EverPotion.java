@@ -7,6 +7,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber
 public final class EverPotion {
 
-    public static final String MODID = "everpotion";
+	public static final String MODID = "everpotion";
 
 }

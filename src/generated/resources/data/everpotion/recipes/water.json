@@ -1,0 +1,17 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:splash_potion",
+    "nbt": "{Potion:\"minecraft:water\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "none",
+    "type": "splash",
+    "charge": 2.0
+  }
+}

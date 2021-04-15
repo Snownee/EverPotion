@@ -1,0 +1,17 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:splash_potion",
+    "nbt": "{Potion:\"minecraft:long_strength\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 10,
+  "output": {
+    "effect": "strength",
+    "duration": 96,
+    "type": "splash"
+  }
+}

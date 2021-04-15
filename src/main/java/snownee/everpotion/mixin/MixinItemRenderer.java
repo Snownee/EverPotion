@@ -28,48 +28,49 @@ import snownee.everpotion.handler.EverHandler.Cache;
 @Mixin(ItemRenderer.class)
 public abstract class MixinItemRenderer {
 
-    @Inject(at = @At("TAIL"), method = "renderItemOverlayIntoGUI")
-    public void everpotion_renderItemOverlayIntoGUI(FontRenderer fr, ItemStack stack, int xPosition, int yPosition, @Nullable String text, CallbackInfo info) {
-        if (!(stack.getItem() instanceof ShootableItem))
-            return;
-        ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (player == null)
-            return;
-        ItemStack mainhand = player.getHeldItemMainhand();
-        ItemStack offhand = player.getHeldItemOffhand();
-        if (mainhand != stack && offhand != stack)
-            return;
-        LazyOptional<EverHandler> optional = player.getCapability(EverCapabilities.HANDLER);
-        if (!optional.isPresent())
-            return;
-        EverHandler handler = optional.orElse(null);
-        if (!handler.canUseSlot(handler.tipIndex, false))
-            return;
-        Cache cache = handler.caches[handler.tipIndex];
-        if (cache == null || cache.effect == null)
-            return;
-        RenderSystem.disableDepthTest();
-        RenderSystem.enableAlphaTest();
-        RenderSystem.disableBlend();
-        Tessellator tessellator = Tessellator.getInstance();
-        BufferBuilder buffer = tessellator.getBuffer();
-        PotionSpriteUploader potionspriteuploader = Minecraft.getInstance().getPotionSpriteUploader();
-        TextureAtlasSprite sprite = potionspriteuploader.getSprite(cache.effect.getPotion());
-        sprite.getAtlasTexture().bindTexture();
+	@Inject(at = @At("TAIL"), method = "renderItemOverlayIntoGUI")
+	public void everpotion_renderItemOverlayIntoGUI(FontRenderer fr, ItemStack stack, int xPosition, int yPosition, @Nullable String text, CallbackInfo info) {
+		if (!(stack.getItem() instanceof ShootableItem))
+			return;
+		Minecraft mc = Minecraft.getInstance();
+		ClientPlayerEntity player = mc.player;
+		if (player == null || mc.currentScreen != null)
+			return;
+		ItemStack mainhand = player.getHeldItemMainhand();
+		ItemStack offhand = player.getHeldItemOffhand();
+		if (mainhand != stack && offhand != stack)
+			return;
+		LazyOptional<EverHandler> optional = player.getCapability(EverCapabilities.HANDLER);
+		if (!optional.isPresent())
+			return;
+		EverHandler handler = optional.orElse(null);
+		if (!handler.canUseSlot(handler.tipIndex, false))
+			return;
+		Cache cache = handler.caches[handler.tipIndex];
+		if (cache == null || cache.effect == null)
+			return;
+		RenderSystem.disableDepthTest();
+		RenderSystem.enableAlphaTest();
+		RenderSystem.disableBlend();
+		Tessellator tessellator = Tessellator.getInstance();
+		BufferBuilder buffer = tessellator.getBuffer();
+		PotionSpriteUploader potionspriteuploader = Minecraft.getInstance().getPotionSpriteUploader();
+		TextureAtlasSprite sprite = potionspriteuploader.getSprite(cache.effect.getPotion());
+		sprite.getAtlasTexture().bindTexture();
 
-        float width = 9;
-        float left = xPosition + 9;
-        float right = left + width;
-        float top = yPosition + 4;
-        float bottom = top + width;
+		float width = 9;
+		float left = xPosition + 9;
+		float right = left + width;
+		float top = yPosition + 4;
+		float bottom = top + width;
 
-        buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-        buffer.pos(left, bottom, 0).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
-        buffer.pos(right, bottom, 0).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
-        buffer.pos(right, top, 0).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
-        buffer.pos(left, top, 0).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
-        tessellator.draw();
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-    }
+		buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
+		buffer.pos(left, bottom, 0).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
+		buffer.pos(right, bottom, 0).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
+		buffer.pos(right, top, 0).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
+		buffer.pos(left, top, 0).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
+		tessellator.draw();
+		RenderSystem.enableBlend();
+		RenderSystem.enableDepthTest();
+	}
 }

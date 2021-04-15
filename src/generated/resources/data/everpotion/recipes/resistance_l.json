@@ -1,0 +1,17 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:lingering_potion",
+    "nbt": "{Potion:\"minecraft:turtle_master\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "resistance",
+    "duration": 60,
+    "type": "lingering"
+  }
+}

@@ -30,75 +30,75 @@ import snownee.kiwi.util.MathUtil;
 @OnlyIn(Dist.CLIENT)
 public final class ClientHandler {
 
-    public static void onItemColorsInit(ColorHandlerEvent.Item event) {
-        ItemColors colors = event.getItemColors();
-        colors.register((stack, i) -> {
-            if (i == 0) {
-                EffectInstance effect = CoreItem.getEffectInstance(stack);
-                int rgb;
-                if (effect != null) {
-                    rgb = effect.getPotion().getLiquidColor();
-                } else {
-                    rgb = 3694022;
-                }
-                Vector3f hsv = MathUtil.RGBtoHSV(rgb);
-                hsv.mul(1, .75f, 1);
-                return MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), hsv.getZ());
-            }
-            return -1;
-        }, CoreModule.CORE);
-        colors.register((stack, i) -> {
-            if (i == 1) {
-                int tier = UnlockSlotItem.getTier(stack);
-                switch (tier) {
-                default:
-                    return 16733525;
-                case 1:
-                    return 16777215;
-                case 2:
-                    return 16777045;
-                case 3:
-                    return 5636095;
-                case 4:
-                    return 16733695;
-                }
-            }
-            return -1;
-        }, CoreModule.UNLOCK_SLOT);
-    }
+	public static void onItemColorsInit(ColorHandlerEvent.Item event) {
+		ItemColors colors = event.getItemColors();
+		colors.register((stack, i) -> {
+			if (i == 0) {
+				EffectInstance effect = CoreItem.getEffectInstance(stack);
+				int rgb;
+				if (effect != null) {
+					rgb = effect.getPotion().getLiquidColor();
+				} else {
+					rgb = 3694022;
+				}
+				Vector3f hsv = MathUtil.RGBtoHSV(rgb);
+				hsv.mul(1, .75f, 1);
+				return MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), hsv.getZ());
+			}
+			return -1;
+		}, CoreModule.CORE);
+		colors.register((stack, i) -> {
+			if (i == 1) {
+				int tier = UnlockSlotItem.getTier(stack);
+				switch (tier) {
+				default:
+					return 16733525;
+				case 1:
+					return 16777215;
+				case 2:
+					return 16777045;
+				case 3:
+					return 5636095;
+				case 4:
+					return 16733695;
+				}
+			}
+			return -1;
+		}, CoreModule.UNLOCK_SLOT);
+	}
 
-    public static final KeyBinding kbUse = new KeyBinding("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
+	public static final KeyBinding kbUse = new KeyBinding("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
 
-    public static void onKeyInput(KeyInputEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null || mc.currentScreen != null || mc.player.isSpectator()) {
-            return;
-        }
-        if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown()) {
-            EverHandler handler = mc.player.getCapability(EverCapabilities.HANDLER).orElse(null);
-            if (handler == null) {
-                return;
-            }
-            if (mc.player.isCrouching()) {
-                if (handler.getSlots() == 0) {
-                    mc.ingameGUI./*addChatMessage*/func_238450_a_(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"), Util.DUMMY_UUID);
-                    return;
-                }
-                new COpenContainerPacket().send();
-            } else if (kbUse.getKeyModifier().isActive(null)) {
-                if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {
-                    return;
-                }
-                mc.displayGuiScreen(new UseScreen());
-            }
-        }
-    }
+	public static void onKeyInput(KeyInputEvent event) {
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.player == null || mc.currentScreen != null || mc.player.isSpectator()) {
+			return;
+		}
+		if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown()) {
+			EverHandler handler = mc.player.getCapability(EverCapabilities.HANDLER).orElse(null);
+			if (handler == null) {
+				return;
+			}
+			if (mc.player.isCrouching()) {
+				if (handler.getSlots() == 0) {
+					mc.ingameGUI./*addChatMessage*/func_238450_a_(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"), Util.DUMMY_UUID);
+					return;
+				}
+				new COpenContainerPacket().send();
+			} else if (kbUse.getKeyModifier().isActive(null)) {
+				if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {
+					return;
+				}
+				mc.displayGuiScreen(new UseScreen());
+			}
+		}
+	}
 
-    public static void renderOverlay(RenderGameOverlayEvent event) {
-        Minecraft mc = Minecraft.getInstance();
-        if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {
-            event.setCanceled(true);
-        }
-    }
+	public static void renderOverlay(RenderGameOverlayEvent event) {
+		Minecraft mc = Minecraft.getInstance();
+		if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {
+			event.setCanceled(true);
+		}
+	}
 
 }

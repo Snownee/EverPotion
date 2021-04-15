@@ -1,0 +1,17 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:lingering_potion",
+    "nbt": "{Potion:\"minecraft:long_slowness\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "slowness",
+    "duration": 48,
+    "type": "lingering"
+  }
+}

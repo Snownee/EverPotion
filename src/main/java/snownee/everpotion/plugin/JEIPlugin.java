@@ -26,36 +26,36 @@ import snownee.kiwi.Kiwi;
 @JeiPlugin
 public class JEIPlugin implements IModPlugin {
 
-    public static final ResourceLocation UID = new ResourceLocation(EverPotion.MODID, "anvil");
+	public static final ResourceLocation UID = new ResourceLocation(EverPotion.MODID, "anvil");
 
-    @Override
-    public ResourceLocation getPluginUid() {
-        return UID;
-    }
+	@Override
+	public ResourceLocation getPluginUid() {
+		return UID;
+	}
 
-    @Override
-    public void registerItemSubtypes(ISubtypeRegistration registration) {
-        ISubtypeInterpreter interpreter = stack -> Objects.toString(stack.getTag());
-        registration.registerSubtypeInterpreter(CoreModule.CORE, interpreter);
-        registration.registerSubtypeInterpreter(CoreModule.UNLOCK_SLOT, interpreter);
-    }
+	@Override
+	public void registerItemSubtypes(ISubtypeRegistration registration) {
+		ISubtypeInterpreter interpreter = stack -> Objects.toString(stack.getTag());
+		registration.registerSubtypeInterpreter(CoreModule.CORE, interpreter);
+		registration.registerSubtypeInterpreter(CoreModule.UNLOCK_SLOT, interpreter);
+	}
 
-    @Override
-    public void registerRecipes(IRecipeRegistration registration) {
-        if (!Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting"))) {
-            return;
-        }
-        World world = Minecraft.getInstance().world;
-        if (world == null) {
-            return;
-        }
+	@Override
+	public void registerRecipes(IRecipeRegistration registration) {
+		if (!Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting"))) {
+			return;
+		}
+		World world = Minecraft.getInstance().world;
+		if (world == null) {
+			return;
+		}
 
-        List<AnvilRecipe> recipes = world.getRecipeManager().getRecipes(CraftingModule.RECIPE_TYPE).values().stream().map($ -> {
-            EverAnvilRecipe recipe = (EverAnvilRecipe) $;
-            return new AnvilRecipe(ImmutableList.copyOf(recipe.getLeft().getMatchingStacks()), ImmutableList.copyOf(recipe.getRight().getMatchingStacks()), Collections.singletonList(recipe.getRecipeOutput()));
-        }).collect(Collectors.toList());
+		List<AnvilRecipe> recipes = world.getRecipeManager().getRecipes(CraftingModule.RECIPE_TYPE).values().stream().map($ -> {
+			EverAnvilRecipe recipe = (EverAnvilRecipe) $;
+			return new AnvilRecipe(ImmutableList.copyOf(recipe.getLeft().getMatchingStacks()), ImmutableList.copyOf(recipe.getRight().getMatchingStacks()), Collections.singletonList(recipe.getRecipeOutput()));
+		}).collect(Collectors.toList());
 
-        registration.addRecipes(recipes, VanillaRecipeCategoryUid.ANVIL);
-    }
+		registration.addRecipes(recipes, VanillaRecipeCategoryUid.ANVIL);
+	}
 
 }

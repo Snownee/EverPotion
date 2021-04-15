@@ -1,0 +1,18 @@
+{
+  "type": "everpotion:anvil",
+  "left": {
+    "type": "forge:nbt",
+    "item": "minecraft:lingering_potion",
+    "nbt": "{Potion:\"minecraft:long_night_vision\"}"
+  },
+  "right": {
+    "tag": "everpotion:ingredient"
+  },
+  "cost": 12,
+  "output": {
+    "effect": "night_vision",
+    "duration": 96,
+    "type": "lingering",
+    "charge": 0.8
+  }
+}

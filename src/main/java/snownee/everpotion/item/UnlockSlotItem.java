@@ -30,103 +30,103 @@ import snownee.kiwi.util.NBTHelper;
 
 public class UnlockSlotItem extends ModItem {
 
-    public UnlockSlotItem() {
-        super(new Item.Properties());
-    }
+	public UnlockSlotItem() {
+		super(new Item.Properties());
+	}
 
-    @Override
-    public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        ItemStack stack = playerIn.getHeldItem(handIn);
-        if (worldIn.isRemote) {
-            return ActionResult.resultFail(stack);
-        }
-        EverHandler handler = playerIn.getCapability(EverCapabilities.HANDLER).orElse(null);
-        if (handler == null) {
-            sendMsg((ServerPlayerEntity) playerIn, "noHandler");
-            return ActionResult.resultFail(stack);
-        }
-        boolean force = NBTHelper.of(stack).getBoolean("Force");
-        int tier = getTier(stack);
-        if (!force) {
-            if (handler.getSlots() >= EverCommonConfig.maxSlots) {
-                sendMsg((ServerPlayerEntity) playerIn, "maxLevel");
-                return ActionResult.resultFail(stack);
-            }
-            if (tier > 0) {
-                if (handler.getSlots() + 1 < tier) {
-                    sendMsg((ServerPlayerEntity) playerIn, "tooHigh");
-                    return ActionResult.resultFail(stack);
-                }
-                if (handler.getSlots() + 1 > tier) {
-                    sendMsg((ServerPlayerEntity) playerIn, "tooLow");
-                    return ActionResult.resultFail(stack);
-                }
-            } else {
-                tier = handler.getSlots() + 1;
-            }
-        }
-        handler.setSlots(tier);
-        // TODO more fancy effects!
-        stack.shrink(1);
-        worldIn.playSound(null, playerIn.getPosition(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
-        CoreModule.sync((ServerPlayerEntity) playerIn);
-        return ActionResult.resultConsume(stack);
-    }
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
+		ItemStack stack = playerIn.getHeldItem(handIn);
+		if (worldIn.isRemote) {
+			return ActionResult.resultFail(stack);
+		}
+		EverHandler handler = playerIn.getCapability(EverCapabilities.HANDLER).orElse(null);
+		if (handler == null) {
+			sendMsg((ServerPlayerEntity) playerIn, "noHandler");
+			return ActionResult.resultFail(stack);
+		}
+		boolean force = NBTHelper.of(stack).getBoolean("Force");
+		int tier = getTier(stack);
+		if (!force) {
+			if (handler.getSlots() >= EverCommonConfig.maxSlots) {
+				sendMsg((ServerPlayerEntity) playerIn, "maxLevel");
+				return ActionResult.resultFail(stack);
+			}
+			if (tier > 0) {
+				if (handler.getSlots() + 1 < tier) {
+					sendMsg((ServerPlayerEntity) playerIn, "tooHigh");
+					return ActionResult.resultFail(stack);
+				}
+				if (handler.getSlots() + 1 > tier) {
+					sendMsg((ServerPlayerEntity) playerIn, "tooLow");
+					return ActionResult.resultFail(stack);
+				}
+			} else {
+				tier = handler.getSlots() + 1;
+			}
+		}
+		handler.setSlots(tier);
+		// TODO more fancy effects!
+		stack.shrink(1);
+		worldIn.playSound(null, playerIn.getPosition(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
+		CoreModule.sync((ServerPlayerEntity) playerIn);
+		return ActionResult.resultConsume(stack);
+	}
 
-    private static void sendMsg(ServerPlayerEntity player, String translationKey) {
-        player./*sendMessage*/func_241151_a_(new TranslationTextComponent("msg.everpotion." + translationKey), ChatType.GAME_INFO, Util.DUMMY_UUID);
-    }
+	private static void sendMsg(ServerPlayerEntity player, String translationKey) {
+		player./*sendMessage*/func_241151_a_(new TranslationTextComponent("msg.everpotion." + translationKey), ChatType.GAME_INFO, Util.DUMMY_UUID);
+	}
 
-    @Override
-    public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-        if (NBTHelper.of(stack).getBoolean("Force")) {
-            tooltip.add(new TranslationTextComponent("tip.everpotion.force").mergeStyle(TextFormatting.RED));
-        }
-        super.addInformation(stack, worldIn, tooltip, flagIn);
-    }
+	@Override
+	public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+		if (NBTHelper.of(stack).getBoolean("Force")) {
+			tooltip.add(new TranslationTextComponent("tip.everpotion.force").mergeStyle(TextFormatting.RED));
+		}
+		super.addInformation(stack, worldIn, tooltip, flagIn);
+	}
 
-    @Override
-    public String getTranslationKey(ItemStack stack) {
-        int tier = getTier(stack);
-        if (tier > 0 && tier <= 4) {
-            return getTranslationKey() + "." + tier;
-        }
-        return getTranslationKey();
-    }
+	@Override
+	public String getTranslationKey(ItemStack stack) {
+		int tier = getTier(stack);
+		if (tier > 0 && tier <= 4) {
+			return getTranslationKey() + "." + tier;
+		}
+		return getTranslationKey();
+	}
 
-    @Override
-    public Rarity getRarity(ItemStack stack) {
-        switch (getTier(stack)) {
-        default:
-            return Rarity.COMMON;
-        case 2:
-            return Rarity.UNCOMMON;
-        case 3:
-            return Rarity.RARE;
-        case 4:
-            return Rarity.EPIC;
-        }
-    }
+	@Override
+	public Rarity getRarity(ItemStack stack) {
+		switch (getTier(stack)) {
+		default:
+			return Rarity.COMMON;
+		case 2:
+			return Rarity.UNCOMMON;
+		case 3:
+			return Rarity.RARE;
+		case 4:
+			return Rarity.EPIC;
+		}
+	}
 
-    public static int getTier(ItemStack stack) {
-        return MathHelper.clamp(NBTHelper.of(stack).getInt("Tier"), 0, 4);
-    }
+	public static int getTier(ItemStack stack) {
+		return MathHelper.clamp(NBTHelper.of(stack).getInt("Tier"), 0, 4);
+	}
 
-    @Override
-    public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-        if (this.isInGroup(group)) {
-            ItemStack stack = new ItemStack(this);
-            NBTHelper data = NBTHelper.of(stack);
-            for (int i = 0; i < 2; i++) {
-                items.add(stack.copy());
-                for (int j = 1; j <= 4; j++) {
-                    data.setInt("Tier", j);
-                    items.add(stack.copy());
-                }
-                stack.getTag().keySet().clear();
-                data.setBoolean("Force", true);
-            }
-        }
-    }
+	@Override
+	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
+		if (this.isInGroup(group)) {
+			ItemStack stack = new ItemStack(this);
+			NBTHelper data = NBTHelper.of(stack);
+			for (int i = 0; i < 2; i++) {
+				items.add(stack.copy());
+				for (int j = 1; j <= 4; j++) {
+					data.setInt("Tier", j);
+					items.add(stack.copy());
+				}
+				stack.getTag().keySet().clear();
+				data.setBoolean("Force", true);
+			}
+		}
+	}
 
 }
