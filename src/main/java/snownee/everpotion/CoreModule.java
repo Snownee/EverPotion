@@ -74,7 +74,7 @@ public class CoreModule extends AbstractModule {
 
 	public static final UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
 
-	public static final EntityType<EverArrowEntity> ARROW = EntityType.Builder.<EverArrowEntity>create(EverArrowEntity::new, EntityClassification.MISC).size(0.5F, 0.5F).func_233606_a_(4).func_233608_b_(20).build("arrow");
+	public static final EntityType<EverArrowEntity> ARROW = EntityType.Builder.<EverArrowEntity>create(EverArrowEntity::new, EntityClassification.MISC).size(0.5F, 0.5F).func_233606_a_(4).func_233608_b_(20).build("everpotion:arrow");
 
 	public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
 

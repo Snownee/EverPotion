@@ -11,7 +11,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class EverArrowEntity extends ArrowEntity {
 
-	public EverArrowEntity(EntityType<? extends ArrowEntity> type, World worldIn) {
+	public EverArrowEntity(EntityType<? extends EverArrowEntity> type, World worldIn) {
 		super(type, worldIn);
 	}
 
