@@ -16,3 +16,6 @@ description=""
     versionRange="[3.4, 3.10)"
     ordering="BEFORE"
     side="BOTH"
+
+[modproperties.everpotion]
+    catalogueItemIcon="everpotion:core" #Support for Catalogue mod
