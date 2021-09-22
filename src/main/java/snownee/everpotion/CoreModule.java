@@ -2,30 +2,24 @@ package snownee.everpotion;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.command.CommandSource;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -39,22 +33,21 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fmlclient.registry.ClientRegistry;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
-import snownee.everpotion.container.PlaceContainer;
 import snownee.everpotion.data.EverAnvilRecipeProvider;
-import snownee.everpotion.entity.EverArrowEntity;
+import snownee.everpotion.entity.EverArrow;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
+import snownee.everpotion.menu.PlaceMenu;
 import snownee.everpotion.network.CDrinkPacket;
 import snownee.everpotion.network.COpenContainerPacket;
 import snownee.everpotion.network.SCancelPacket;
@@ -67,23 +60,24 @@ import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
 @KiwiModule
 @KiwiModule.Subscriber
-@KiwiModule.Group("brewing")
+@KiwiModule.Category("brewing")
 public class CoreModule extends AbstractModule {
 
 	public static final CoreItem CORE = new CoreItem();
 
 	public static final UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
 
-	public static final EntityType<EverArrowEntity> ARROW = EntityType.Builder.<EverArrowEntity>create(EverArrowEntity::new, EntityClassification.MISC).size(0.5F, 0.5F).func_233606_a_(4).func_233608_b_(20).build("everpotion:arrow");
+	public static final EntityType<EverArrow> ARROW = EntityType.Builder.<EverArrow>of(EverArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("everpotion:arrow");
 
-	public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
+	public static final MenuType<PlaceMenu> MAIN = new MenuType<>(PlaceMenu::new);
 
 	public CoreModule() {
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		if (FMLEnvironment.dist.isClient()) {
 			eventBus.addListener(ClientHandler::onItemColorsInit);
+			eventBus.addListener(ClientHandler::registerRenderers);
 		}
-		eventBus.addListener(this::gatherData);
+		eventBus.addListener(this::registerCap);
 	}
 
 	@Override
@@ -94,39 +88,25 @@ public class CoreModule extends AbstractModule {
 		NetworkChannel.register(SCancelPacket.class, new SCancelPacket.Handler());
 	}
 
-	@Override
-	protected void init(FMLCommonSetupEvent event) {
-		CapabilityManager.INSTANCE.register(EverHandler.class, new Capability.IStorage<EverHandler>() {
-
-			@Override
-			public INBT writeNBT(Capability<EverHandler> capability, EverHandler instance, Direction side) {
-				return new CompoundNBT();
-			}
-
-			@Override
-			public void readNBT(Capability<EverHandler> capability, EverHandler instance, Direction side, INBT nbt) {
-			}
-
-		}, EverHandler::new);
+	protected void registerCap(RegisterCapabilitiesEvent event) {
+		event.register(EverHandler.class);
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	protected void clientInit(FMLClientSetupEvent event) {
 		ClientRegistry.registerKeyBinding(ClientHandler.kbUse);
-		ScreenManager.registerFactory(MAIN, PlaceScreen::new);
+		MenuScreens.register(MAIN, PlaceScreen::new);
 		MinecraftForge.EVENT_BUS.addListener(ClientHandler::renderOverlay);
 		MinecraftForge.EVENT_BUS.addListener(ClientHandler::onKeyInput);
-		ItemModelsProperties.func_239418_a_(CORE, new ResourceLocation("type"), (stack, world, entity) -> {
+		ItemProperties.register(CORE, new ResourceLocation("type"), (stack, world, entity, seed) -> {
 			return CoreItem.getPotionType(stack).ordinal();
 		});
-		EntityRendererManager manager = Minecraft.getInstance().getRenderManager();
-		manager.renderers.put(ARROW, manager.renderers.get(EntityType.ARROW));
 	}
 
 	@SubscribeEvent
 	protected void onCommandsRegister(RegisterCommandsEvent event) {
-		LiteralArgumentBuilder<CommandSource> builder = EverCommand.init(event.getDispatcher());
+		LiteralArgumentBuilder<CommandSourceStack> builder = EverCommand.init(event.getDispatcher());
 		event.getDispatcher().register(builder);
 	}
 
@@ -134,21 +114,21 @@ public class CoreModule extends AbstractModule {
 
 	@SubscribeEvent
 	public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-		if (event.getObject() instanceof PlayerEntity && !(event.getObject() instanceof FakePlayer)) {
-			event.addCapability(HANDLER_ID, new EverCapabilityProvider(new EverHandler((PlayerEntity) event.getObject())));
+		if (event.getObject() instanceof Player && !(event.getObject() instanceof FakePlayer)) {
+			event.addCapability(HANDLER_ID, new EverCapabilityProvider(new EverHandler((Player) event.getObject())));
 		}
 	}
 
 	@SubscribeEvent
 	protected void onPlayerJoinWorld(EntityJoinWorldEvent event) {
 		Entity entity = event.getEntity();
-		if (entity.world.isRemote) {
+		if (entity.level.isClientSide) {
 			return;
 		}
-		if (entity instanceof ServerPlayerEntity && !(entity instanceof FakePlayer)) {
+		if (entity instanceof ServerPlayer && !(entity instanceof FakePlayer)) {
 			Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
 				if (t >= 5) {
-					sync((ServerPlayerEntity) entity);
+					sync((ServerPlayer) entity);
 					return true;
 				}
 				return false;
@@ -156,7 +136,7 @@ public class CoreModule extends AbstractModule {
 		}
 	}
 
-	public static void sync(ServerPlayerEntity player) {
+	public static void sync(ServerPlayer player) {
 		if (player instanceof FakePlayer) {
 			return;
 		}
@@ -173,7 +153,7 @@ public class CoreModule extends AbstractModule {
 
 	@SubscribeEvent
 	public void onLivingDamage(LivingDamageEvent event) {
-		if (event.getEntity().world.isRemote) {
+		if (event.getEntity().level.isClientSide) {
 			return;
 		}
 		if (!(event.getSource() instanceof EntityDamageSource)) {
@@ -182,18 +162,18 @@ public class CoreModule extends AbstractModule {
 		LivingEntity living = event.getEntityLiving();
 		living.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 			handler.stopDrinking();
-			if (living instanceof ServerPlayerEntity) {
-				new SCancelPacket().send((ServerPlayerEntity) living);
+			if (living instanceof ServerPlayer) {
+				new SCancelPacket().send((ServerPlayer) living);
 
 			}
 		});
 
-		Entity source = event.getSource().getTrueSource();
-		if (source instanceof ServerPlayerEntity && EverCommonConfig.damageAcceleration > 0) {
+		Entity source = event.getSource().getEntity();
+		if (source instanceof ServerPlayer && EverCommonConfig.damageAcceleration > 0) {
 			source.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 				handler.accelerate(.05f * event.getAmount() * (float) EverCommonConfig.damageAcceleration);
-				if (source.world.rand.nextBoolean()) {
-					sync((ServerPlayerEntity) source);
+				if (source.level.random.nextBoolean()) {
+					sync((ServerPlayer) source);
 				}
 			});
 		}
@@ -210,17 +190,18 @@ public class CoreModule extends AbstractModule {
 
 	@SubscribeEvent(priority = EventPriority.LOW)
 	public void tempLoot(LivingDeathEvent event) {
-		if (EverCommonConfig.mobDropUnlockItem == 0 || event.getEntity().world.isRemote) {
+		if (EverCommonConfig.mobDropUnlockItem == 0 || event.getEntity().level.isClientSide) {
 			return;
 		}
-		Entity source = event.getSource().getTrueSource();
-		if (source instanceof PlayerEntity && event.getEntity() instanceof MobEntity) {
-			if (event.getEntityLiving().getRNG().nextFloat() < EverCommonConfig.mobDropUnlockItem) {
-				event.getEntityLiving().entityDropItem(UNLOCK_SLOT);
+		Entity source = event.getSource().getEntity();
+		if (source instanceof Player && event.getEntity() instanceof Mob) {
+			if (event.getEntityLiving().getRandom().nextFloat() < EverCommonConfig.mobDropUnlockItem) {
+				event.getEntityLiving().spawnAtLocation(UNLOCK_SLOT);
 			}
 		}
 	}
 
+	@Override
 	public void gatherData(GatherDataEvent event) {
 		DataGenerator generator = event.getGenerator();
 		generator.addProvider(new EverAnvilRecipeProvider(generator));

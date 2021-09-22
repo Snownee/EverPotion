@@ -2,21 +2,22 @@ package snownee.everpotion.client;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.math.Vector3f;
+
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.color.item.ItemColors;
+import net.minecraft.client.renderer.entity.TippableArrowRenderer;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.cap.EverCapabilities;
@@ -34,16 +35,16 @@ public final class ClientHandler {
 		ItemColors colors = event.getItemColors();
 		colors.register((stack, i) -> {
 			if (i == 0) {
-				EffectInstance effect = CoreItem.getEffectInstance(stack);
+				MobEffectInstance effect = CoreItem.getEffectInstance(stack);
 				int rgb;
 				if (effect != null) {
-					rgb = effect.getPotion().getLiquidColor();
+					rgb = effect.getEffect().getColor();
 				} else {
 					rgb = 3694022;
 				}
 				Vector3f hsv = MathUtil.RGBtoHSV(rgb);
 				hsv.mul(1, .75f, 1);
-				return MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), hsv.getZ());
+				return Mth.hsvToRgb(hsv.x(), hsv.y(), hsv.z());
 			}
 			return -1;
 		}, CoreModule.CORE);
@@ -67,21 +68,25 @@ public final class ClientHandler {
 		}, CoreModule.UNLOCK_SLOT);
 	}
 
-	public static final KeyBinding kbUse = new KeyBinding("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
+	public static void registerRenderers(RegisterRenderers event) {
+		event.registerEntityRenderer(CoreModule.ARROW, TippableArrowRenderer::new);
+	}
+
+	public static final KeyMapping kbUse = new KeyMapping("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
 
 	public static void onKeyInput(KeyInputEvent event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.player == null || mc.currentScreen != null || mc.player.isSpectator()) {
+		if (mc.player == null || mc.screen != null || mc.player.isSpectator()) {
 			return;
 		}
-		if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isKeyDown()) {
+		if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isDown()) {
 			EverHandler handler = mc.player.getCapability(EverCapabilities.HANDLER).orElse(null);
 			if (handler == null) {
 				return;
 			}
 			if (mc.player.isCrouching()) {
 				if (handler.getSlots() == 0) {
-					mc.ingameGUI./*addChatMessage*/func_238450_a_(ChatType.GAME_INFO, new TranslationTextComponent("msg.everpotion.noSlots"), Util.DUMMY_UUID);
+					mc.player.displayClientMessage(new TranslatableComponent("msg.everpotion.noSlots"), true);
 					return;
 				}
 				new COpenContainerPacket().send();
@@ -89,14 +94,14 @@ public final class ClientHandler {
 				if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {
 					return;
 				}
-				mc.displayGuiScreen(new UseScreen());
+				mc.setScreen(new UseScreen());
 			}
 		}
 	}
 
-	public static void renderOverlay(RenderGameOverlayEvent event) {
+	public static void renderOverlay(RenderGameOverlayEvent.PreLayer event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {
+		if (event.getOverlay() == ForgeIngameGui.CROSSHAIR_ELEMENT && mc.screen != null && mc.screen.getClass() == UseScreen.class) {
 			event.setCanceled(true);
 		}
 	}

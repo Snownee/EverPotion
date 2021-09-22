@@ -3,15 +3,15 @@ package snownee.everpotion.cap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import snownee.everpotion.handler.EverHandler;
 
-public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundNBT> {
+public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializable<CompoundTag> {
 
 	private final LazyOptional<EverHandler> handler;
 
@@ -29,12 +29,12 @@ public class EverCapabilityProvider implements ICapabilityProvider, INBTSerializ
 	}
 
 	@Override
-	public CompoundNBT serializeNBT() {
-		return handler.map($ -> $.serializeNBT()).orElseGet(CompoundNBT::new);
+	public CompoundTag serializeNBT() {
+		return handler.map($ -> $.serializeNBT()).orElseGet(CompoundTag::new);
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		handler.ifPresent($ -> $.deserializeNBT(nbt));
 	}
 

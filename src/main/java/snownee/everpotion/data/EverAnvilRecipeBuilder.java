@@ -9,11 +9,11 @@ import javax.annotation.Nullable;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import net.minecraft.data.IFinishedRecipe;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
@@ -24,7 +24,7 @@ import snownee.everpotion.crafting.CraftingModule;
 import snownee.everpotion.crafting.EverAnvilRecipe;
 import snownee.kiwi.util.Util;
 
-public class EverAnvilRecipeBuilder implements IFinishedRecipe {
+public class EverAnvilRecipeBuilder implements FinishedRecipe {
 
 	private Ingredient left;
 	private Ingredient right;
@@ -42,12 +42,12 @@ public class EverAnvilRecipeBuilder implements IFinishedRecipe {
 		return new EverAnvilRecipeBuilder(output);
 	}
 
-	public static EverAnvilRecipeBuilder coreRecipe(@Nullable EffectInstance effect, PotionType type, float charge) {
+	public static EverAnvilRecipeBuilder coreRecipe(@Nullable MobEffectInstance effect, PotionType type, float charge) {
 		String save;
 		if (effect == null) {
 			save = "water";
 		} else {
-			save = Util.trimRL(effect.getPotion().getRegistryName()).replace(':', '/');
+			save = Util.trimRL(effect.getEffect().getRegistryName()).replace(':', '/');
 			if (type == PotionType.SPLASH) {
 				save += "_s";
 			} else if (type == PotionType.LINGERING) {
@@ -62,10 +62,10 @@ public class EverAnvilRecipeBuilder implements IFinishedRecipe {
 		return this;
 	}
 
-	public void build(Consumer<IFinishedRecipe> consumerIn) {
+	public void build(Consumer<FinishedRecipe> consumerIn) {
 		if (id == null) {
 			ResourceLocation reg = output.getItem().getRegistryName();
-			id = new ResourceLocation(reg.getNamespace(), getSerializer().getRegistryName().getPath() + "/" + reg.getPath());
+			id = new ResourceLocation(reg.getNamespace(), getType().getRegistryName().getPath() + "/" + reg.getPath());
 		}
 		this.validate(id);
 		consumerIn.accept(this);
@@ -107,9 +107,9 @@ public class EverAnvilRecipeBuilder implements IFinishedRecipe {
 	}
 
 	@Override
-	public void serialize(JsonObject json) {
+	public void serializeRecipeData(JsonObject json) {
 		EverAnvilRecipe recipe = new EverAnvilRecipe(id, left, right, cost, materialCost, output);
-		getSerializer().write(json, recipe);
+		getType().toJson(json, recipe);
 		if (conditions.isEmpty())
 			return;
 
@@ -119,24 +119,24 @@ public class EverAnvilRecipeBuilder implements IFinishedRecipe {
 	}
 
 	@Override
-	public EverAnvilRecipe.Serializer getSerializer() {
+	public EverAnvilRecipe.Serializer getType() {
 		return CraftingModule.SERIALIZER;
 	}
 
 	@Override
-	public ResourceLocation getID() {
+	public ResourceLocation getId() {
 		return this.id;
 	}
 
 	@Nullable
 	@Override
-	public JsonObject getAdvancementJson() {
+	public JsonObject serializeAdvancement() {
 		return null;
 	}
 
 	@Nullable
 	@Override
-	public ResourceLocation getAdvancementID() {
+	public ResourceLocation getAdvancementId() {
 		return null;
 	}
 

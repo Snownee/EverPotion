@@ -1,24 +1,26 @@
 package snownee.everpotion.client.gui;
 
-import org.lwjgl.opengl.GL11;
-
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.texture.PotionSpriteUploader;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.MobEffectTextureManager;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
@@ -29,7 +31,7 @@ import snownee.everpotion.handler.EverHandler.Cache;
 
 public class UseScreen extends Screen {
 
-	private static final ITextComponent TITLE = new TranslationTextComponent("gui.everpotion.use.title");
+	private static final Component TITLE = new TranslatableComponent("gui.everpotion.use.title");
 	private EverHandler handler;
 	private final float[] scales = new float[4];
 	private final String[] names = new String[4];
@@ -38,7 +40,7 @@ public class UseScreen extends Screen {
 	private int clickIndex = -1;
 	private float drinkTick;
 
-	private KeyBinding[] keyBindsHotbar;
+	private KeyMapping[] keyBindsHotbar;
 
 	public UseScreen() {
 		super(TITLE);
@@ -50,21 +52,21 @@ public class UseScreen extends Screen {
 			return;
 		}
 		handler = minecraft.player.getCapability(EverCapabilities.HANDLER).orElse(null);
-		keyBindsHotbar = minecraft.gameSettings.keyBindsHotbar;
+		keyBindsHotbar = minecraft.options.keyHotbarSlots;
 	}
 
 	@Override
-	public void render(MatrixStack matrix, int mouseX, int mouseY, float pTicks) {
+	public void render(PoseStack matrix, int mouseX, int mouseY, float pTicks) {
 		if (handler == null) {
 			return;
 		}
 
 		openTick += closing ? -pTicks * .4f : pTicks * .2f;
 		if (closing && openTick <= 0) {
-			Minecraft.getInstance().displayGuiScreen(null);
+			Minecraft.getInstance().setScreen(null);
 			return;
 		}
-		openTick = MathHelper.clamp(openTick, 0, 1);
+		openTick = Mth.clamp(openTick, 0, 1);
 
 		float xCenter = width / 2f;
 		float yCenter = height / 2f;
@@ -75,7 +77,7 @@ public class UseScreen extends Screen {
 		if (!closing && (drinkTick > 0 || handler.drinkIndex != -1)) {
 			drinkTick += pTicks;
 			if (drinkTick > EverCommonConfig.drinkDelay) {
-				closeScreen();
+				onClose();
 			}
 		}
 
@@ -107,7 +109,7 @@ public class UseScreen extends Screen {
 	}
 
 	@SuppressWarnings("null")
-	private void drawButton(MatrixStack matrix, float xCenter, float yCenter, int mouseX, int mouseY, int index, float pTicks) {
+	private void drawButton(PoseStack matrix, float xCenter, float yCenter, int mouseX, int mouseY, int index, float pTicks) {
 		Cache cache = handler.caches[index];
 		float a = .5F * openTick;
 
@@ -121,7 +123,7 @@ public class UseScreen extends Screen {
 		}
 
 		scales[index] += (hover ? pTicks : -pTicks) * 0.5f;
-		scales[index] = MathHelper.clamp(scales[index], 0, 1);
+		scales[index] = Mth.clamp(scales[index], 0, 1);
 		hd += scales[index] * 5;
 
 		float r, g, b;
@@ -135,18 +137,16 @@ public class UseScreen extends Screen {
 			g = .1F;
 			b = .1F;
 		}
-		Matrix4f matrix4f = matrix.getLast().getMatrix();
+		Matrix4f matrix4f = matrix.last().pose();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableTexture();
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = tessellator.getBuffer();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter + hd, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
+		BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		buffer.vertex(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter + hd, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
 
 		a = .75f * openTick;
 		if (hover || handler.tipIndex == index) {
@@ -162,45 +162,43 @@ public class UseScreen extends Screen {
 
 		float hdborder = hd + 3;
 
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter + hd, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter + hd, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
+		buffer.vertex(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
+
+		buffer.vertex(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter + hd, 0.0F).color(r, g, b, a).endVertex();
+
+		buffer.vertex(matrix4f, xCenter, yCenter + hd, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
+
+		buffer.vertex(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
+		buffer.end();
+		BufferUploader.end(buffer);
 
 		if (handler.drinkIndex == index) {
 			float h = hd * 2 * drinkTick / EverCommonConfig.drinkDelay - hd;
 			float ia = .2f;
-			buffer.begin(GL11.GL_TRIANGLE_FAN, DefaultVertexFormats.POSITION_COLOR);
-			buffer.pos(matrix4f, xCenter - hd + Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
+			buffer.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_COLOR);
+			buffer.vertex(matrix4f, xCenter - hd + Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
 			if (h > 0) {
-				buffer.pos(matrix4f, xCenter - hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
+				buffer.vertex(matrix4f, xCenter - hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
 			}
-			buffer.pos(matrix4f, xCenter, yCenter + hd, 0.0F).color(1, 1, 1, ia).endVertex();
+			buffer.vertex(matrix4f, xCenter, yCenter + hd, 0.0F).color(1, 1, 1, ia).endVertex();
 			if (h > 0) {
-				buffer.pos(matrix4f, xCenter + hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
+				buffer.vertex(matrix4f, xCenter + hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
 			}
-			buffer.pos(matrix4f, xCenter + hd - Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
-			tessellator.draw();
+			buffer.vertex(matrix4f, xCenter + hd - Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
+			buffer.end();
+			BufferUploader.end(buffer);
 		}
 
 		float hdshadow;
@@ -215,45 +213,40 @@ public class UseScreen extends Screen {
 		g = .1F;
 		b = .1F;
 
-		RenderSystem.disableAlphaTest();
-		RenderSystem.shadeModel(GL11.GL_SMOOTH);
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter + hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter - hdshadow, 0.0F).color(r, g, b, 0).endVertex();
-		tessellator.draw();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter + hdshadow, 0.0F).color(r, g, b, 0).endVertex();
-		buffer.pos(matrix4f, xCenter + hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
-		buffer.pos(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter - hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter + hdshadow, 0.0F).color(r, g, b, 0).endVertex();
-		tessellator.draw();
-		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		buffer.pos(matrix4f, xCenter, yCenter - hdshadow, 0.0F).color(r, g, b, 0).endVertex();
-		buffer.pos(matrix4f, xCenter - hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
-		buffer.pos(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
-		buffer.pos(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
-		tessellator.draw();
-		RenderSystem.shadeModel(GL11.GL_FLAT);
-		RenderSystem.enableAlphaTest();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+		buffer.vertex(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter + hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter - hdshadow, 0.0F).color(r, g, b, 0).endVertex();
+
+		buffer.vertex(matrix4f, xCenter, yCenter + hdshadow, 0.0F).color(r, g, b, 0).endVertex();
+		buffer.vertex(matrix4f, xCenter + hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
+		buffer.vertex(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
+
+		buffer.vertex(matrix4f, xCenter, yCenter + hdborder, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter - hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter + hdshadow, 0.0F).color(r, g, b, 0).endVertex();
+
+		buffer.vertex(matrix4f, xCenter, yCenter - hdshadow, 0.0F).color(r, g, b, 0).endVertex();
+		buffer.vertex(matrix4f, xCenter - hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
+		buffer.vertex(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
+		buffer.vertex(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
+		buffer.end();
+		BufferUploader.end(buffer);
 		RenderSystem.enableTexture();
 
 		refreshName(index);
-		matrix.push();
-		RenderSystem.color4f(1, 1, 1, openTick);
+		matrix.pushPose();
+		RenderSystem.setShaderColor(1, 1, 1, openTick);
 		int textAlpha = (int) (openTick * 255);
 		int textColor = textAlpha << 24 | 0xffffff;
 
 		String name;
 		if (hover && cache.type != PotionType.NORMAL) {
-			name = I18n.format(cache.type.getDescKey());
+			name = I18n.get(cache.type.getDescKey());
 		} else {
 			name = names[index];
 		}
@@ -267,23 +260,18 @@ public class UseScreen extends Screen {
 			matrix.scale(0.75f, 0.75f, 0.75f);
 			drawCenteredString(matrix, font, name, 0, 0, textColor);
 		} else if (cache.effect != null) {
-			PotionSpriteUploader potionspriteuploader = this.minecraft.getPotionSpriteUploader();
-			TextureAtlasSprite sprite = potionspriteuploader.getSprite(cache.effect.getPotion());
-			sprite.getAtlasTexture().bindTexture();
+			MobEffectTextureManager potionspriteuploader = this.minecraft.getMobEffectTextures();
+			TextureAtlasSprite sprite = potionspriteuploader.get(cache.effect.getEffect());
+			RenderSystem.setShaderTexture(0, sprite.atlas().location());
 
 			float yCenter2 = yCenter - 6 * (1 + 0.125f * scales[index]);
 			float halfwidth = 12 + 1.5f * scales[index];
 			float left = xCenter - halfwidth;
-			float right = xCenter + halfwidth;
+			//float right = xCenter + halfwidth;
 			float top = yCenter2 - halfwidth;
-			float bottom = yCenter2 + halfwidth;
+			//float bottom = yCenter2 + halfwidth;
 
-			buffer.begin(7, DefaultVertexFormats.POSITION_TEX);
-			buffer.pos(left, bottom, 0).tex(sprite.getMinU(), sprite.getMaxV()).endVertex();
-			buffer.pos(right, bottom, 0).tex(sprite.getMaxU(), sprite.getMaxV()).endVertex();
-			buffer.pos(right, top, 0).tex(sprite.getMaxU(), sprite.getMinV()).endVertex();
-			buffer.pos(left, top, 0).tex(sprite.getMinU(), sprite.getMinV()).endVertex();
-			tessellator.draw();
+			Gui.blit(matrix, (int) left, (int) top, getBlitOffset(), (int) halfwidth * 2, (int) halfwidth * 2, sprite);
 
 			matrix.translate(xCenter, yCenter + 10, 0);
 			matrix.scale(0.75f, 0.75f, 0.75f);
@@ -293,7 +281,7 @@ public class UseScreen extends Screen {
 			matrix.scale(0.75f, 0.75f, 0.75f);
 			drawCenteredString(matrix, font, name, 0, 0, textColor);
 		}
-		matrix.pop();
+		matrix.popPose();
 	}
 
 	private void refreshName(int i) {
@@ -305,14 +293,14 @@ public class UseScreen extends Screen {
 			if (i < handler.getSlots()) {
 				names[i] = "";
 			} else {
-				names[i] = TextFormatting.GRAY + I18n.format("msg.everpotion.locked");
+				names[i] = ChatFormatting.GRAY + I18n.get("msg.everpotion.locked");
 			}
 		} else if (cache.effect == null) {
-			names[i] = I18n.format("effect.none");
+			names[i] = I18n.get("effect.none");
 		} else {
-			names[i] = I18n.format(cache.effect.getEffectName());
+			names[i] = I18n.get(cache.effect.getDescriptionId());
 			if (cache.effect.getAmplifier() > 0) {
-				names[i] += " " + I18n.format("potion.potency." + cache.effect.getAmplifier());
+				names[i] += " " + I18n.get("potion.potency." + cache.effect.getAmplifier());
 			}
 		}
 	}
@@ -320,7 +308,7 @@ public class UseScreen extends Screen {
 	@Override
 	public boolean mouseClicked(double p_mouseClicked_1_, double p_mouseClicked_3_, int p_mouseClicked_5_) {
 		if (clickIndex == -2) { // click outside of main area
-			closeScreen();
+			onClose();
 			return true;
 		}
 		if (closing || clickIndex == -1) {
@@ -332,7 +320,7 @@ public class UseScreen extends Screen {
 		scales[clickIndex] = 0.25f;
 		handler.startDrinking(clickIndex);
 		if (handler.drinkIndex == -1) {
-			closeScreen();
+			onClose();
 		}
 		return true;
 	}
@@ -343,28 +331,28 @@ public class UseScreen extends Screen {
 			return false;
 		}
 		for (int i = 0; i < handler.getSlots(); i++) {
-			if (handler.canUseSlot(i, true) && keyBindsHotbar[i].getKey().getKeyCode() == key) {
+			if (handler.canUseSlot(i, true) && keyBindsHotbar[i].getKey().getValue() == key) {
 				clickIndex = i;
 				scales[i] = 1;
 				handler.startDrinking(clickIndex);
 				if (handler.drinkIndex == -1) {
-					closeScreen();
+					onClose();
 				}
 				return true;
 			}
 		}
-		if (ClientHandler.kbUse.getKeyModifier().isActive(null) && ClientHandler.kbUse.getKey().getKeyCode() == key) {
+		if (ClientHandler.kbUse.getKeyModifier().isActive(null) && ClientHandler.kbUse.getKey().getValue() == key) {
 			if (ClientHandler.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
 				return false;
 			}
-			closeScreen();
+			onClose();
 			return true;
 		}
 		return super.keyPressed(key, scanCode, modifiers);
 	}
 
 	@Override
-	public void closeScreen() {
+	public void onClose() {
 		closing = true;
 	}
 

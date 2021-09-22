@@ -5,12 +5,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.item.ArrowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.LazyOptional;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.handler.EverHandler;
@@ -23,14 +23,14 @@ public abstract class MixinArrowItem /*extends Item*/ {
 	//    }
 
 	@Inject(at = @At("HEAD"), method = "createArrow", cancellable = true)
-	public void everpotion_createArrow(World worldIn, ItemStack stack, LivingEntity shooter, CallbackInfoReturnable<AbstractArrowEntity> info) {
+	public void everpotion_createArrow(Level worldIn, ItemStack stack, LivingEntity shooter, CallbackInfoReturnable<AbstractArrow> info) {
 		if (stack.getItem() != Items.ARROW) {
 			return;
 		}
 		LazyOptional<EverHandler> optional = shooter.getCapability(EverCapabilities.HANDLER);
 
 		optional.ifPresent($ -> {
-			AbstractArrowEntity arrow = $.tryTipArrow(worldIn, stack);
+			AbstractArrow arrow = $.tryTipArrow(worldIn, stack);
 			if (arrow != null) {
 				info.setReturnValue(arrow);
 			}

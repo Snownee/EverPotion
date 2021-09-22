@@ -4,30 +4,31 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CampfireBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.AbstractArrowEntity;
-import net.minecraft.entity.projectile.PotionEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
+import com.mojang.math.Vector3f;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.world.World;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.entity.EverArrowEntity;
+import snownee.everpotion.entity.EverArrow;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.network.CDrinkPacket;
 import snownee.kiwi.util.MathUtil;
@@ -35,7 +36,7 @@ import snownee.kiwi.util.NBTHelper;
 
 public class EverHandler extends ItemStackHandler {
 
-	private PlayerEntity owner;
+	private Player owner;
 	private int slots;
 	public final Cache[] caches = new Cache[4];
 	public int chargeIndex = -1;
@@ -48,7 +49,7 @@ public class EverHandler extends ItemStackHandler {
 		this(null);
 	}
 
-	public EverHandler(PlayerEntity owner) {
+	public EverHandler(Player owner) {
 		super(4);
 		this.owner = owner;
 	}
@@ -91,8 +92,8 @@ public class EverHandler extends ItemStackHandler {
 	}
 
 	@Override
-	public CompoundNBT serializeNBT() {
-		CompoundNBT tag = super.serializeNBT();
+	public CompoundTag serializeNBT() {
+		CompoundTag tag = super.serializeNBT();
 		tag.putInt("Slots", slots);
 		for (int i = 0; i < caches.length; i++) {
 			if (caches[i] == null) {
@@ -105,7 +106,7 @@ public class EverHandler extends ItemStackHandler {
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt) {
+	public void deserializeNBT(CompoundTag nbt) {
 		NBTHelper data = NBTHelper.of(nbt);
 		slots = data.getInt("Slots", EverCommonConfig.beginnerSlots);
 		super.deserializeNBT(nbt);
@@ -133,7 +134,7 @@ public class EverHandler extends ItemStackHandler {
 		if (stack.getItem() != CoreModule.CORE || slot >= slots) {
 			return false;
 		}
-		Effect effect = CoreItem.getEffect(stack);
+		MobEffect effect = CoreItem.getEffect(stack);
 		for (ItemStack stackIn : stacks) {
 			if (!stackIn.isEmpty() && stackIn.getItem() == CoreModule.CORE && CoreItem.getEffect(stackIn) == effect) {
 				return false;
@@ -164,14 +165,14 @@ public class EverHandler extends ItemStackHandler {
 				updateCharge();
 				return;
 			}
-			cache.progress = MathHelper.clamp(cache.progress + cache.speed * acceleration, 0, EverCommonConfig.refillTime);
+			cache.progress = Mth.clamp(cache.progress + cache.speed * acceleration, 0, EverCommonConfig.refillTime);
 			if (EverCommonConfig.naturallyRefill) {
-				cache.progress = MathHelper.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
+				cache.progress = Mth.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
 			}
 			if (cache.progress == EverCommonConfig.refillTime) {
 				updateCharge();
-				if (!owner.world.isRemote) {
-					CoreModule.sync((ServerPlayerEntity) owner);
+				if (!owner.level.isClientSide) {
+					CoreModule.sync((ServerPlayer) owner);
 				}
 			}
 		}
@@ -205,7 +206,7 @@ public class EverHandler extends ItemStackHandler {
 		} else {
 			drinkIndex = slot;
 		}
-		if (owner.world.isRemote) {
+		if (owner.level.isClientSide) {
 			new CDrinkPacket(slot).send();
 		}
 	}
@@ -222,7 +223,7 @@ public class EverHandler extends ItemStackHandler {
 	private void use(int slot) {
 		Cache cache = caches[slot];
 		cache.progress = 0;
-		if (owner.world.isRemote) {
+		if (owner.level.isClientSide) {
 			return;
 		}
 
@@ -231,53 +232,53 @@ public class EverHandler extends ItemStackHandler {
 			doEffect(cache.effect, owner);
 		} else if (type == PotionType.SPLASH) {
 			if (cache.effect == null) {
-				BlockPos pos = owner.getPosition();
-				this.extinguishFires(owner.world, pos, Direction.DOWN);
-				this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
+				BlockPos pos = owner.blockPosition();
+				this.extinguishFires(owner.level, pos, Direction.DOWN);
+				this.extinguishFires(owner.level, pos.above(), Direction.DOWN);
 
 				for (Direction direction : Direction.Plane.HORIZONTAL) {
-					this.extinguishFires(owner.world, pos.offset(direction), direction);
+					this.extinguishFires(owner.level, pos.relative(direction), direction);
 				}
 			}
-			AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner.getPosition()).grow(4.0D, 2.0D, 4.0D);
-			List<LivingEntity> list = owner.world.getEntitiesWithinAABB(LivingEntity.class, axisalignedbb);
+			AABB axisalignedbb = new AABB(owner.blockPosition()).inflate(4.0D, 2.0D, 4.0D);
+			List<LivingEntity> list = owner.level.getEntitiesOfClass(LivingEntity.class, axisalignedbb);
 			if (!list.isEmpty()) {
 				for (LivingEntity livingentity : list) {
-					double d0 = owner.getDistanceSq(livingentity);
+					double d0 = owner.distanceToSqr(livingentity);
 					if (d0 < 16.0D) {
 						doEffect(cache.effect, livingentity);
 					}
 				}
 			}
-			int i = (cache.effect != null && cache.effect.getPotion().isInstant()) ? 2007 : 2002;
-			owner.world.playEvent(i, owner.getPosition(), cache.color);
+			int i = (cache.effect != null && cache.effect.getEffect().isInstantenous()) ? 2007 : 2002;
+			owner.level.levelEvent(i, owner.blockPosition(), cache.color);
 		}
 	}
 
-	private void doEffect(EffectInstance effect, LivingEntity entity) {
+	private void doEffect(MobEffectInstance effect, LivingEntity entity) {
 		if (effect == null) {
-			entity.extinguish();
-			if (PotionEntity.WATER_SENSITIVE.test(entity)) {
-				entity.attackEntityFrom(DamageSource.causeIndirectMagicDamage(entity, owner), 1.0F);
+			entity.clearFire();
+			if (ThrownPotion.WATER_SENSITIVE.test(entity)) {
+				entity.hurt(DamageSource.indirectMagic(entity, owner), 1.0F);
 			}
 		} else {
-			if (effect.getPotion().isInstant()) {
-				effect.getPotion().affectEntity(entity, owner, entity, effect.getAmplifier(), 1.0D);
+			if (effect.getEffect().isInstantenous()) {
+				effect.getEffect().applyInstantenousEffect(entity, owner, entity, effect.getAmplifier(), 1.0D);
 			} else {
-				entity.addPotionEffect(new EffectInstance(effect));
+				entity.addEffect(new MobEffectInstance(effect));
 			}
 		}
 	}
 
-	// Copied from PotionEntity
-	private void extinguishFires(World world, BlockPos pos, Direction p_184542_2_) {
+	// Copied from ThrownPotion
+	private void extinguishFires(Level world, BlockPos pos, Direction p_184542_2_) {
 		BlockState blockstate = world.getBlockState(pos);
-		if (blockstate.isIn(BlockTags.FIRE)) {
+		if (blockstate.is(BlockTags.FIRE)) {
 			world.removeBlock(pos, false);
-		} else if (CampfireBlock.isLit(blockstate)) {
-			world.playEvent((PlayerEntity) null, 1009, pos, 0);
-			CampfireBlock.extinguish(world, pos, blockstate);
-			world.setBlockState(pos, blockstate.with(CampfireBlock.LIT, Boolean.valueOf(false)));
+		} else if (CampfireBlock.isLitCampfire(blockstate)) {
+			world.levelEvent(null, 1009, pos, 0);
+			CampfireBlock.dowse(owner, world, pos, blockstate);
+			world.setBlockAndUpdate(pos, blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
 		}
 	}
 
@@ -296,13 +297,13 @@ public class EverHandler extends ItemStackHandler {
 		return false;
 	}
 
-	public AbstractArrowEntity tryTipArrow(World worldIn, ItemStack stack) {
-		if (!worldIn.isRemote && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
-			EverArrowEntity arrow = new EverArrowEntity(worldIn, owner);
+	public AbstractArrow tryTipArrow(Level worldIn, ItemStack stack) {
+		if (!worldIn.isClientSide && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
+			EverArrow arrow = new EverArrow(worldIn, owner);
 			arrow.addEffect(caches[tipIndex].effect);
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
-			CoreModule.sync((ServerPlayerEntity) owner);
+			CoreModule.sync((ServerPlayer) owner);
 			return arrow;
 		}
 		return null;
@@ -310,7 +311,7 @@ public class EverHandler extends ItemStackHandler {
 
 	public static final class Cache {
 		@Nullable
-		public final EffectInstance effect;
+		public final MobEffectInstance effect;
 		public final PotionType type;
 		public float progress;
 		public final int color;
@@ -323,16 +324,16 @@ public class EverHandler extends ItemStackHandler {
 			type = CoreItem.getPotionType(stack);
 			speed = CoreItem.getChargeModifier(stack);
 			if (effect != null) {
-				int color = effect.getPotion().getLiquidColor();
+				int color = effect.getEffect().getColor();
 				Vector3f hsv = MathUtil.RGBtoHSV(color);
-				this.color = MathHelper.hsvToRGB(hsv.getX(), hsv.getY(), 1);
+				this.color = Mth.hsvToRgb(hsv.x(), hsv.y(), 1);
 			} else {
 				color = 4749311; // 3694022;
 			}
 		}
 
 		private boolean matches(ItemStack stack) {
-			return ItemStack.areItemStacksEqual(this.stack, stack);
+			return ItemStack.matches(this.stack, stack);
 		}
 	}
 
@@ -348,7 +349,7 @@ public class EverHandler extends ItemStackHandler {
 			}
 			caches[i].progress = time;
 		}
-		CoreModule.sync((ServerPlayerEntity) owner);
+		CoreModule.sync((ServerPlayer) owner);
 	}
 
 }

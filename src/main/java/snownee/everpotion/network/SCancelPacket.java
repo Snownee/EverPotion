@@ -3,8 +3,9 @@ package snownee.everpotion.network;
 import java.util.function.Supplier;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.fmllegacy.network.NetworkDirection;
+import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.gui.UseScreen;
 import snownee.kiwi.network.Packet;
@@ -17,12 +18,12 @@ public class SCancelPacket extends Packet {
 	public static class Handler extends PacketHandler<SCancelPacket> {
 
 		@Override
-		public SCancelPacket decode(PacketBuffer buf) {
+		public SCancelPacket decode(FriendlyByteBuf buf) {
 			return new SCancelPacket();
 		}
 
 		@Override
-		public void encode(SCancelPacket pkt, PacketBuffer buf) {
+		public void encode(SCancelPacket pkt, FriendlyByteBuf buf) {
 		}
 
 		@Override
@@ -34,12 +35,17 @@ public class SCancelPacket extends Packet {
 				}
 				mc.player.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 					handler.stopDrinking();
-					if (mc.currentScreen instanceof UseScreen) {
-						mc.displayGuiScreen(null);
+					if (mc.screen instanceof UseScreen) {
+						mc.setScreen(null);
 					}
 				});
 			});
 			ctx.get().setPacketHandled(true);
+		}
+
+		@Override
+		public NetworkDirection direction() {
+			return NetworkDirection.PLAY_TO_CLIENT;
 		}
 
 	}

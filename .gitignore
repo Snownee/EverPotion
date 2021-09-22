@@ -24,3 +24,5 @@ run
 !gradle-wrapper.jar
 /logs
 /Projects/
+/libs
+/.apt_generated_tests/

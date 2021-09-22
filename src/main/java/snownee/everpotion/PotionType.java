@@ -2,8 +2,8 @@ package snownee.everpotion;
 
 import java.util.Locale;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public enum PotionType {
 	NORMAL(8, Items.POTION), SPLASH(10, Items.SPLASH_POTION), LINGERING(12, Items.LINGERING_POTION);

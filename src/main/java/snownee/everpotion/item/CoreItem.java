@@ -6,78 +6,79 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectUtils;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffectUtil;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.container.PlaceContainer;
 import snownee.everpotion.crafting.CraftingModule;
+import snownee.everpotion.menu.PlaceMenu;
 import snownee.kiwi.Kiwi;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
+import snownee.kiwi.util.Util;
 
 public class CoreItem extends ModItem {
 
 	public CoreItem() {
-		super(new Item.Properties().maxStackSize(1));
+		super(new Item.Properties().stacksTo(1));
 	}
 
+	//PotionItem
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		EffectInstance effectinstance = getEffectInstance(stack);
+	public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+		MobEffectInstance effectinstance = getEffectInstance(stack);
 		if (effectinstance != null) {
-			TextComponent itextcomponent = new TranslationTextComponent(effectinstance.getEffectName());
-			Effect effect = effectinstance.getPotion();
+			MutableComponent itextcomponent = new TranslatableComponent(effectinstance.getDescriptionId());
+			MobEffect effect = effectinstance.getEffect();
 			if (effectinstance.getAmplifier() > 0) {
-				itextcomponent.appendString(" ").append(new TranslationTextComponent("potion.potency." + effectinstance.getAmplifier()));
+				itextcomponent = new TranslatableComponent("potion.withAmplifier", itextcomponent, new TranslatableComponent("potion.potency." + effectinstance.getAmplifier()));
 			}
 			if (effectinstance.getDuration() > 20) {
-				itextcomponent.appendString(" (").appendString(EffectUtils.getPotionDurationString(effectinstance, (float) EverCommonConfig.durationFactor)).appendString(")");
+				itextcomponent = new TranslatableComponent("potion.withDuration", itextcomponent, MobEffectUtil.formatDuration(effectinstance, (float) EverCommonConfig.durationFactor));
 			}
-			tooltip.add(itextcomponent.mergeStyle(effect.getEffectType().getColor()));
+			tooltip.add(itextcomponent.withStyle(effect.getCategory().getTooltipFormatting()));
 		} else {
-			tooltip.add((new TranslationTextComponent("effect.none")).mergeStyle(TextFormatting.GRAY));
+			tooltip.add((new TranslatableComponent("effect.none")).withStyle(ChatFormatting.GRAY));
 		}
 		PotionType type = getPotionType(stack);
 		if (type != PotionType.NORMAL) {
-			tooltip.add(new TranslationTextComponent(type.getDescKey()).mergeStyle(TextFormatting.GRAY));
+			tooltip.add(new TranslatableComponent(type.getDescKey()).withStyle(ChatFormatting.GRAY));
 		}
-		super.addInformation(stack, worldIn, tooltip, flagIn);
+		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 	}
 
 	@Nullable
-	public static EffectInstance getEffectInstance(ItemStack stack) {
-		CompoundNBT tag = stack.getChildTag("Effect");
-		return tag == null ? null : EffectInstance.read(tag);
+	public static MobEffectInstance getEffectInstance(ItemStack stack) {
+		CompoundTag tag = stack.getTagElement("Effect");
+		return tag == null ? null : MobEffectInstance.load(tag);
 	}
 
 	@Nullable
-	public static Effect getEffect(ItemStack stack) {
-		EffectInstance instance = getEffectInstance(stack);
-		return instance == null ? null : instance.getPotion();
+	public static MobEffect getEffect(ItemStack stack) {
+		MobEffectInstance instance = getEffectInstance(stack);
+		return instance == null ? null : instance.getEffect();
 	}
 
 	public static PotionType getPotionType(ItemStack stack) {
@@ -88,11 +89,11 @@ public class CoreItem extends ModItem {
 		return NBTHelper.of(stack).getFloat("Charge", 1);
 	}
 
-	public ItemStack make(@Nullable EffectInstance effect, PotionType type, float charge) {
+	public ItemStack make(@Nullable MobEffectInstance effect, PotionType type, float charge) {
 		ItemStack stack = new ItemStack(this);
 		stack.getOrCreateTag().putByte("Type", (byte) type.ordinal());
 		if (effect != null) {
-			stack.getTag().put("Effect", effect.write(new CompoundNBT()));
+			stack.getTag().put("Effect", effect.save(new CompoundTag()));
 		}
 		if (charge != 1) {
 			stack.getTag().putFloat("Charge", charge);
@@ -101,20 +102,16 @@ public class CoreItem extends ModItem {
 	}
 
 	@Override
-	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-		if (!this.isInGroup(group)) {
+	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
+		if (!this.allowdedIn(group)) {
 			return;
 		}
 		if (!Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting"))) {
 			return;
 		}
-		RecipeManager manager = CraftingModule.getRecipeManager();
-		if (manager == null) {
-			return;
-		}
 		/* off */
-        items.addAll(manager.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
-                .map(IRecipe::getRecipeOutput)
+        items.addAll(Util.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
+                .map(Recipe::getResultItem)
                 .filter(s -> s.getItem() == CoreModule.CORE)
                 .sorted((a, b) -> {
                     String effectA = Objects.toString(getEffect(a));
@@ -132,11 +129,11 @@ public class CoreItem extends ModItem {
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		if (!worldIn.isRemote) {
-			playerIn.openContainer(PlaceContainer.ContainerProvider.INSTANCE);
+	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+		if (!worldIn.isClientSide) {
+			playerIn.openMenu(PlaceMenu.ContainerProvider.INSTANCE);
 		}
-		return ActionResult.resultSuccess(playerIn.getHeldItem(handIn));
+		return InteractionResultHolder.success(playerIn.getItemInHand(handIn));
 	}
 
 }
