@@ -20,7 +20,7 @@ public class PlaceScreen extends AbstractContainerScreen<PlaceMenu> {
 		super(screenContainer, inv, titleIn);
 		this.passEvents = false;
 		this.imageHeight = 133;
-		this.titleLabelY = this.imageHeight - 94;
+		this.inventoryLabelY = this.imageHeight - 94;
 	}
 
 	@Override

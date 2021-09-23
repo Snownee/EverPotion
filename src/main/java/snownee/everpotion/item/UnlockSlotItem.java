@@ -89,7 +89,7 @@ public class UnlockSlotItem extends ModItem {
 		if (tier > 0 && tier <= 4) {
 			return getDescriptionId() + "." + tier;
 		}
-		return getDescriptionId(stack);
+		return getDescriptionId();
 	}
 
 	@Override

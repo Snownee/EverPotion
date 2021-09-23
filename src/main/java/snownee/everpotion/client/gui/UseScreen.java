@@ -12,7 +12,6 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -141,6 +140,7 @@ public class UseScreen extends Screen {
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.disableTexture();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		BufferBuilder buffer = Tesselator.getInstance().getBuilder();
 		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		buffer.vertex(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
@@ -213,7 +213,6 @@ public class UseScreen extends Screen {
 		g = .1F;
 		b = .1F;
 
-		RenderSystem.setShader(GameRenderer::getPositionColorShader);
 		buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		buffer.vertex(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
 		buffer.vertex(matrix4f, xCenter + hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
@@ -267,11 +266,18 @@ public class UseScreen extends Screen {
 			float yCenter2 = yCenter - 6 * (1 + 0.125f * scales[index]);
 			float halfwidth = 12 + 1.5f * scales[index];
 			float left = xCenter - halfwidth;
-			//float right = xCenter + halfwidth;
+			float right = xCenter + halfwidth;
 			float top = yCenter2 - halfwidth;
-			//float bottom = yCenter2 + halfwidth;
+			float bottom = yCenter2 + halfwidth;
 
-			Gui.blit(matrix, (int) left, (int) top, getBlitOffset(), (int) halfwidth * 2, (int) halfwidth * 2, sprite);
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+			buffer.vertex(matrix4f, left, bottom, 0).uv(sprite.getU0(), sprite.getV1()).endVertex();
+			buffer.vertex(matrix4f, right, bottom, 0).uv(sprite.getU1(), sprite.getV1()).endVertex();
+			buffer.vertex(matrix4f, right, top, 0).uv(sprite.getU1(), sprite.getV0()).endVertex();
+			buffer.vertex(matrix4f, left, top, 0).uv(sprite.getU0(), sprite.getV0()).endVertex();
+			buffer.end();
+			BufferUploader.end(buffer);
 
 			matrix.translate(xCenter, yCenter + 10, 0);
 			matrix.scale(0.75f, 0.75f, 0.75f);
