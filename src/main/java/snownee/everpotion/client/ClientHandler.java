@@ -89,7 +89,8 @@ public final class ClientHandler {
 					mc.player.displayClientMessage(new TranslatableComponent("msg.everpotion.noSlots"), true);
 					return;
 				}
-				new COpenContainerPacket().send();
+				COpenContainerPacket.I.sendToServer($ -> {
+				});
 			} else if (kbUse.getKeyModifier().isActive(null)) {
 				if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {
 					return;

@@ -1,52 +1,32 @@
 package snownee.everpotion.network;
 
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
-import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
 import snownee.everpotion.cap.EverCapabilities;
-import snownee.kiwi.network.ClientPacket;
+import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.PacketHandler;
 
-public class CDrinkPacket extends ClientPacket {
+@KiwiPacket("drink")
+public class CDrinkPacket extends PacketHandler {
+	public static CDrinkPacket I;
 
-	private final int index;
-
-	public CDrinkPacket(int index) {
-		this.index = index;
+	@Override
+	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+		int index = buf.readByte();
+		return executor.apply(() -> {
+			sender.getCapability(EverCapabilities.HANDLER).ifPresent(hander -> {
+				if (hander.canUseSlot(index, true)) {
+					hander.startDrinking(index);
+				}
+			});
+		});
 	}
 
-	public static class Handler extends PacketHandler<CDrinkPacket> {
-
-		@Override
-		public CDrinkPacket decode(FriendlyByteBuf buf) {
-			return new CDrinkPacket(buf.readByte());
-		}
-
-		@Override
-		public void encode(CDrinkPacket pkt, FriendlyByteBuf buf) {
-			buf.writeByte(pkt.index);
-		}
-
-		@Override
-		public void handle(CDrinkPacket pkt, Supplier<Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				ServerPlayer sender = ctx.get().getSender();
-				sender.getCapability(EverCapabilities.HANDLER).ifPresent(hander -> {
-					if (hander.canUseSlot(pkt.index, true)) {
-						hander.startDrinking(pkt.index);
-					}
-				});
-			});
-			ctx.get().setPacketHandled(true);
-		}
-
-		@Override
-		public NetworkDirection direction() {
-			return NetworkDirection.PLAY_TO_SERVER;
-		}
-
+	public static void send(int index) {
+		I.sendToServer($ -> $.writeByte(index));
 	}
 
 }

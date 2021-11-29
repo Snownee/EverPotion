@@ -207,7 +207,7 @@ public class EverHandler extends ItemStackHandler {
 			drinkIndex = slot;
 		}
 		if (owner.level.isClientSide) {
-			new CDrinkPacket(slot).send();
+			CDrinkPacket.send(slot);
 		}
 	}
 

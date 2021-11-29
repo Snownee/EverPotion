@@ -1,39 +1,23 @@
 package snownee.everpotion.network;
 
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
-import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
+import net.minecraft.server.level.ServerPlayer;
 import snownee.everpotion.menu.PlaceMenu;
-import snownee.kiwi.network.ClientPacket;
+import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.PacketHandler;
 
-public class COpenContainerPacket extends ClientPacket {
+@KiwiPacket("open_container")
+public class COpenContainerPacket extends PacketHandler {
+	public static COpenContainerPacket I;
 
-	public static class Handler extends PacketHandler<COpenContainerPacket> {
-
-		@Override
-		public COpenContainerPacket decode(FriendlyByteBuf buf) {
-			return new COpenContainerPacket();
-		}
-
-		@Override
-		public void encode(COpenContainerPacket pkt, FriendlyByteBuf buf) {
-		}
-
-		@Override
-		public void handle(COpenContainerPacket pkt, Supplier<Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				ctx.get().getSender().openMenu(PlaceMenu.ContainerProvider.INSTANCE);
-			});
-			ctx.get().setPacketHandled(true);
-		}
-
-		@Override
-		public NetworkDirection direction() {
-			return NetworkDirection.PLAY_TO_SERVER;
-		}
-
+	@Override
+	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+		return executor.apply(() -> {
+			sender.openMenu(PlaceMenu.ContainerProvider.INSTANCE);
+		});
 	}
 
 }

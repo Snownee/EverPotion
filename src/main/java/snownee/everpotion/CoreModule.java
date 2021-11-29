@@ -33,7 +33,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fmlclient.registry.ClientRegistry;
@@ -48,13 +47,11 @@ import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.menu.PlaceMenu;
-import snownee.everpotion.network.CDrinkPacket;
-import snownee.everpotion.network.COpenContainerPacket;
 import snownee.everpotion.network.SCancelPacket;
 import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.network.NetworkChannel;
+import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 
@@ -80,21 +77,13 @@ public class CoreModule extends AbstractModule {
 		eventBus.addListener(this::registerCap);
 	}
 
-	@Override
-	protected void preInit() {
-		NetworkChannel.register(CDrinkPacket.class, new CDrinkPacket.Handler());
-		NetworkChannel.register(COpenContainerPacket.class, new COpenContainerPacket.Handler());
-		NetworkChannel.register(SSyncPotionsPacket.class, new SSyncPotionsPacket.Handler());
-		NetworkChannel.register(SCancelPacket.class, new SCancelPacket.Handler());
-	}
-
 	protected void registerCap(RegisterCapabilitiesEvent event) {
 		event.register(EverHandler.class);
 	}
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	protected void clientInit(FMLClientSetupEvent event) {
+	protected void clientInit(ClientInitEvent event) {
 		ClientRegistry.registerKeyBinding(ClientHandler.kbUse);
 		MenuScreens.register(MAIN, PlaceScreen::new);
 		MinecraftForge.EVENT_BUS.addListener(ClientHandler::renderOverlay);
@@ -140,7 +129,7 @@ public class CoreModule extends AbstractModule {
 		if (player instanceof FakePlayer) {
 			return;
 		}
-		new SSyncPotionsPacket(player).send();
+		SSyncPotionsPacket.send(player);
 	}
 
 	@SubscribeEvent
@@ -163,8 +152,8 @@ public class CoreModule extends AbstractModule {
 		living.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 			handler.stopDrinking();
 			if (living instanceof ServerPlayer) {
-				new SCancelPacket().send((ServerPlayer) living);
-
+				SCancelPacket.I.send((ServerPlayer) living, $ -> {
+				});
 			}
 		});
 

@@ -11,7 +11,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import snownee.everpotion.EverPotion;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
-import snownee.kiwi.Name;
+import snownee.kiwi.KiwiModule.Name;
 import snownee.kiwi.util.Util;
 
 @KiwiModule("crafting")

@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.AnvilUpdateEvent;
-import snownee.kiwi.crafting.EmptyInventory;
+import snownee.kiwi.recipe.EmptyInventory;
 
 public class AnvilContext extends EmptyInventory {
 	@Nonnull

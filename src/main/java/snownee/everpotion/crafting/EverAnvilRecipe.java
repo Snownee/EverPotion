@@ -19,7 +19,7 @@ import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
 import snownee.everpotion.item.CoreItem;
-import snownee.kiwi.crafting.Simple;
+import snownee.kiwi.recipe.Simple;
 import snownee.kiwi.util.Util;
 
 public class EverAnvilRecipe extends Simple<AnvilContext> {

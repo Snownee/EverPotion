@@ -1,86 +1,59 @@
 package snownee.everpotion.network;
 
-import java.util.function.Supplier;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.fmllegacy.network.NetworkDirection;
-import net.minecraftforge.fmllegacy.network.NetworkEvent.Context;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.handler.EverHandler;
-import snownee.kiwi.network.Packet;
+import snownee.kiwi.network.KiwiPacket;
+import snownee.kiwi.network.KiwiPacket.Direction;
+import snownee.kiwi.network.PacketHandler;
 
-public class SSyncPotionsPacket extends Packet {
-
-	private final ServerPlayer player;
-	private final EverHandler handler;
-
-	public SSyncPotionsPacket(ServerPlayer player) {
-		this.player = player;
-		this.handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
-	}
-
-	public SSyncPotionsPacket(EverHandler handler) {
-		this.player = null;
-		this.handler = handler;
-	}
+@KiwiPacket(value = "sync_potions", dir = Direction.PLAY_TO_CLIENT)
+public class SSyncPotionsPacket extends PacketHandler {
+	public static SSyncPotionsPacket I;
 
 	@Override
-	public void send() {
-		if (handler != null) {
-			send(player);
+	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+		EverHandler newHandler = new EverHandler();
+		int slots = buf.readByte();
+		newHandler.setSlots(slots);
+		for (int i = 0; i < slots; i++) {
+			newHandler.setStackInSlot(i, buf.readItem());
+			float progress = buf.readFloat();
+			if (newHandler.caches[i] != null) {
+				newHandler.caches[i].progress = progress;
+			}
 		}
+		newHandler.chargeIndex = buf.readByte();
+		newHandler.tipIndex = buf.readByte();
+		newHandler.acceleration = buf.readFloat();
+		return executor.apply(() -> {
+			Minecraft.getInstance().player.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
+				handler.copyFrom(newHandler);
+			});
+		});
 	}
 
-	public static class Handler extends PacketHandler<SSyncPotionsPacket> {
-
-		@Override
-		public SSyncPotionsPacket decode(FriendlyByteBuf buf) {
-			EverHandler handler = new EverHandler();
-			int slots = buf.readByte();
-			handler.setSlots(slots);
-			for (int i = 0; i < slots; i++) {
-				handler.setStackInSlot(i, buf.readItem());
-				float progress = buf.readFloat();
-				if (handler.caches[i] != null) {
-					handler.caches[i].progress = progress;
-				}
-			}
-			handler.chargeIndex = buf.readByte();
-			handler.tipIndex = buf.readByte();
-			handler.acceleration = buf.readFloat();
-			return new SSyncPotionsPacket(handler);
+	public static void send(ServerPlayer player) {
+		EverHandler handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
+		if (handler == null) {
+			return;
 		}
-
-		@Override
-		public void encode(SSyncPotionsPacket pkt, FriendlyByteBuf buf) {
-			int slots = pkt.handler.getSlots();
+		I.send(player, buf -> {
+			int slots = handler.getSlots();
 			buf.writeByte(slots);
 			for (int i = 0; i < slots; i++) {
-				buf.writeItem(pkt.handler.getStackInSlot(i));
-				buf.writeFloat(pkt.handler.caches[i] == null ? 0 : pkt.handler.caches[i].progress);
+				buf.writeItem(handler.getStackInSlot(i));
+				buf.writeFloat(handler.caches[i] == null ? 0 : handler.caches[i].progress);
 			}
-			buf.writeByte(pkt.handler.chargeIndex);
-			buf.writeByte(pkt.handler.tipIndex);
-			buf.writeFloat(pkt.handler.acceleration);
-		}
-
-		@Override
-		public void handle(SSyncPotionsPacket pkt, Supplier<Context> ctx) {
-			ctx.get().enqueueWork(() -> {
-				Minecraft.getInstance().player.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
-					handler.copyFrom(pkt.handler);
-				});
-			});
-			ctx.get().setPacketHandled(true);
-		}
-
-		@Override
-		public NetworkDirection direction() {
-			return NetworkDirection.PLAY_TO_CLIENT;
-		}
-
+			buf.writeByte(handler.chargeIndex);
+			buf.writeByte(handler.tipIndex);
+			buf.writeFloat(handler.acceleration);
+		});
 	}
 
 }
