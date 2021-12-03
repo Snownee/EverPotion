@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.FakePlayer;
@@ -34,8 +35,6 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.fmlclient.registry.ClientRegistry;
 import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
@@ -51,6 +50,7 @@ import snownee.everpotion.network.SCancelPacket;
 import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
+import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.ClientInitEvent;
 import snownee.kiwi.schedule.Scheduler;
 import snownee.kiwi.schedule.impl.SimpleGlobalTask;
@@ -70,7 +70,7 @@ public class CoreModule extends AbstractModule {
 
 	public CoreModule() {
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-		if (FMLEnvironment.dist.isClient()) {
+		if (Platform.isPhysicalClient()) {
 			eventBus.addListener(ClientHandler::onItemColorsInit);
 			eventBus.addListener(ClientHandler::registerRenderers);
 		}

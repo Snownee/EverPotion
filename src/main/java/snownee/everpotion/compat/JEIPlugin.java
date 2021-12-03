@@ -1,3 +1,4 @@
+/*
 package snownee.everpotion.compat;
 
 import java.util.Collections;
@@ -61,3 +62,4 @@ public class JEIPlugin implements IModPlugin {
 	}
 
 }
+*/

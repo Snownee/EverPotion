@@ -110,7 +110,7 @@ public class CoreItem extends ModItem {
 			return;
 		}
 		/* off */
-        items.addAll(Util.getRecipes(CraftingModule.RECIPE_TYPE).values().stream()
+        items.addAll(Util.getRecipes(CraftingModule.RECIPE_TYPE).stream()
                 .map(Recipe::getResultItem)
                 .filter(s -> s.getItem() == CoreModule.CORE)
                 .sorted((a, b) -> {
