@@ -1,4 +1,3 @@
-/*
 package snownee.everpotion.compat;
 
 import java.util.Collections;
@@ -53,7 +52,7 @@ public class JEIPlugin implements IModPlugin {
 			return;
 		}
 
-		List<AnvilRecipe> recipes = Util.getRecipes(CraftingModule.RECIPE_TYPE).values().stream().map($ -> {
+		List<AnvilRecipe> recipes = Util.getRecipes(CraftingModule.RECIPE_TYPE).stream().map($ -> {
 			EverAnvilRecipe recipe = (EverAnvilRecipe) $;
 			return new AnvilRecipe(ImmutableList.copyOf(recipe.getLeft().getItems()), ImmutableList.copyOf(recipe.getRight().getItems()), Collections.singletonList(recipe.getResultItem()));
 		}).collect(Collectors.toList());
@@ -62,4 +61,3 @@ public class JEIPlugin implements IModPlugin {
 	}
 
 }
-*/
