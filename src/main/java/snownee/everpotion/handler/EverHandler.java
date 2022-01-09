@@ -315,7 +315,7 @@ public class EverHandler extends ItemStackHandler {
 	public AbstractArrow tryTipArrow(Level worldIn, ItemStack stack) {
 		if (!worldIn.isClientSide && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
 			EverArrow arrow = new EverArrow(worldIn, owner);
-			arrow.addEffect(caches[tipIndex].effect);
+			arrow.addEffect(new MobEffectInstance(caches[tipIndex].effect));
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
 			CoreModule.sync((ServerPlayer) owner, false);
