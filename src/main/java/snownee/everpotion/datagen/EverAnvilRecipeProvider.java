@@ -1,4 +1,4 @@
-package snownee.everpotion.data;
+package snownee.everpotion.datagen;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -14,6 +14,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -24,12 +25,14 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.NBTIngredient;
 import net.minecraftforge.registries.ForgeRegistries;
+import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
 import snownee.everpotion.crafting.CraftingModule;
 
 public class EverAnvilRecipeProvider extends RecipeProvider {
 
 	private static final Ingredient RIGHT = Ingredient.of(CraftingModule.INGREDIENT);
+	private static final ResourceLocation MODULE_ID = new ResourceLocation(EverPotion.MODID, "crafting");
 
 	public EverAnvilRecipeProvider(DataGenerator generatorIn) {
 		super(generatorIn);
@@ -84,7 +87,7 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 
 	private void register(Potion potion, @Nullable MobEffectInstance effect, PotionType type, float charge, Consumer<FinishedRecipe> consumer) {
 		Ingredient left = new AccessIt(PotionUtils.setPotion(new ItemStack(type.potionItem), potion));
-		EverAnvilRecipeBuilder.coreRecipe(effect, type, charge).left(left).right(RIGHT).levelCost(type.level).build(consumer);
+		EverAnvilRecipeBuilder.coreRecipe(effect, type, charge).left(left).right(RIGHT).levelCost(type.level).whenModuleLoaded(MODULE_ID).build(consumer);
 	}
 
 	private static class AccessIt extends NBTIngredient {

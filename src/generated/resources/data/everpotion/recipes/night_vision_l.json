@@ -11,8 +11,14 @@
   "cost": 12,
   "output": {
     "effect": "night_vision",
-    "duration": 96,
+    "duration": 48,
     "type": "lingering",
     "charge": 0.8
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

@@ -11,7 +11,13 @@
   "cost": 12,
   "output": {
     "effect": "resistance",
-    "duration": 60,
+    "duration": 30,
     "type": "lingering"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

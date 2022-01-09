@@ -1,11 +1,11 @@
-//package snownee.everpotion;
-//
-//import net.minecraftforge.common.ForgeConfigSpec;
-//
-//public final class EverClientConfig {
-//
-//    private EverClientConfig(ForgeConfigSpec.Builder builder) {
-//        builder.push("hud");
-//    }
-//
-//}
+package snownee.everpotion;
+
+import snownee.kiwi.config.KiwiConfig;
+import snownee.kiwi.config.KiwiConfig.ConfigType;
+
+@KiwiConfig(type = ConfigType.CLIENT)
+public final class EverClientConfig {
+
+	public static boolean refillCompleteNotificationSound = true;
+
+}

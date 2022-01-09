@@ -110,7 +110,11 @@ public final class ClientHandler {
 	}
 
 	public static void playSound(SoundEvent soundEvent) {
-		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, 1));
+		playSound(soundEvent, 1);
+	}
+
+	public static void playSound(SoundEvent soundEvent, float vol) {
+		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, vol));
 	}
 
 }

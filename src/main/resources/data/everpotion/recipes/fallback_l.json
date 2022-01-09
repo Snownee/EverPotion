@@ -1,22 +1,22 @@
 {
-  "type": "everpotion:anvil",
+  "type": "everpotion:fallback",
   "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:lingering_potion",
-    "nbt": "{Potion:\"minecraft:luck\"}"
+    "item": "minecraft:lingering_potion"
   },
   "right": {
     "tag": "everpotion:ingredient"
   },
   "cost": 12,
   "output": {
-    "effect": "luck",
-    "duration": 30,
-    "type": "lingering"
+    "item": "everpotion:core"
   },
   "conditions": [
     {
       "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    },
+    {
+      "module": "everpotion:fallback_recipe",
       "type": "kiwi:is_loaded"
     }
   ]

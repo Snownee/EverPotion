@@ -11,7 +11,13 @@
   "cost": 12,
   "output": {
     "effect": "weakness",
-    "duration": 48,
+    "duration": 24,
     "type": "lingering"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

@@ -41,7 +41,7 @@ import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
-import snownee.everpotion.data.EverAnvilRecipeProvider;
+import snownee.everpotion.datagen.EverAnvilRecipeProvider;
 import snownee.everpotion.entity.EverArrow;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
@@ -125,7 +125,7 @@ public class CoreModule extends AbstractModule {
 		if (entity instanceof ServerPlayer && !(entity instanceof FakePlayer)) {
 			Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
 				if (t >= 5) {
-					sync((ServerPlayer) entity);
+					sync((ServerPlayer) entity, false);
 					return true;
 				}
 				return false;
@@ -133,11 +133,11 @@ public class CoreModule extends AbstractModule {
 		}
 	}
 
-	public static void sync(ServerPlayer player) {
+	public static void sync(ServerPlayer player, boolean filled) {
 		if (player instanceof FakePlayer) {
 			return;
 		}
-		SSyncPotionsPacket.send(player);
+		SSyncPotionsPacket.send(player, filled);
 	}
 
 	@SubscribeEvent
@@ -170,7 +170,7 @@ public class CoreModule extends AbstractModule {
 			source.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 				handler.accelerate(.05f * event.getAmount() * (float) EverCommonConfig.damageAcceleration);
 				if (source.level.random.nextBoolean()) {
-					sync((ServerPlayer) source);
+					sync((ServerPlayer) source, false);
 				}
 			});
 		}

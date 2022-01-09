@@ -13,5 +13,11 @@
     "effect": "instant_health",
     "type": "lingering",
     "charge": 0.9
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

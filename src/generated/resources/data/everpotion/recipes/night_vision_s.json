@@ -14,5 +14,11 @@
     "duration": 96,
     "type": "splash",
     "charge": 0.8
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

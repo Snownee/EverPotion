@@ -62,6 +62,7 @@ public class ProcessingOutput {
 		return out;
 	}
 
+	@SuppressWarnings("deprecation")
 	public JsonElement serialize() {
 		JsonObject json = new JsonObject();
 		ResourceLocation resourceLocation = compatDatagenOutput == null ? stack.getItem().getRegistryName() : compatDatagenOutput.getLeft();

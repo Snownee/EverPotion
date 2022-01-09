@@ -11,7 +11,13 @@
   "cost": 12,
   "output": {
     "effect": "fire_resistance",
-    "duration": 96,
+    "duration": 48,
     "type": "lingering"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

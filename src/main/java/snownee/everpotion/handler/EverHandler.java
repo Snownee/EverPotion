@@ -169,16 +169,15 @@ public class EverHandler extends ItemStackHandler {
 				updateCharge();
 				return;
 			}
+			float oProgress = cache.progress;
 			cache.progress = Mth.clamp(cache.progress + cache.speed * acceleration, 0, EverCommonConfig.refillTime);
 			if (EverCommonConfig.naturallyRefill) {
 				cache.progress = Mth.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
 			}
 			if (cache.progress == EverCommonConfig.refillTime) {
 				updateCharge();
-				if (owner.level.isClientSide) {
-					owner.playSound(CoreModule.FILL_COMPLETE_SOUND, 0.5F, 0.8F);
-				} else {
-					CoreModule.sync((ServerPlayer) owner);
+				if (!owner.level.isClientSide && cache.progress != oProgress) {
+					CoreModule.sync((ServerPlayer) owner, true);
 				}
 			}
 		}
@@ -319,7 +318,7 @@ public class EverHandler extends ItemStackHandler {
 			arrow.addEffect(caches[tipIndex].effect);
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
-			CoreModule.sync((ServerPlayer) owner);
+			CoreModule.sync((ServerPlayer) owner, false);
 			return arrow;
 		}
 		return null;
@@ -365,7 +364,7 @@ public class EverHandler extends ItemStackHandler {
 			}
 			caches[i].progress = time;
 		}
-		CoreModule.sync((ServerPlayer) owner);
+		CoreModule.sync((ServerPlayer) owner, time == EverCommonConfig.refillTime);
 	}
 
 }

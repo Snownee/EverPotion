@@ -13,5 +13,11 @@
     "effect": "luck",
     "duration": 60,
     "type": "splash"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

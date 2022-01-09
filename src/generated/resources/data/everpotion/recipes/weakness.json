@@ -13,5 +13,11 @@
     "effect": "weakness",
     "duration": 48,
     "type": "normal"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

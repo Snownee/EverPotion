@@ -13,5 +13,11 @@
     "effect": "slow_falling",
     "duration": 48,
     "type": "splash"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

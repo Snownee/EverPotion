@@ -11,7 +11,13 @@
   "cost": 12,
   "output": {
     "effect": "poison",
-    "duration": 18,
+    "duration": 9,
     "type": "lingering"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

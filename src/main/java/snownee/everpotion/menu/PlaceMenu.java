@@ -77,7 +77,7 @@ public class PlaceMenu extends AbstractContainerMenu {
 	public void removed(Player playerIn) {
 		super.removed(playerIn);
 		if (!playerIn.level.isClientSide) {
-			CoreModule.sync((ServerPlayer) playerIn);
+			CoreModule.sync((ServerPlayer) playerIn, false);
 		}
 	}
 

@@ -13,5 +13,11 @@
     "effect": "none",
     "type": "splash",
     "charge": 2.0
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

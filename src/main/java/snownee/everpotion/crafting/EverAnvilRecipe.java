@@ -24,11 +24,11 @@ import snownee.kiwi.util.Util;
 
 public class EverAnvilRecipe extends Simple<AnvilContext> {
 
-	private final Ingredient left;
-	private final Ingredient right;
-	private final int cost;
-	private final int materialCost;
-	private final ProcessingOutput output;
+	protected final Ingredient left;
+	protected final Ingredient right;
+	protected final int cost;
+	protected final int materialCost;
+	protected final ProcessingOutput output;
 
 	public EverAnvilRecipe(ResourceLocation id, Ingredient left, Ingredient right, int cost, int materialCost, ItemStack output) {
 		super(id);
@@ -74,10 +74,23 @@ public class EverAnvilRecipe extends Simple<AnvilContext> {
 		return CraftingModule.RECIPE_TYPE;
 	}
 
-	public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<EverAnvilRecipe> {
+	@FunctionalInterface
+	public interface EverAnvilRecipeFactory<T extends EverAnvilRecipe> {
+
+		T create(ResourceLocation id, Ingredient left, Ingredient right, int cost, int materialCost, ItemStack output);
+
+	}
+
+	public static class Serializer<T extends EverAnvilRecipe> extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<T> {
+
+		protected final EverAnvilRecipeFactory<T> factory;
+
+		public Serializer(EverAnvilRecipeFactory<T> factory) {
+			this.factory = factory;
+		}
 
 		@Override
-		public EverAnvilRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+		public T fromJson(ResourceLocation recipeId, JsonObject json) {
 			Ingredient left = CraftingHelper.getIngredient(json.get("left"));
 			Ingredient right = CraftingHelper.getIngredient(json.get("right"));
 			int cost = GsonHelper.getAsInt(json, "cost", 0);
@@ -98,10 +111,10 @@ public class EverAnvilRecipe extends Simple<AnvilContext> {
 			} else {
 				output = CraftingHelper.getItemStack(outputObj, true);
 			}
-			return new EverAnvilRecipe(recipeId, left, right, cost, materialCost, output);
+			return factory.create(recipeId, left, right, cost, materialCost, output);
 		}
 
-		public void toJson(JsonObject json, EverAnvilRecipe recipe) {
+		public void toJson(JsonObject json, T recipe) {
 			json.add("left", recipe.left.toJson());
 			json.add("right", recipe.right.toJson());
 			if (recipe.cost != 0)
@@ -121,7 +134,7 @@ public class EverAnvilRecipe extends Simple<AnvilContext> {
 					if (effect.getAmplifier() > 0)
 						o.addProperty("amplifier", effect.getAmplifier());
 					if (!effect.getEffect().isInstantenous())
-						o.addProperty("duration", effect.getDuration() / 100); //lets just hardcode here...
+						o.addProperty("duration", (int) (effect.getDuration() * type.durationFactor / 20));
 				}
 				o.addProperty("type", type.toString());
 				if (charge != 1)
@@ -133,17 +146,17 @@ public class EverAnvilRecipe extends Simple<AnvilContext> {
 		}
 
 		@Override
-		public EverAnvilRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+		public T fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
 			Ingredient left = Ingredient.fromNetwork(buffer);
 			Ingredient right = Ingredient.fromNetwork(buffer);
 			int cost = buffer.readVarInt();
 			int materialCost = buffer.readVarInt();
 			ItemStack output = buffer.readItem();
-			return new EverAnvilRecipe(recipeId, left, right, cost, materialCost, output);
+			return factory.create(recipeId, left, right, cost, materialCost, output);
 		}
 
 		@Override
-		public void toNetwork(FriendlyByteBuf buffer, EverAnvilRecipe recipe) {
+		public void toNetwork(FriendlyByteBuf buffer, T recipe) {
 			recipe.left.toNetwork(buffer);
 			recipe.right.toNetwork(buffer);
 			buffer.writeVarInt(recipe.cost);

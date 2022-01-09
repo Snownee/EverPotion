@@ -14,5 +14,11 @@
     "amplifier": 1,
     "duration": 18,
     "type": "splash"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

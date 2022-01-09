@@ -6,15 +6,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public enum PotionType {
-	NORMAL(8, Items.POTION), SPLASH(10, Items.SPLASH_POTION), LINGERING(12, Items.LINGERING_POTION);
+	NORMAL(8, Items.POTION, 0.2F), SPLASH(10, Items.SPLASH_POTION, 0.2F), LINGERING(12, Items.LINGERING_POTION, 0.1F);
 
 	private String descKey;
 	public final int level;
 	public final Item potionItem;
+	public final float durationFactor;
 
-	private PotionType(int level, Item potionItem) {
+	private PotionType(int level, Item potionItem, float durationFactor) {
 		this.level = level;
 		this.potionItem = potionItem;
+		this.durationFactor = durationFactor;
 	}
 
 	public String getDescKey() {
@@ -50,4 +52,5 @@ public enum PotionType {
 	public String toString() {
 		return super.toString().toLowerCase(Locale.ENGLISH);
 	}
+
 }

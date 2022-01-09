@@ -12,5 +12,11 @@
   "output": {
     "effect": "instant_damage",
     "type": "normal"
-  }
+  },
+  "conditions": [
+    {
+      "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    }
+  ]
 }

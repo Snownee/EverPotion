@@ -6,7 +6,10 @@ import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import snownee.everpotion.CoreModule;
+import snownee.everpotion.EverClientConfig;
 import snownee.everpotion.cap.EverCapabilities;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
@@ -31,14 +34,18 @@ public class SSyncPotionsPacket extends PacketHandler {
 		newHandler.chargeIndex = buf.readByte();
 		newHandler.tipIndex = buf.readByte();
 		newHandler.acceleration = buf.readFloat();
+		boolean filled = buf.readBoolean();
 		return executor.apply(() -> {
 			Minecraft.getInstance().player.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 				handler.copyFrom(newHandler);
 			});
+			if (EverClientConfig.refillCompleteNotificationSound && filled) {
+				ClientHandler.playSound(CoreModule.FILL_COMPLETE_SOUND, 0.5F);
+			}
 		});
 	}
 
-	public static void send(ServerPlayer player) {
+	public static void send(ServerPlayer player, boolean filled) {
 		EverHandler handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
 		if (handler == null) {
 			return;
@@ -53,6 +60,7 @@ public class SSyncPotionsPacket extends PacketHandler {
 			buf.writeByte(handler.chargeIndex);
 			buf.writeByte(handler.tipIndex);
 			buf.writeFloat(handler.acceleration);
+			buf.writeBoolean(filled);
 		});
 	}
 

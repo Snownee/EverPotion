@@ -1,22 +1,22 @@
 {
-  "type": "everpotion:anvil",
+  "type": "everpotion:fallback",
   "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:potion",
-    "nbt": "{Potion:\"minecraft:long_poison\"}"
+    "item": "minecraft:potion"
   },
   "right": {
     "tag": "everpotion:ingredient"
   },
   "cost": 8,
   "output": {
-    "effect": "poison",
-    "duration": 18,
-    "type": "normal"
+    "item": "everpotion:core"
   },
   "conditions": [
     {
       "module": "everpotion:crafting",
+      "type": "kiwi:is_loaded"
+    },
+    {
+      "module": "everpotion:fallback_recipe",
       "type": "kiwi:is_loaded"
     }
   ]

@@ -1,4 +1,4 @@
-package snownee.everpotion.data;
+package snownee.everpotion.datagen;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +22,7 @@ import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
 import snownee.everpotion.crafting.CraftingModule;
 import snownee.everpotion.crafting.EverAnvilRecipe;
+import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.kiwi.util.Util;
 
 public class EverAnvilRecipeBuilder implements FinishedRecipe {
@@ -101,6 +102,10 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 		return withCondition(new ModLoadedCondition(modid));
 	}
 
+	public EverAnvilRecipeBuilder whenModuleLoaded(ResourceLocation moduleId) {
+		return withCondition(new ModuleLoadedCondition(moduleId));
+	}
+
 	public EverAnvilRecipeBuilder withCondition(ICondition condition) {
 		conditions.add(condition);
 		return this;
@@ -119,7 +124,7 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 	}
 
 	@Override
-	public EverAnvilRecipe.Serializer getType() {
+	public EverAnvilRecipe.Serializer<EverAnvilRecipe> getType() {
 		return CraftingModule.SERIALIZER;
 	}
 

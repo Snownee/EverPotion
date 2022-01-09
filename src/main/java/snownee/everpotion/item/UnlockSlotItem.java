@@ -66,7 +66,7 @@ public class UnlockSlotItem extends ModItem {
 		if (!worldIn.isClientSide) {
 			stack.shrink(1);
 			handler.setSlots(tier);
-			CoreModule.sync((ServerPlayer) playerIn);
+			CoreModule.sync((ServerPlayer) playerIn, false);
 		} else if (tier > handler.getSlots()) {
 			sendMsg(playerIn, "newSlot", ClientHandler.kbUse.getTranslatedKeyMessage());
 		}
