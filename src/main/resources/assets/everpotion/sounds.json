@@ -1,0 +1,34 @@
+{
+  "fill_complete": {
+    "sounds": [
+      "everpotion:fill_complete"
+    ]
+  },
+  "charge_short": {
+    "sounds": [
+      "everpotion:charge_short"
+    ]
+  },
+  "charge_long": {
+    "sounds": [
+      "everpotion:charge_long"
+    ]
+  },
+  "use_normal": {
+    "sounds": [
+      "everpotion:use_normal"
+    ]
+  },
+  "use_splash": {
+    "sounds": [
+      "everpotion:use_splash"
+    ]
+  },
+  "hover": {
+    "sounds": [
+      "everpotion:hover_0",
+      "everpotion:hover_1",
+      "everpotion:hover_2"
+    ]
+  }
+}

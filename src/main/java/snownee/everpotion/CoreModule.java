@@ -8,6 +8,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -60,13 +61,20 @@ import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 @KiwiModule.Category("brewing")
 public class CoreModule extends AbstractModule {
 
-	public static final CoreItem CORE = new CoreItem();
+	public static CoreItem CORE = new CoreItem();
 
-	public static final UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
+	public static UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
 
-	public static final EntityType<EverArrow> ARROW = EntityType.Builder.<EverArrow>of(EverArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("everpotion:arrow");
+	public static EntityType<EverArrow> ARROW = EntityType.Builder.<EverArrow>of(EverArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("everpotion:arrow");
 
-	public static final MenuType<PlaceMenu> MAIN = new MenuType<>(PlaceMenu::new);
+	public static MenuType<PlaceMenu> MAIN = new MenuType<>(PlaceMenu::new);
+
+	public static SoundEvent FILL_COMPLETE_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "fill_complete"));
+	public static SoundEvent USE_NORMAL_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "use_normal"));
+	public static SoundEvent USE_SPLASH_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "use_splash"));
+	public static SoundEvent CHARGE_SHORT_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "charge_short"));
+	public static SoundEvent CHARGE_LONG_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "charge_long"));
+	public static SoundEvent HOVER_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "hover"));
 
 	public CoreModule() {
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();

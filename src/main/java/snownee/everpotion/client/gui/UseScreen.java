@@ -21,12 +21,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraftforge.client.settings.KeyModifier;
+import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.handler.EverHandler.Cache;
+import snownee.everpotion.network.COpenContainerPacket;
 
 public class UseScreen extends Screen {
 
@@ -80,6 +82,7 @@ public class UseScreen extends Screen {
 			}
 		}
 
+		int oClickIndex = clickIndex;
 		float offset = 35 + openTick * 25;
 		if (EverCommonConfig.maxSlots == 1) {
 			drawButton(matrix, xCenter, yCenter, mouseX, mouseY, 0, pTicks);
@@ -100,6 +103,15 @@ public class UseScreen extends Screen {
 			int range = EverCommonConfig.maxSlots == 1 ? 60 : 120;
 			boolean out = Math.abs(mouseX - xCenter) + Math.abs(mouseY - yCenter) > range;
 			clickIndex = out ? -2 : -1;
+		} else {
+			Cache cache = handler.caches[clickIndex];
+			if (cache == null && clickIndex < handler.getSlots()) {
+				Component tooltip = new TranslatableComponent("tip.everpotion.emptySlot", ClientHandler.kbUse.getTranslatedKeyMessage());
+				renderTooltip(matrix, tooltip, mouseX, mouseY);
+			}
+			if (cache != null && oClickIndex != clickIndex) {
+				ClientHandler.playSound(CoreModule.HOVER_SOUND);
+			}
 		}
 
 		RenderSystem.disableBlend();
@@ -113,10 +125,13 @@ public class UseScreen extends Screen {
 		float a = .5F * openTick;
 
 		float hd = 40;
-		boolean hover = !closing && cache != null && openTick == 1 && Math.abs(mouseX - xCenter) + Math.abs(mouseY - yCenter) < hd + 10;
+		boolean hover = !closing && openTick == 1 && index < handler.getSlots() && Math.abs(mouseX - xCenter) + Math.abs(mouseY - yCenter) < hd + 10;
 		hover = hover && (handler.drinkIndex == index || handler.drinkIndex == -1);
 		if (hover) {
 			clickIndex = index;
+			if (cache == null) {
+				hover = false;
+			}
 		} else if (clickIndex == index) {
 			clickIndex = -1;
 		}
@@ -319,6 +334,12 @@ public class UseScreen extends Screen {
 		}
 		if (closing || clickIndex == -1) {
 			return false;
+		}
+		Cache cache = handler.caches[clickIndex];
+		if (cache == null) {
+			COpenContainerPacket.I.sendToServer($ -> {
+			});
+			return true;
 		}
 		if (!handler.canUseSlot(clickIndex, true)) {
 			return false;

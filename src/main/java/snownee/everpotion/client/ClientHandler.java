@@ -8,7 +8,9 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.entity.TippableArrowRenderer;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.api.distmarker.Dist;
@@ -105,6 +107,10 @@ public final class ClientHandler {
 		if (event.getOverlay() == ForgeIngameGui.CROSSHAIR_ELEMENT && mc.screen != null && mc.screen.getClass() == UseScreen.class) {
 			event.setCanceled(true);
 		}
+	}
+
+	public static void playSound(SoundEvent soundEvent) {
+		Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundEvent, 1));
 	}
 
 }

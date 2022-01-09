@@ -10,6 +10,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -28,9 +30,11 @@ import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.entity.EverArrow;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.network.CDrinkPacket;
+import snownee.everpotion.network.SSplashPacket;
 import snownee.kiwi.util.MathUtil;
 import snownee.kiwi.util.NBTHelper;
 
@@ -171,7 +175,9 @@ public class EverHandler extends ItemStackHandler {
 			}
 			if (cache.progress == EverCommonConfig.refillTime) {
 				updateCharge();
-				if (!owner.level.isClientSide) {
+				if (owner.level.isClientSide) {
+					owner.playSound(CoreModule.FILL_COMPLETE_SOUND, 0.5F, 0.8F);
+				} else {
 					CoreModule.sync((ServerPlayer) owner);
 				}
 			}
@@ -208,12 +214,21 @@ public class EverHandler extends ItemStackHandler {
 		}
 		if (owner.level.isClientSide) {
 			CDrinkPacket.send(slot);
+
+			if (cache.type == PotionType.LINGERING) {
+				ClientHandler.playSound(SoundEvents.UI_BUTTON_CLICK);
+			} else if (EverCommonConfig.drinkDelay < 40) {
+				ClientHandler.playSound(CoreModule.CHARGE_SHORT_SOUND);
+			} else {
+				ClientHandler.playSound(CoreModule.CHARGE_LONG_SOUND);
+			}
 		}
 	}
 
 	public void stopDrinking() {
 		drinkIndex = -1;
 		drinkTick = 0;
+		// stop sound?
 	}
 
 	public void invalidate() {
@@ -230,6 +245,7 @@ public class EverHandler extends ItemStackHandler {
 		PotionType type = cache.type;
 		if (type == PotionType.NORMAL) {
 			doEffect(cache.effect, owner);
+			owner.level.playSound(null, owner, CoreModule.USE_NORMAL_SOUND, SoundSource.PLAYERS, 1, 1);
 		} else if (type == PotionType.SPLASH) {
 			if (cache.effect == null) {
 				BlockPos pos = owner.blockPosition();
@@ -250,8 +266,8 @@ public class EverHandler extends ItemStackHandler {
 					}
 				}
 			}
-			int i = (cache.effect != null && cache.effect.getEffect().isInstantenous()) ? 2007 : 2002;
-			owner.level.levelEvent(i, owner.blockPosition(), cache.color);
+			boolean instant = cache.effect != null && cache.effect.getEffect().isInstantenous();
+			SSplashPacket.send(owner, cache.color, instant);
 		}
 	}
 

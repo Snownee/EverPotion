@@ -22,6 +22,7 @@ import net.minecraft.world.level.Level;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
@@ -35,44 +36,47 @@ public class UnlockSlotItem extends ModItem {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
 		ItemStack stack = playerIn.getItemInHand(handIn);
-		if (worldIn.isClientSide) {
-			return InteractionResultHolder.fail(stack);
-		}
 		EverHandler handler = playerIn.getCapability(EverCapabilities.HANDLER).orElse(null);
 		if (handler == null) {
-			sendMsg((ServerPlayer) playerIn, "noHandler");
+			sendMsg(playerIn, "noHandler");
 			return InteractionResultHolder.fail(stack);
 		}
 		boolean force = NBTHelper.of(stack).getBoolean("Force");
 		int tier = getTier(stack);
 		if (!force) {
 			if (handler.getSlots() >= EverCommonConfig.maxSlots) {
-				sendMsg((ServerPlayer) playerIn, "maxLevel");
+				sendMsg(playerIn, "maxLevel");
 				return InteractionResultHolder.fail(stack);
 			}
 			if (tier > 0) {
 				if (handler.getSlots() + 1 < tier) {
-					sendMsg((ServerPlayer) playerIn, "tooHigh");
+					sendMsg(playerIn, "tooHigh");
 					return InteractionResultHolder.fail(stack);
 				}
 				if (handler.getSlots() + 1 > tier) {
-					sendMsg((ServerPlayer) playerIn, "tooLow");
+					sendMsg(playerIn, "tooLow");
 					return InteractionResultHolder.fail(stack);
 				}
 			} else {
 				tier = handler.getSlots() + 1;
 			}
 		}
-		handler.setSlots(tier);
 		// TODO more fancy effects!
-		stack.shrink(1);
-		worldIn.playSound(null, playerIn.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1, 1);
-		CoreModule.sync((ServerPlayer) playerIn);
-		return InteractionResultHolder.consume(stack);
+		worldIn.playSound(playerIn, playerIn.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1, 1);
+		if (!worldIn.isClientSide) {
+			stack.shrink(1);
+			handler.setSlots(tier);
+			CoreModule.sync((ServerPlayer) playerIn);
+		} else if (tier > handler.getSlots()) {
+			sendMsg(playerIn, "newSlot", ClientHandler.kbUse.getTranslatedKeyMessage());
+		}
+		return InteractionResultHolder.sidedSuccess(stack, worldIn.isClientSide);
 	}
 
-	private static void sendMsg(ServerPlayer player, String translationKey) {
-		player.displayClientMessage(new TranslatableComponent("msg.everpotion." + translationKey), true);
+	private static void sendMsg(Player player, String translationKey, Object... objects) {
+		if (player.level.isClientSide) {
+			player.displayClientMessage(new TranslatableComponent("msg.everpotion." + translationKey, objects), true);
+		}
 	}
 
 	@Override
