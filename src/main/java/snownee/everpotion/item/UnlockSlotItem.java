@@ -14,9 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -24,6 +22,7 @@ import net.minecraft.world.World;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.cap.EverCapabilities;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
@@ -37,44 +36,46 @@ public class UnlockSlotItem extends ModItem {
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
 		ItemStack stack = playerIn.getHeldItem(handIn);
-		if (worldIn.isRemote) {
-			return ActionResult.resultFail(stack);
-		}
 		EverHandler handler = playerIn.getCapability(EverCapabilities.HANDLER).orElse(null);
 		if (handler == null) {
-			sendMsg((ServerPlayerEntity) playerIn, "noHandler");
+			sendMsg(playerIn, "noHandler");
 			return ActionResult.resultFail(stack);
 		}
 		boolean force = NBTHelper.of(stack).getBoolean("Force");
 		int tier = getTier(stack);
 		if (!force) {
 			if (handler.getSlots() >= EverCommonConfig.maxSlots) {
-				sendMsg((ServerPlayerEntity) playerIn, "maxLevel");
+				sendMsg(playerIn, "maxLevel");
 				return ActionResult.resultFail(stack);
 			}
 			if (tier > 0) {
 				if (handler.getSlots() + 1 < tier) {
-					sendMsg((ServerPlayerEntity) playerIn, "tooHigh");
+					sendMsg(playerIn, "tooHigh");
 					return ActionResult.resultFail(stack);
 				}
 				if (handler.getSlots() + 1 > tier) {
-					sendMsg((ServerPlayerEntity) playerIn, "tooLow");
+					sendMsg(playerIn, "tooLow");
 					return ActionResult.resultFail(stack);
 				}
 			} else {
 				tier = handler.getSlots() + 1;
 			}
 		}
-		handler.setSlots(tier);
-		// TODO more fancy effects!
-		stack.shrink(1);
-		worldIn.playSound(null, playerIn.getPosition(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
-		CoreModule.sync((ServerPlayerEntity) playerIn);
-		return ActionResult.resultConsume(stack);
+		worldIn.playSound(playerIn, playerIn.getPosition(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.PLAYERS, 1, 1);
+		if (!worldIn.isRemote) {
+			stack.shrink(1);
+			handler.setSlots(tier);
+			CoreModule.sync((ServerPlayerEntity) playerIn, false);
+		} else if (tier > handler.getSlots()) {
+			sendMsg(playerIn, "newSlot", ClientHandler.kbUse.func_238171_j_/*getTranslatedKeyMessage*/());
+		}
+		return ActionResult.func_233538_a_(stack, worldIn.isRemote);
 	}
 
-	private static void sendMsg(ServerPlayerEntity player, String translationKey) {
-		player./*sendMessage*/func_241151_a_(new TranslationTextComponent("msg.everpotion." + translationKey), ChatType.GAME_INFO, Util.DUMMY_UUID);
+	private static void sendMsg(PlayerEntity player, String translationKey, Object... objects) {
+		if (player.world.isRemote) {
+			player.sendStatusMessage(new TranslationTextComponent("msg.everpotion." + translationKey, objects), true);
+		}
 	}
 
 	@Override
@@ -114,7 +115,7 @@ public class UnlockSlotItem extends ModItem {
 
 	@Override
 	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-		if (this.isInGroup(group)) {
+		if (isInGroup(group)) {
 			ItemStack stack = new ItemStack(this);
 			NBTHelper data = NBTHelper.of(stack);
 			for (int i = 0; i < 2; i++) {

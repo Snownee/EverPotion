@@ -50,7 +50,7 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 			EffectInstance effect = potion.getEffects().get(0);
 			if (!accept(effect))
 				continue;
-			if (!effect.getPotion().getRegistryName().getNamespace().equals("minecraft"))
+			if (!"minecraft".equals(effect.getPotion().getRegistryName().getNamespace()))
 				continue;
 			Pair<EffectInstance, Potion> exist = effects.get(effect.getPotion());
 			if (exist != null && exist.getLeft().getDuration() > effect.getDuration())

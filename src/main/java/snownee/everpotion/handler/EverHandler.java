@@ -18,18 +18,23 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.entity.EverArrowEntity;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.network.CDrinkPacket;
+import snownee.everpotion.network.SSplashPacket;
 import snownee.kiwi.util.MathUtil;
 import snownee.kiwi.util.NBTHelper;
 
@@ -116,7 +121,7 @@ public class EverHandler extends ItemStackHandler {
 			if (caches[i] == null) {
 				continue;
 			}
-			this.caches[i].progress = data.getFloat("Progress" + i);
+			caches[i].progress = data.getFloat("Progress" + i);
 		}
 		tipIndex = data.getInt("Tip", -1);
 	}
@@ -148,12 +153,12 @@ public class EverHandler extends ItemStackHandler {
 		for (int i = 0; i < caches.length; i++) {
 			onContentsChanged(i);
 			if (caches[i] != null && that.caches[i] != null) {
-				this.caches[i].progress = that.caches[i].progress;
+				caches[i].progress = that.caches[i].progress;
 			}
 		}
-		this.chargeIndex = that.chargeIndex;
-		this.tipIndex = that.tipIndex;
-		this.acceleration = that.acceleration;
+		chargeIndex = that.chargeIndex;
+		tipIndex = that.tipIndex;
+		acceleration = that.acceleration;
 	}
 
 	public void tick() {
@@ -164,14 +169,15 @@ public class EverHandler extends ItemStackHandler {
 				updateCharge();
 				return;
 			}
+			float oProgress = cache.progress;
 			cache.progress = MathHelper.clamp(cache.progress + cache.speed * acceleration, 0, EverCommonConfig.refillTime);
 			if (EverCommonConfig.naturallyRefill) {
 				cache.progress = MathHelper.clamp(cache.progress + cache.speed, 0, EverCommonConfig.refillTime);
 			}
 			if (cache.progress == EverCommonConfig.refillTime) {
 				updateCharge();
-				if (!owner.world.isRemote) {
-					CoreModule.sync((ServerPlayerEntity) owner);
+				if (!owner.world.isRemote && cache.progress != oProgress) {
+					CoreModule.sync((ServerPlayerEntity) owner, true);
 				}
 			}
 		}
@@ -207,6 +213,14 @@ public class EverHandler extends ItemStackHandler {
 		}
 		if (owner.world.isRemote) {
 			new CDrinkPacket(slot).send();
+
+			if (cache.type == PotionType.LINGERING) {
+				ClientHandler.playSound(SoundEvents.UI_BUTTON_CLICK);
+			} else if (EverCommonConfig.drinkDelay < 40) {
+				ClientHandler.playSound(CoreModule.CHARGE_SHORT_SOUND);
+			} else {
+				ClientHandler.playSound(CoreModule.CHARGE_LONG_SOUND);
+			}
 		}
 	}
 
@@ -229,14 +243,15 @@ public class EverHandler extends ItemStackHandler {
 		PotionType type = cache.type;
 		if (type == PotionType.NORMAL) {
 			doEffect(cache.effect, owner);
+			owner.world.playMovingSound(null, owner, CoreModule.USE_NORMAL_SOUND, SoundCategory.PLAYERS, 1, 1);
 		} else if (type == PotionType.SPLASH) {
 			if (cache.effect == null) {
 				BlockPos pos = owner.getPosition();
-				this.extinguishFires(owner.world, pos, Direction.DOWN);
-				this.extinguishFires(owner.world, pos.up(), Direction.DOWN);
+				extinguishFires(owner.world, pos, Direction.DOWN);
+				extinguishFires(owner.world, pos.up(), Direction.DOWN);
 
 				for (Direction direction : Direction.Plane.HORIZONTAL) {
-					this.extinguishFires(owner.world, pos.offset(direction), direction);
+					extinguishFires(owner.world, pos.offset(direction), direction);
 				}
 			}
 			AxisAlignedBB axisalignedbb = new AxisAlignedBB(owner.getPosition()).grow(4.0D, 2.0D, 4.0D);
@@ -249,8 +264,8 @@ public class EverHandler extends ItemStackHandler {
 					}
 				}
 			}
-			int i = (cache.effect != null && cache.effect.getPotion().isInstant()) ? 2007 : 2002;
-			owner.world.playEvent(i, owner.getPosition(), cache.color);
+			boolean instant = cache.effect != null && cache.effect.getPotion().isInstant();
+			new SSplashPacket(owner.getPosition(), cache.color, instant).send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> owner));
 		}
 	}
 
@@ -277,7 +292,7 @@ public class EverHandler extends ItemStackHandler {
 		} else if (CampfireBlock.isLit(blockstate)) {
 			world.playEvent((PlayerEntity) null, 1009, pos, 0);
 			CampfireBlock.extinguish(world, pos, blockstate);
-			world.setBlockState(pos, blockstate.with(CampfireBlock.LIT, Boolean.valueOf(false)));
+			world.setBlockState(pos, blockstate.with(CampfireBlock.LIT, false));
 		}
 	}
 
@@ -302,7 +317,7 @@ public class EverHandler extends ItemStackHandler {
 			arrow.addEffect(new EffectInstance(caches[tipIndex].effect));
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
-			CoreModule.sync((ServerPlayerEntity) owner);
+			CoreModule.sync((ServerPlayerEntity) owner, false);
 			return arrow;
 		}
 		return null;
@@ -348,7 +363,7 @@ public class EverHandler extends ItemStackHandler {
 			}
 			caches[i].progress = time;
 		}
-		CoreModule.sync((ServerPlayerEntity) owner);
+		CoreModule.sync((ServerPlayerEntity) owner, time == EverCommonConfig.refillTime);
 	}
 
 }

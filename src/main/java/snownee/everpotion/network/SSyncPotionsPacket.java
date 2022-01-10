@@ -6,7 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
+import snownee.everpotion.CoreModule;
+import snownee.everpotion.EverClientConfig;
 import snownee.everpotion.cap.EverCapabilities;
+import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.network.Packet;
 
@@ -14,15 +17,18 @@ public class SSyncPotionsPacket extends Packet {
 
 	private final ServerPlayerEntity player;
 	private final EverHandler handler;
+	private final boolean filled;
 
-	public SSyncPotionsPacket(ServerPlayerEntity player) {
+	public SSyncPotionsPacket(ServerPlayerEntity player, boolean filled) {
 		this.player = player;
-		this.handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
+		handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
+		this.filled = filled;
 	}
 
-	public SSyncPotionsPacket(EverHandler handler) {
-		this.player = null;
+	public SSyncPotionsPacket(EverHandler handler, boolean filled) {
+		player = null;
 		this.handler = handler;
+		this.filled = filled;
 	}
 
 	@Override
@@ -49,7 +55,7 @@ public class SSyncPotionsPacket extends Packet {
 			handler.chargeIndex = buf.readByte();
 			handler.tipIndex = buf.readByte();
 			handler.acceleration = buf.readFloat();
-			return new SSyncPotionsPacket(handler);
+			return new SSyncPotionsPacket(handler, buf.readBoolean());
 		}
 
 		@Override
@@ -63,6 +69,7 @@ public class SSyncPotionsPacket extends Packet {
 			buf.writeByte(pkt.handler.chargeIndex);
 			buf.writeByte(pkt.handler.tipIndex);
 			buf.writeFloat(pkt.handler.acceleration);
+			buf.writeBoolean(pkt.filled);
 		}
 
 		@Override
@@ -71,6 +78,9 @@ public class SSyncPotionsPacket extends Packet {
 				Minecraft.getInstance().player.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 					handler.copyFrom(pkt.handler);
 				});
+				if (EverClientConfig.refillCompleteNotificationSound && pkt.filled) {
+					ClientHandler.playSound(CoreModule.FILL_COMPLETE_SOUND, 0.5F);
+				}
 			});
 			ctx.get().setPacketHandled(true);
 		}

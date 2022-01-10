@@ -3,9 +3,11 @@ package snownee.everpotion.client;
 import org.lwjgl.glfw.GLFW;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
@@ -99,6 +101,14 @@ public final class ClientHandler {
 		if (event.getType() == ElementType.CROSSHAIRS && mc.currentScreen != null && mc.currentScreen.getClass() == UseScreen.class) {
 			event.setCanceled(true);
 		}
+	}
+
+	public static void playSound(SoundEvent soundEvent) {
+		playSound(soundEvent, 1);
+	}
+
+	public static void playSound(SoundEvent soundEvent, float pitch) {
+		Minecraft.getInstance().getSoundHandler().play(SimpleSound.master(soundEvent, pitch));
 	}
 
 }

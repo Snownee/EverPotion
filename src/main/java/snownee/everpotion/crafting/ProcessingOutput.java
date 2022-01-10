@@ -36,8 +36,8 @@ public class ProcessingOutput {
 	}
 
 	public ProcessingOutput(Pair<ResourceLocation, Integer> item, float chance) {
-		this.stack = ItemStack.EMPTY;
-		this.compatDatagenOutput = item;
+		stack = ItemStack.EMPTY;
+		compatDatagenOutput = item;
 		this.chance = chance;
 	}
 

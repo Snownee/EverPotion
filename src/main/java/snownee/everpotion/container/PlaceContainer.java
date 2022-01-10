@@ -32,17 +32,17 @@ public class PlaceContainer extends Container {
 		int xOffset = 2 - EverCommonConfig.maxSlots / 2;
 		int xStart = 44 + xOffset * 18;
 		for (int j = 0; j < handler.getSlots(); ++j) {
-			this.addSlot(new ModSlot(inventory, j, xStart + j * 18, 20));
+			addSlot(new ModSlot(inventory, j, xStart + j * 18, 20));
 		}
 
 		for (int l = 0; l < 3; ++l) {
 			for (int k = 0; k < 9; ++k) {
-				this.addSlot(new Slot(playerInventory, k + l * 9 + 9, 8 + k * 18, l * 18 + 51));
+				addSlot(new Slot(playerInventory, k + l * 9 + 9, 8 + k * 18, l * 18 + 51));
 			}
 		}
 
 		for (int i1 = 0; i1 < 9; ++i1) {
-			this.addSlot(new Slot(playerInventory, i1, 8 + i1 * 18, 109));
+			addSlot(new Slot(playerInventory, i1, 8 + i1 * 18, 109));
 		}
 
 	}
@@ -51,15 +51,15 @@ public class PlaceContainer extends Container {
 	@Override
 	public ItemStack transferStackInSlot(PlayerEntity playerIn, int index) {
 		ItemStack itemstack = ItemStack.EMPTY;
-		Slot slot = this.inventorySlots.get(index);
+		Slot slot = inventorySlots.get(index);
 		if (slot != null && slot.getHasStack()) {
 			ItemStack itemstack1 = slot.getStack();
 			itemstack = itemstack1.copy();
-			if (index < this.handler.getSlots()) {
-				if (!this.mergeItemStack(itemstack1, this.handler.getSlots(), this.inventorySlots.size(), true)) {
+			if (index < handler.getSlots()) {
+				if (!mergeItemStack(itemstack1, handler.getSlots(), inventorySlots.size(), true)) {
 					return ItemStack.EMPTY;
 				}
-			} else if (!this.mergeItemStack(itemstack1, 0, this.handler.getSlots(), false)) {
+			} else if (!mergeItemStack(itemstack1, 0, handler.getSlots(), false)) {
 				return ItemStack.EMPTY;
 			}
 
@@ -77,7 +77,7 @@ public class PlaceContainer extends Container {
 	public void onContainerClosed(PlayerEntity playerIn) {
 		super.onContainerClosed(playerIn);
 		if (!playerIn.world.isRemote) {
-			CoreModule.sync((ServerPlayerEntity) playerIn);
+			CoreModule.sync((ServerPlayerEntity) playerIn, false);
 		}
 	}
 

@@ -17,16 +17,16 @@ public class PlaceScreen extends ContainerScreen<PlaceContainer> {
 
 	public PlaceScreen(PlaceContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
 		super(screenContainer, inv, titleIn);
-		this.passEvents = false;
-		this.ySize = 133;
-		this.playerInventoryTitleY = this.ySize - 94;
+		passEvents = false;
+		ySize = 133;
+		playerInventoryTitleY = ySize - 94;
 	}
 
 	@Override
 	public void render(MatrixStack matrix, int p_render_1_, int p_render_2_, float p_render_3_) {
 		this.renderBackground(matrix);
 		super.render(matrix, p_render_1_, p_render_2_, p_render_3_);
-		this./*renderHoveredToolTip*/func_230459_a_(matrix, p_render_1_, p_render_2_);
+		/*renderHoveredToolTip*/func_230459_a_(matrix, p_render_1_, p_render_2_);
 	}
 
 	/**
@@ -35,10 +35,10 @@ public class PlaceScreen extends ContainerScreen<PlaceContainer> {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrix, float partialTicks, int mouseX, int mouseY) {
 		RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.minecraft.getTextureManager().bindTexture(HOPPER_GUI_TEXTURE);
-		int i = (this.width - this.xSize) / 2;
-		int j = (this.height - this.ySize) / 2;
-		this.blit(matrix, i, j, 0, 0, this.xSize, this.ySize);
+		minecraft.getTextureManager().bindTexture(HOPPER_GUI_TEXTURE);
+		int i = (width - xSize) / 2;
+		int j = (height - ySize) / 2;
+		this.blit(matrix, i, j, 0, 0, xSize, ySize);
 		int slots = container.getSlots();
 		int xOffset = 2 - EverCommonConfig.maxSlots / 2;
 		int xStart = guiLeft + 43 + xOffset * 18;

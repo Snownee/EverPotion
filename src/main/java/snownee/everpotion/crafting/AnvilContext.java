@@ -22,8 +22,8 @@ public class AnvilContext extends EmptyInventory {
 	}
 
 	public AnvilContext(AnvilUpdateEvent event) {
-		this.left = event.getLeft();
-		this.right = event.getRight();
-		this.name = event.getName();
+		left = event.getLeft();
+		right = event.getRight();
+		name = event.getName();
 	}
 }

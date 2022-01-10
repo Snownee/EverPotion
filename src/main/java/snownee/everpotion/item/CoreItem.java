@@ -102,7 +102,7 @@ public class CoreItem extends ModItem {
 
 	@Override
 	public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> items) {
-		if (!this.isInGroup(group)) {
+		if (!isInGroup(group)) {
 			return;
 		}
 		if (!Kiwi.isLoaded(new ResourceLocation(EverPotion.MODID, "crafting"))) {

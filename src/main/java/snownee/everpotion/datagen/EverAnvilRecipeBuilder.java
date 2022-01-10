@@ -67,7 +67,7 @@ public class EverAnvilRecipeBuilder implements IFinishedRecipe {
 			ResourceLocation reg = output.getItem().getRegistryName();
 			id = new ResourceLocation(reg.getNamespace(), getSerializer().getRegistryName().getPath() + "/" + reg.getPath());
 		}
-		this.validate(id);
+		validate(id);
 		consumerIn.accept(this);
 	}
 
@@ -125,7 +125,7 @@ public class EverAnvilRecipeBuilder implements IFinishedRecipe {
 
 	@Override
 	public ResourceLocation getID() {
-		return this.id;
+		return id;
 	}
 
 	@Nullable

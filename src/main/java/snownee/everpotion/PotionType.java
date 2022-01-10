@@ -13,7 +13,7 @@ public enum PotionType {
 	public final Item potionItem;
 	public final float durationFactor;
 
-	private PotionType(int level, Item potionItem, float durationFactor) {
+	PotionType(int level, Item potionItem, float durationFactor) {
 		this.level = level;
 		this.potionItem = potionItem;
 		this.durationFactor = durationFactor;

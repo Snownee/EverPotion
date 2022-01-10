@@ -21,6 +21,7 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -77,6 +78,13 @@ public class CoreModule extends AbstractModule {
 	public static final EntityType<EverArrowEntity> ARROW = EntityType.Builder.<EverArrowEntity>create(EverArrowEntity::new, EntityClassification.MISC).size(0.5F, 0.5F).func_233606_a_(4).func_233608_b_(20).build("everpotion:arrow");
 
 	public static final ContainerType<PlaceContainer> MAIN = new ContainerType<>(PlaceContainer::new);
+
+	public static final SoundEvent FILL_COMPLETE_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "fill_complete"));
+	public static final SoundEvent USE_NORMAL_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "use_normal"));
+	public static final SoundEvent USE_SPLASH_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "use_splash"));
+	public static final SoundEvent CHARGE_SHORT_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "charge_short"));
+	public static final SoundEvent CHARGE_LONG_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "charge_long"));
+	public static final SoundEvent HOVER_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "hover"));
 
 	public CoreModule() {
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -148,7 +156,7 @@ public class CoreModule extends AbstractModule {
 		if (entity instanceof ServerPlayerEntity && !(entity instanceof FakePlayer)) {
 			Scheduler.add(new SimpleGlobalTask(LogicalSide.SERVER, Phase.END, t -> {
 				if (t >= 5) {
-					sync((ServerPlayerEntity) entity);
+					sync((ServerPlayerEntity) entity, false);
 					return true;
 				}
 				return false;
@@ -156,11 +164,11 @@ public class CoreModule extends AbstractModule {
 		}
 	}
 
-	public static void sync(ServerPlayerEntity player) {
+	public static void sync(ServerPlayerEntity player, boolean filled) {
 		if (player instanceof FakePlayer) {
 			return;
 		}
-		new SSyncPotionsPacket(player).send();
+		new SSyncPotionsPacket(player, filled).send();
 	}
 
 	@SubscribeEvent
@@ -193,7 +201,7 @@ public class CoreModule extends AbstractModule {
 			source.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 				handler.accelerate(.05f * event.getAmount() * (float) EverCommonConfig.damageAcceleration);
 				if (source.world.rand.nextBoolean()) {
-					sync((ServerPlayerEntity) source);
+					sync((ServerPlayerEntity) source, false);
 				}
 			});
 		}

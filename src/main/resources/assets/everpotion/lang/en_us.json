@@ -9,7 +9,7 @@
 "tip.everpotion.potionType.lingering": "Tip Arrow",
 "tip.everpotion.potionType.splash": "Splash",
 "tip.everpotion.force": "Force applying",
-"tip.everpotion.return": "Returns arrow if has Infinity",
+"tip.everpotion.emptySlot": "Click here or press Sneak+%s to change cores",
 
 "msg.everpotion.maxLevel": "You have unlocked all the slots!",
 "msg.everpotion.tooLow": "You have unlocked the tiered slot!",
@@ -17,6 +17,7 @@
 "msg.everpotion.noHandler": "You don't have ability to use EverPotion!",
 "msg.everpotion.noSlots": "You don't have any slots!",
 "msg.everpotion.locked": "Locked",
+"msg.everpotion.newSlot": "You've unlocked a new slot! Press %s to use.",
 
 "container.everpotion.main": "Change Cores",
 

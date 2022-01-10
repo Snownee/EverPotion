@@ -50,7 +50,9 @@ public class JEIPlugin implements IModPlugin {
 			return;
 		}
 
-		List<AnvilRecipe> recipes = world.getRecipeManager().getRecipes(CraftingModule.RECIPE_TYPE).values().stream().map($ -> {
+		List<AnvilRecipe> recipes = world.getRecipeManager().getRecipes(CraftingModule.RECIPE_TYPE).values().stream().filter($ -> {
+			return !$.getRecipeOutput().isEmpty();
+		}).map($ -> {
 			EverAnvilRecipe recipe = (EverAnvilRecipe) $;
 			return new AnvilRecipe(ImmutableList.copyOf(recipe.getLeft().getMatchingStacks()), ImmutableList.copyOf(recipe.getRight().getMatchingStacks()), Collections.singletonList(recipe.getRecipeOutput()));
 		}).collect(Collectors.toList());
