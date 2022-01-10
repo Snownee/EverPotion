@@ -11,7 +11,7 @@
   "cost": 12,
   "output": {
     "effect": "regeneration",
-    "duration": 18,
+    "duration": 9,
     "type": "lingering"
   }
 }

@@ -1,4 +1,4 @@
-package snownee.everpotion.data;
+package snownee.everpotion.datagen;
 
 import java.util.Map;
 import java.util.function.Consumer;

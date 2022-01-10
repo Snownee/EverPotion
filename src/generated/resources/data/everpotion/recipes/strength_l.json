@@ -11,7 +11,7 @@
   "cost": 12,
   "output": {
     "effect": "strength",
-    "duration": 96,
+    "duration": 48,
     "type": "lingering"
   }
 }

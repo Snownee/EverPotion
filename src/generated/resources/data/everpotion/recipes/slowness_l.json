@@ -11,7 +11,7 @@
   "cost": 12,
   "output": {
     "effect": "slowness",
-    "duration": 48,
+    "duration": 24,
     "type": "lingering"
   }
 }

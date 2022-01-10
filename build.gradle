@@ -16,7 +16,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = "${version_major}.${version_minor}.${version_patch}"
-group = "snownee"
+group = "snownee.everpotion"
 archivesBaseName = "EverPotion-${minecraft_version}"
 
 if (System.getenv().BUILD_NUMBER != null) {

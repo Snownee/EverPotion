@@ -13,7 +13,7 @@ public final class EverCommonConfig {
 	@Range(min = 5)
 	public static int refillTime = 2400;
 	@Range(min = 5)
-	public static int tipArrowTimeCost = 300;
+	public static int tipArrowTimeCost = 600;
 	public static boolean naturallyRefill = true;
 	@Range(min = 0, max = 10)
 	@Comment("Damaging mobs can speed up refilling")

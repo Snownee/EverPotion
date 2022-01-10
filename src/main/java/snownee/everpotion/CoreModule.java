@@ -50,7 +50,7 @@ import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
 import snownee.everpotion.client.gui.PlaceScreen;
 import snownee.everpotion.container.PlaceContainer;
-import snownee.everpotion.data.EverAnvilRecipeProvider;
+import snownee.everpotion.datagen.EverAnvilRecipeProvider;
 import snownee.everpotion.entity.EverArrowEntity;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;

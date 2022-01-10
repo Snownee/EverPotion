@@ -24,11 +24,11 @@ import snownee.kiwi.util.Util;
 
 public class EverAnvilRecipe extends Recipe<AnvilContext> {
 
-	private final Ingredient left;
-	private final Ingredient right;
-	private final int cost;
-	private final int materialCost;
-	private final ProcessingOutput output;
+	protected final Ingredient left;
+	protected final Ingredient right;
+	protected final int cost;
+	protected final int materialCost;
+	protected final ProcessingOutput output;
 
 	public EverAnvilRecipe(ResourceLocation id, Ingredient left, Ingredient right, int cost, int materialCost, ItemStack output) {
 		super(id);
@@ -121,7 +121,7 @@ public class EverAnvilRecipe extends Recipe<AnvilContext> {
 					if (effect.getAmplifier() > 0)
 						o.addProperty("amplifier", effect.getAmplifier());
 					if (!effect.getPotion().isInstant())
-						o.addProperty("duration", effect.getDuration() / 100); //lets just hardcode here...
+						o.addProperty("duration", (int) (effect.getDuration() * type.durationFactor / 20));
 				}
 				o.addProperty("type", type.toString());
 				if (charge != 1)

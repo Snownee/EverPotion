@@ -299,7 +299,7 @@ public class EverHandler extends ItemStackHandler {
 	public AbstractArrowEntity tryTipArrow(World worldIn, ItemStack stack) {
 		if (!worldIn.isRemote && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
 			EverArrowEntity arrow = new EverArrowEntity(worldIn, owner);
-			arrow.addEffect(caches[tipIndex].effect);
+			arrow.addEffect(new EffectInstance(caches[tipIndex].effect));
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
 			CoreModule.sync((ServerPlayerEntity) owner);
