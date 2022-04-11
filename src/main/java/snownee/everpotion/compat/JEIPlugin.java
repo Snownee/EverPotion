@@ -9,8 +9,9 @@ import com.google.common.collect.ImmutableList;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.constants.VanillaRecipeCategoryUid;
+import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
+import mezz.jei.api.recipe.vanilla.IJeiAnvilRecipe;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.plugins.vanilla.anvil.AnvilRecipe;
@@ -52,14 +53,14 @@ public class JEIPlugin implements IModPlugin {
 			return;
 		}
 
-		List<AnvilRecipe> recipes = Util.getRecipes(CraftingModule.RECIPE_TYPE).stream().filter($ -> {
+		List<IJeiAnvilRecipe> recipes = Util.getRecipes(CraftingModule.RECIPE_TYPE).stream().filter($ -> {
 			return !$.getResultItem().isEmpty();
 		}).map($ -> {
 			EverAnvilRecipe recipe = (EverAnvilRecipe) $;
 			return new AnvilRecipe(ImmutableList.copyOf(recipe.getLeft().getItems()), ImmutableList.copyOf(recipe.getRight().getItems()), Collections.singletonList(recipe.getResultItem()));
 		}).collect(Collectors.toList());
 
-		registration.addRecipes(recipes, VanillaRecipeCategoryUid.ANVIL);
+		registration.addRecipes(RecipeTypes.ANVIL, recipes);
 	}
 
 }

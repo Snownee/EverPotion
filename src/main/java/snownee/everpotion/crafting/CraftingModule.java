@@ -2,7 +2,7 @@ package snownee.everpotion.crafting;
 
 import java.util.List;
 
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -27,7 +27,7 @@ public class CraftingModule extends AbstractModule {
 	@Name("anvil")
 	public static final EverAnvilRecipe.Serializer<EverAnvilRecipe> SERIALIZER = new EverAnvilRecipe.Serializer<>(EverAnvilRecipe::new);
 
-	public static final Tag.Named<Item> INGREDIENT = itemTag(EverPotion.MODID, "ingredient");
+	public static final TagKey<Item> INGREDIENT = itemTag(EverPotion.MODID, "ingredient");
 
 	@SubscribeEvent
 	public void onAnvilCrafting(AnvilUpdateEvent event) {
