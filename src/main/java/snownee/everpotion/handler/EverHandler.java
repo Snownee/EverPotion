@@ -9,6 +9,7 @@ import com.mojang.math.Vector3f;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -98,7 +99,7 @@ public class EverHandler extends ItemStackHandler {
 	@Override
 	public CompoundTag serializeNBT() {
 		CompoundTag tag = super.serializeNBT();
-		tag.putInt("Slots", slots);
+		tag.putInt("UnlockedSlots", slots - EverCommonConfig.beginnerSlots);
 		for (int i = 0; i < caches.length; i++) {
 			if (caches[i] == null) {
 				continue;
@@ -112,7 +113,11 @@ public class EverHandler extends ItemStackHandler {
 	@Override
 	public void deserializeNBT(CompoundTag nbt) {
 		NBTHelper data = NBTHelper.of(nbt);
-		slots = data.getInt("Slots", EverCommonConfig.beginnerSlots);
+		if (data.hasTag("UnlockedSlots", Tag.TAG_INT)) {
+			slots = Mth.clamp(EverCommonConfig.beginnerSlots + data.getInt("UnlockedSlots"), 0, EverCommonConfig.maxSlots);
+		} else {
+			slots = Math.max(EverCommonConfig.beginnerSlots, data.getInt("Slots"));
+		}
 		super.deserializeNBT(nbt);
 		for (int i = 0; i < slots; i++) {
 			onContentsChanged(i);
