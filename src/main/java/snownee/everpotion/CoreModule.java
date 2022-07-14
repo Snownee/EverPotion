@@ -59,6 +59,7 @@ import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.network.CDrinkPacket;
 import snownee.everpotion.network.COpenContainerPacket;
 import snownee.everpotion.network.SCancelPacket;
+import snownee.everpotion.network.SSplashPacket;
 import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiModule;
@@ -99,6 +100,7 @@ public class CoreModule extends AbstractModule {
 		NetworkChannel.register(CDrinkPacket.class, new CDrinkPacket.Handler());
 		NetworkChannel.register(COpenContainerPacket.class, new COpenContainerPacket.Handler());
 		NetworkChannel.register(SSyncPotionsPacket.class, new SSyncPotionsPacket.Handler());
+		NetworkChannel.register(SSplashPacket.class, new SSplashPacket.Handler());
 		NetworkChannel.register(SCancelPacket.class, new SCancelPacket.Handler());
 	}
 
