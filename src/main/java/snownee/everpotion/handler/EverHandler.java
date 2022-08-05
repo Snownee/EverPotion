@@ -127,7 +127,7 @@ public class EverHandler extends ItemStackHandler {
 	}
 
 	public void setSlots(int slots) {
-		this.slots = slots;
+		this.slots = MathHelper.clamp(slots, 0, EverCommonConfig.maxSlots);
 		drinkIndex = -1;
 		tipIndex = -1;
 		updateCharge();
