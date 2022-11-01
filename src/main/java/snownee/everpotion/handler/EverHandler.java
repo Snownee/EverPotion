@@ -285,7 +285,7 @@ public class EverHandler extends ItemStackHandler {
 			if (effect.getEffect().isInstantenous()) {
 				effect.getEffect().applyInstantenousEffect(entity, owner, entity, effect.getAmplifier(), 1.0D);
 			} else {
-				entity.addEffect(new MobEffectInstance(effect));
+				entity.addEffect(copyEffectWithDuration(effect));
 			}
 		}
 	}
@@ -320,7 +320,7 @@ public class EverHandler extends ItemStackHandler {
 	public AbstractArrow tryTipArrow(Level worldIn, ItemStack stack) {
 		if (!worldIn.isClientSide && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
 			EverArrow arrow = new EverArrow(worldIn, owner);
-			arrow.addEffect(new MobEffectInstance(caches[tipIndex].effect));
+			arrow.addEffect(copyEffectWithDuration(caches[tipIndex].effect));
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
 			CoreModule.sync((ServerPlayer) owner, false);
@@ -370,6 +370,10 @@ public class EverHandler extends ItemStackHandler {
 			caches[i].progress = time;
 		}
 		CoreModule.sync((ServerPlayer) owner, time == EverCommonConfig.refillTime);
+	}
+
+	public static MobEffectInstance copyEffectWithDuration(MobEffectInstance effect) {
+		return new MobEffectInstance(effect.getEffect(), (int) (effect.getDuration() * EverCommonConfig.durationFactor), effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon());
 	}
 
 }
