@@ -86,7 +86,7 @@ public final class ClientHandler {
 			if (handler == null) {
 				return;
 			}
-			if (mc.player.isCrouching()) {
+			if (mc.player.isShiftKeyDown()) {
 				if (handler.getSlots() == 0) {
 					mc.player.displayClientMessage(new TranslatableComponent("msg.everpotion.noSlots"), true);
 					return;
