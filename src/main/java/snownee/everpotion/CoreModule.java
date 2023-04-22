@@ -179,7 +179,10 @@ public class CoreModule extends AbstractModule {
 	@SubscribeEvent
 	public void onPlayerClone(PlayerEvent.Clone event) {
 		EverHandler newHandler = event.getPlayer().getCapability(EverCapabilities.HANDLER).orElse(null);
-		EverHandler oldHandler = event.getOriginal().getCapability(EverCapabilities.HANDLER).orElse(null);
+		Player original = event.getOriginal();
+		original.reviveCaps();
+		EverHandler oldHandler = original.getCapability(EverCapabilities.HANDLER).orElse(null);
+		original.invalidateCaps();
 		if (newHandler != null && oldHandler != null) {
 			newHandler.copyFrom(oldHandler);
 		}
