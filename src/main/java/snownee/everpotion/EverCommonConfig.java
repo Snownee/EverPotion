@@ -19,6 +19,7 @@ public final class EverCommonConfig {
 	@Range(min = 0, max = 10)
 	@Comment("Damaging mobs can speed up refilling")
 	public static double damageAcceleration = 1;
+	public static boolean interruptedOnHurt;
 
 	@Path("slots.maxSlots")
 	@Range(min = 1, max = 4)
@@ -38,5 +39,4 @@ public final class EverCommonConfig {
 	public static boolean showParticles = true;
 	@Path("effects.showIcon")
 	public static boolean showIcon = true;
-
 }

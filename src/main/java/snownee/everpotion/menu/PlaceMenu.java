@@ -10,7 +10,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
-import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.inventory.InvHandlerWrapper;
 import snownee.kiwi.inventory.container.ModSlot;
@@ -19,13 +18,9 @@ public class PlaceMenu extends AbstractContainerMenu {
 	private final EverHandler handler;
 
 	public PlaceMenu(int id, Inventory playerInventory) {
-		super(CoreModule.MAIN.get(), id);
+		super(CoreModule.PLACE.get(), id);
 		Player player = playerInventory.player;
-		handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
-		if (handler == null) {
-			player.openMenu(null);
-			return;
-		}
+		handler = EverHandler.of(player);
 		InvHandlerWrapper inventory = new InvHandlerWrapper(handler);
 
 		int xOffset = 2 - EverCommonConfig.maxSlots / 2;
@@ -51,7 +46,7 @@ public class PlaceMenu extends AbstractContainerMenu {
 	public ItemStack quickMoveStack(Player playerIn, int index) {
 		ItemStack itemstack = ItemStack.EMPTY;
 		Slot slot = this.slots.get(index);
-		if (slot != null && slot.hasItem()) {
+		if (slot.hasItem()) {
 			ItemStack itemstack1 = slot.getItem();
 			itemstack = itemstack1.copy();
 			if (index < this.handler.getSlots()) {

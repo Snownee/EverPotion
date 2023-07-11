@@ -27,14 +27,11 @@ public enum PotionType {
 	}
 
 	public static PotionType parse(String s) {
-		switch (s) {
-		case "splash":
-			return SPLASH;
-		case "lingering":
-			return LINGERING;
-		default:
-			return NORMAL;
-		}
+		return switch (s) {
+			case "splash" -> SPLASH;
+			case "lingering" -> LINGERING;
+			default -> NORMAL;
+		};
 	}
 
 	public static PotionType valueOf(byte b) {

@@ -1,6 +1,4 @@
-package snownee.everpotion.mixin;
-
-import javax.annotation.Nullable;
+package snownee.everpotion.mixin.client;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -11,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.Gui;
@@ -20,23 +19,21 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraftforge.common.util.LazyOptional;
-import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.handler.EverHandler.Cache;
 
 @Mixin(ItemRenderer.class)
-public abstract class MixinItemRenderer {
+public abstract class ItemRendererMixin {
 
 	@Shadow
 	public float blitOffset;
 
 	@Inject(
 			at = @At(
-				"TAIL"
-			), method = "Lnet/minecraft/client/renderer/entity/ItemRenderer;renderGuiItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V"
+					"TAIL"
+			), method = "renderGuiItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V"
 	)
-	public void everpotion_renderGuiItemDecorations(Font fr, ItemStack stack, int xPosition, int yPosition, @Nullable String text, CallbackInfo info) {
+	public void everpotion$renderGuiItemDecorations(Font fr, ItemStack stack, int xPosition, int yPosition, @Nullable String text, CallbackInfo info) {
 		if (!(stack.getItem() instanceof ProjectileWeaponItem))
 			return;
 		Minecraft mc = Minecraft.getInstance();
@@ -47,10 +44,7 @@ public abstract class MixinItemRenderer {
 		ItemStack offhand = player.getOffhandItem();
 		if (mainhand != stack && offhand != stack)
 			return;
-		LazyOptional<EverHandler> optional = player.getCapability(EverCapabilities.HANDLER);
-		if (!optional.isPresent())
-			return;
-		EverHandler handler = optional.orElse(null);
+		EverHandler handler = EverHandler.of(player);
 		if (!handler.canUseSlot(handler.tipIndex, false))
 			return;
 		Cache cache = handler.caches[handler.tipIndex];
@@ -59,8 +53,8 @@ public abstract class MixinItemRenderer {
 		RenderSystem.disableDepthTest();
 		RenderSystem.disableBlend();
 
-		MobEffectTextureManager potionspriteuploader = Minecraft.getInstance().getMobEffectTextures();
-		TextureAtlasSprite sprite = potionspriteuploader.get(cache.effect.getEffect());
+		MobEffectTextureManager textures = mc.getMobEffectTextures();
+		TextureAtlasSprite sprite = textures.get(cache.effect.getEffect());
 		RenderSystem.setShaderTexture(0, sprite.atlas().location());
 
 		float width = 9;

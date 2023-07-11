@@ -1,1 +1,0 @@
-MixinConfigs: everpotion.mixins.json

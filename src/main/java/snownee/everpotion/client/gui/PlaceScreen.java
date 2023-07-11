@@ -8,7 +8,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.menu.PlaceMenu;
 
 // from HopperScreen
@@ -41,14 +40,6 @@ public class PlaceScreen extends AbstractContainerScreen<PlaceMenu> {
 		int i = (this.width - this.imageWidth) / 2;
 		int j = (this.height - this.imageHeight) / 2;
 		this.blit(matrix, i, j, 0, 0, this.imageWidth, this.imageHeight);
-		int slots = menu.getSlots();
-		int xOffset = 2 - EverCommonConfig.maxSlots / 2;
-		int xStart = leftPos + 43 + xOffset * 18;
-		if (xOffset > 0) {
-			fill(matrix, leftPos + 43, topPos + 19, xStart, topPos + 39, 0xffc6c6c6);
-		}
-		xStart += slots * 18;
-		fill(matrix, xStart, topPos + 19, leftPos + 133, topPos + 39, 0xffc6c6c6);
 	}
 
 }

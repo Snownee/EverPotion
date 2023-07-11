@@ -20,8 +20,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
-import snownee.everpotion.cap.EverCapabilities;
-import snownee.everpotion.client.ClientHandler;
+import snownee.everpotion.client.EverPotionClient;
 import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
@@ -35,11 +34,7 @@ public class UnlockSlotItem extends ModItem {
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
 		ItemStack stack = playerIn.getItemInHand(handIn);
-		EverHandler handler = playerIn.getCapability(EverCapabilities.HANDLER).orElse(null);
-		if (handler == null) {
-			sendMsg(playerIn, "noHandler");
-			return InteractionResultHolder.fail(stack);
-		}
+		EverHandler handler = EverHandler.of(playerIn);
 		boolean force = NBTHelper.of(stack).getBoolean("Force");
 		int tier = getTier(stack);
 		if (!force) {
@@ -67,7 +62,7 @@ public class UnlockSlotItem extends ModItem {
 			handler.setSlots(tier);
 			CoreModule.sync((ServerPlayer) playerIn, false);
 		} else if (tier > handler.getSlots()) {
-			sendMsg(playerIn, "newSlot", ClientHandler.kbUse.getTranslatedKeyMessage());
+			sendMsg(playerIn, "newSlot", EverPotionClient.kbUse.getTranslatedKeyMessage());
 		}
 		return InteractionResultHolder.sidedSuccess(stack, worldIn.isClientSide);
 	}

@@ -1,28 +1,21 @@
 package snownee.everpotion.client;
 
+import java.util.function.BiConsumer;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.mojang.math.Vector3f;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.TippableArrowRenderer;
+import net.minecraft.client.color.item.ItemColor;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
-import net.minecraftforge.client.event.InputEvent;
-import net.minecraftforge.client.event.RegisterColorHandlersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.client.settings.KeyModifier;
+import net.minecraft.world.level.ItemLike;
 import snownee.everpotion.CoreModule;
-import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.gui.UseScreen;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.item.CoreItem;
@@ -30,13 +23,12 @@ import snownee.everpotion.item.UnlockSlotItem;
 import snownee.everpotion.network.COpenContainerPacket;
 import snownee.kiwi.util.MathUtil;
 
-@OnlyIn(Dist.CLIENT)
-public final class ClientHandler {
+public final class EverPotionClient {
 
 	public static final KeyMapping kbUse = new KeyMapping("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
 
-	public static void onItemColorsInit(RegisterColorHandlersEvent.Item event) {
-		event.register((stack, i) -> {
+	public static void registerItemColors(BiConsumer<ItemColor, ItemLike> consumer) {
+		consumer.accept((stack, i) -> {
 			if (i == 0) {
 				MobEffectInstance effect = CoreItem.getEffectInstance(stack);
 				int rgb;
@@ -51,40 +43,28 @@ public final class ClientHandler {
 			}
 			return -1;
 		}, CoreModule.CORE.get());
-		event.register((stack, i) -> {
+		consumer.accept((stack, i) -> {
 			if (i == 1) {
 				int tier = UnlockSlotItem.getTier(stack);
-				switch (tier) {
-				default:
-					return 16733525;
-				case 1:
-					return 16777215;
-				case 2:
-					return 16777045;
-				case 3:
-					return 5636095;
-				case 4:
-					return 16733695;
-				}
+				return switch (tier) {
+					default -> 16733525;
+					case 1 -> 16777215;
+					case 2 -> 16777045;
+					case 3 -> 5636095;
+					case 4 -> 16733695;
+				};
 			}
 			return -1;
 		}, CoreModule.UNLOCK_SLOT.get());
 	}
 
-	public static void registerRenderers(RegisterRenderers event) {
-		event.registerEntityRenderer(CoreModule.ARROW.get(), TippableArrowRenderer::new);
-	}
-
-	public static void onKeyInput(InputEvent.Key event) {
+	public static void onKeyInput() {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null || mc.screen != null || mc.player.isSpectator()) {
 			return;
 		}
-		if (event.getAction() == GLFW.GLFW_PRESS && kbUse.isDown()) {
-			EverHandler handler = mc.player.getCapability(EverCapabilities.HANDLER).orElse(null);
-			if (handler == null) {
-				return;
-			}
+		while (kbUse.consumeClick()) {
+			EverHandler handler = EverHandler.of(mc.player);
 			if (mc.player.isShiftKeyDown()) {
 				if (handler.getSlots() == 0) {
 					mc.player.displayClientMessage(Component.translatable("msg.everpotion.noSlots"), true);
@@ -92,24 +72,10 @@ public final class ClientHandler {
 				}
 				COpenContainerPacket.I.sendToServer($ -> {
 				});
-			} else if (kbUse.getKeyModifier().isActive(null)) {
-				if (kbUse.getKeyModifier() == KeyModifier.NONE && event.getModifiers() != 0) {
-					return;
-				}
+			} else {
 				mc.setScreen(new UseScreen());
 			}
 		}
-	}
-
-	public static void renderOverlay(RenderGuiOverlayEvent.Pre event) {
-		Minecraft mc = Minecraft.getInstance();
-		if (event.getOverlay() == VanillaGuiOverlay.CROSSHAIR.type() && mc.screen != null && mc.screen.getClass() == UseScreen.class) {
-			event.setCanceled(true);
-		}
-	}
-
-	public static void registerKeyMapping(RegisterKeyMappingsEvent event) {
-		event.register(ClientHandler.kbUse);
 	}
 
 	public static void playSound(SoundEvent soundEvent) {

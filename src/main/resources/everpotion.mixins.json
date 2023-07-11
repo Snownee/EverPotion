@@ -4,10 +4,12 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "everpotion.refmap.json",
   "mixins": [
-    "MixinArrowItem"
+    "EntityMixin",
+    "ArrowItemMixin",
+    "PlayerMixin"
   ],
   "client": [
-    "MixinItemRenderer"
+    "client.ItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

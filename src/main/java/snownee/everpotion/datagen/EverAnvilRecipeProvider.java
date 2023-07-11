@@ -3,12 +3,11 @@ package snownee.everpotion.datagen;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Maps;
 
+import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -26,7 +25,6 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.PartialNBTIngredient;
-import net.minecraftforge.registries.ForgeRegistries;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
@@ -67,7 +65,7 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 	protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
 		register(Potions.WATER, null, PotionType.SPLASH, 2, consumer);
 		Map<MobEffect, Pair<MobEffectInstance, Potion>> effects = Maps.newHashMap();
-		for (Potion potion : ForgeRegistries.POTIONS) {
+		for (Potion potion : Registry.POTION) {
 			if (potion.getEffects().size() != 1)
 				continue;
 			MobEffectInstance effect = potion.getEffects().get(0);

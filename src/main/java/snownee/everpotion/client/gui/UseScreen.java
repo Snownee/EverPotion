@@ -1,5 +1,7 @@
 package snownee.everpotion.client.gui;
 
+import java.util.Objects;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -23,8 +25,7 @@ import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.cap.EverCapabilities;
-import snownee.everpotion.client.ClientHandler;
+import snownee.everpotion.client.EverPotionClient;
 import snownee.everpotion.handler.EverHandler;
 import snownee.everpotion.handler.EverHandler.Cache;
 import snownee.everpotion.network.COpenContainerPacket;
@@ -48,10 +49,10 @@ public class UseScreen extends Screen {
 
 	@Override
 	protected void init() {
-		if (minecraft.player == null) {
+		if (Objects.requireNonNull(minecraft).player == null) {
 			return;
 		}
-		handler = minecraft.player.getCapability(EverCapabilities.HANDLER).orElse(null);
+		handler = EverHandler.of(minecraft.player);
 		keyBindsHotbar = minecraft.options.keyHotbarSlots;
 	}
 
@@ -105,11 +106,11 @@ public class UseScreen extends Screen {
 		} else {
 			Cache cache = handler.caches[clickIndex];
 			if (cache == null && clickIndex < handler.getSlots()) {
-				Component tooltip = Component.translatable("tip.everpotion.emptySlot", ClientHandler.kbUse.getTranslatedKeyMessage());
+				Component tooltip = Component.translatable("tip.everpotion.emptySlot", EverPotionClient.kbUse.getTranslatedKeyMessage());
 				renderTooltip(matrix, tooltip, mouseX, mouseY);
 			}
 			if (cache != null && oClickIndex != clickIndex) {
-				ClientHandler.playSound(CoreModule.HOVER_SOUND.get());
+				EverPotionClient.playSound(CoreModule.HOVER_SOUND.get());
 			}
 		}
 
@@ -270,7 +271,7 @@ public class UseScreen extends Screen {
 			matrix.scale(0.75f, 0.75f, 0.75f);
 			drawCenteredString(matrix, font, name, 0, 0, textColor);
 		} else if (cache.effect != null) {
-			MobEffectTextureManager potionspriteuploader = this.minecraft.getMobEffectTextures();
+			MobEffectTextureManager potionspriteuploader = minecraft.getMobEffectTextures();
 			TextureAtlasSprite sprite = potionspriteuploader.get(cache.effect.getEffect());
 			RenderSystem.setShaderTexture(0, sprite.atlas().location());
 
@@ -363,8 +364,8 @@ public class UseScreen extends Screen {
 				return true;
 			}
 		}
-		if (ClientHandler.kbUse.getKeyModifier().isActive(null) && ClientHandler.kbUse.getKey().getValue() == key) {
-			if (ClientHandler.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
+		if (EverPotionClient.kbUse.getKeyModifier().isActive(null) && EverPotionClient.kbUse.getKey().getValue() == key) {
+			if (EverPotionClient.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
 				return false;
 			}
 			onClose();

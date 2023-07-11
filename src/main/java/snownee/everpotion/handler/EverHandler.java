@@ -1,10 +1,12 @@
 package snownee.everpotion.handler;
 
 import java.util.List;
+import java.util.Objects;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.math.Vector3f;
-
-import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,11 +21,13 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -31,7 +35,8 @@ import net.minecraftforge.items.ItemStackHandler;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.client.ClientHandler;
+import snownee.everpotion.client.EverPotionClient;
+import snownee.everpotion.duck.EverPotionPlayer;
 import snownee.everpotion.entity.EverArrow;
 import snownee.everpotion.item.CoreItem;
 import snownee.everpotion.network.CDrinkPacket;
@@ -61,6 +66,19 @@ public class EverHandler extends ItemStackHandler {
 
 	public static MobEffectInstance copyEffectWithSettings(MobEffectInstance effect) {
 		return new MobEffectInstance(effect.getEffect(), (int) (effect.getDuration() * EverCommonConfig.durationFactor), effect.getAmplifier(), EverCommonConfig.ambient, EverCommonConfig.showIcon, EverCommonConfig.showParticles);
+	}
+
+	@Nullable
+	public static EverHandler of(@Nullable LivingEntity player) {
+		if (player instanceof EverPotionPlayer epp) {
+			return epp.everpotion$getHandler();
+		}
+		return null;
+	}
+
+	@NotNull
+	public static EverHandler of(Player player) {
+		return ((EverPotionPlayer) player).everpotion$getHandler();
 	}
 
 	@Override
@@ -224,11 +242,11 @@ public class EverHandler extends ItemStackHandler {
 			CDrinkPacket.send(slot);
 
 			if (cache.type == PotionType.LINGERING) {
-				ClientHandler.playSound(SoundEvents.UI_BUTTON_CLICK);
+				EverPotionClient.playSound(SoundEvents.UI_BUTTON_CLICK);
 			} else if (EverCommonConfig.drinkDelay < 40) {
-				ClientHandler.playSound(CoreModule.CHARGE_SHORT_SOUND.get());
+				EverPotionClient.playSound(CoreModule.CHARGE_SHORT_SOUND.get());
 			} else {
-				ClientHandler.playSound(CoreModule.CHARGE_LONG_SOUND.get());
+				EverPotionClient.playSound(CoreModule.CHARGE_LONG_SOUND.get());
 			}
 		}
 	}
@@ -239,8 +257,8 @@ public class EverHandler extends ItemStackHandler {
 		// stop sound?
 	}
 
-	public void invalidate() {
-		owner = null;
+	public void setOwner(Player owner) {
+		this.owner = owner;
 	}
 
 	private void use(int slot) {
@@ -257,15 +275,15 @@ public class EverHandler extends ItemStackHandler {
 		} else if (type == PotionType.SPLASH) {
 			if (cache.effect == null) {
 				BlockPos pos = owner.blockPosition();
-				this.extinguishFires(owner.level, pos, Direction.DOWN);
-				this.extinguishFires(owner.level, pos.above(), Direction.DOWN);
+				this.dowseFire(pos);
+				this.dowseFire(pos.above());
 
 				for (Direction direction : Direction.Plane.HORIZONTAL) {
-					this.extinguishFires(owner.level, pos.relative(direction), direction);
+					this.dowseFire(pos.relative(direction));
 				}
 			}
-			AABB axisalignedbb = new AABB(owner.blockPosition()).inflate(4.0D, 2.0D, 4.0D);
-			List<LivingEntity> list = owner.level.getEntitiesOfClass(LivingEntity.class, axisalignedbb);
+			AABB aabb = new AABB(owner.position(), owner.position()).inflate(4.0D, 2.0D, 4.0D);
+			List<LivingEntity> list = owner.level.getEntitiesOfClass(LivingEntity.class, aabb);
 			if (!list.isEmpty()) {
 				for (LivingEntity livingentity : list) {
 					double d0 = owner.distanceToSqr(livingentity);
@@ -282,7 +300,9 @@ public class EverHandler extends ItemStackHandler {
 	private void doEffect(MobEffectInstance effect, LivingEntity entity) {
 		if (effect == null) {
 			entity.clearFire();
-			if (ThrownPotion.WATER_SENSITIVE.test(entity)) {
+			if (entity instanceof Axolotl axolotl) {
+				axolotl.rehydrate();
+			} else if (ThrownPotion.WATER_SENSITIVE.test(entity)) {
 				entity.hurt(DamageSource.indirectMagic(entity, owner), 1.0F);
 			}
 		} else {
@@ -295,14 +315,17 @@ public class EverHandler extends ItemStackHandler {
 	}
 
 	// Copied from ThrownPotion
-	private void extinguishFires(Level world, BlockPos pos, Direction p_184542_2_) {
-		BlockState blockstate = world.getBlockState(pos);
+	private void dowseFire(BlockPos pos) {
+		Level level = owner.level;
+		BlockState blockstate = level.getBlockState(pos);
 		if (blockstate.is(BlockTags.FIRE)) {
-			world.removeBlock(pos, false);
+			level.removeBlock(pos, false);
+		} else if (AbstractCandleBlock.isLit(blockstate)) {
+			AbstractCandleBlock.extinguish(owner, blockstate, level, pos);
 		} else if (CampfireBlock.isLitCampfire(blockstate)) {
-			world.levelEvent(null, 1009, pos, 0);
-			CampfireBlock.dowse(owner, world, pos, blockstate);
-			world.setBlockAndUpdate(pos, blockstate.setValue(CampfireBlock.LIT, Boolean.valueOf(false)));
+			level.levelEvent(owner, 1009, pos, 0);
+			CampfireBlock.dowse(owner, level, pos, blockstate);
+			level.setBlockAndUpdate(pos, blockstate.setValue(CampfireBlock.LIT, Boolean.FALSE));
 		}
 	}
 
@@ -324,7 +347,7 @@ public class EverHandler extends ItemStackHandler {
 	public AbstractArrow tryTipArrow(Level worldIn, ItemStack stack) {
 		if (!worldIn.isClientSide && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
 			EverArrow arrow = new EverArrow(worldIn, owner);
-			arrow.addEffect(copyEffectWithSettings(caches[tipIndex].effect));
+			arrow.addEffect(copyEffectWithSettings(Objects.requireNonNull(caches[tipIndex].effect)));
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
 			CoreModule.sync((ServerPlayer) owner, false);
@@ -339,11 +362,11 @@ public class EverHandler extends ItemStackHandler {
 
 	public void setAll(int time) {
 		chargeIndex = -1;
-		for (int i = 0; i < caches.length; i++) {
-			if (caches[i] == null) {
+		for (Cache cache : caches) {
+			if (cache == null) {
 				continue;
 			}
-			caches[i].progress = time;
+			cache.progress = time;
 		}
 		CoreModule.sync((ServerPlayer) owner, time == EverCommonConfig.refillTime);
 	}

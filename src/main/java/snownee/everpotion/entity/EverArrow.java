@@ -7,7 +7,7 @@ import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkHooks;
+import snownee.everpotion.util.CommonProxy;
 
 public class EverArrow extends Arrow {
 
@@ -17,10 +17,6 @@ public class EverArrow extends Arrow {
 
 	public EverArrow(Level worldIn, LivingEntity shooter) {
 		super(worldIn, shooter);
-	}
-
-	public EverArrow(Level worldIn, double x, double y, double z) {
-		super(worldIn, x, y, z);
 	}
 
 	@Override
@@ -34,7 +30,7 @@ public class EverArrow extends Arrow {
 
 	@Override
 	public Packet<?> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
+		return CommonProxy.getEntitySpawningPacket(this);
 	}
 
 }

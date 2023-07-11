@@ -13,7 +13,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
-import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.handler.EverHandler;
 
 public class EverCommand {
@@ -79,27 +78,19 @@ public class EverCommand {
 	}
 
 	private static int setAll(CommandContext<CommandSourceStack> ctx, Collection<ServerPlayer> players, int time) {
-		int i = 0;
 		for (ServerPlayer player : players) {
-			EverHandler handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
-			if (handler != null) {
-				handler.setAll(time);
-				++i;
-			}
+			EverHandler handler = EverHandler.of(player);
+			handler.setAll(time);
 		}
-		return i;
+		return players.size();
 	}
 
 	private static int level(CommandContext<CommandSourceStack> source, Collection<ServerPlayer> players, IntUnaryOperator newLevel) {
-		int i = 0;
 		for (ServerPlayer player : players) {
-			EverHandler handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
-			if (handler != null) {
-				handler.setSlots(newLevel.applyAsInt(handler.getSlots()));
-				CoreModule.sync(player, false);
-				++i;
-			}
+			EverHandler handler = EverHandler.of(player);
+			handler.setSlots(newLevel.applyAsInt(handler.getSlots()));
+			CoreModule.sync(player, false);
 		}
-		return i;
+		return players.size();
 	}
 }

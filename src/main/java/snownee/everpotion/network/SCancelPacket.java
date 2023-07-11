@@ -6,8 +6,8 @@ import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.client.gui.UseScreen;
+import snownee.everpotion.handler.EverHandler;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
 import snownee.kiwi.network.PacketHandler;
@@ -23,12 +23,11 @@ public class SCancelPacket extends PacketHandler {
 			if (mc.player == null) {
 				return;
 			}
-			mc.player.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
-				handler.stopDrinking();
-				if (mc.screen instanceof UseScreen) {
-					mc.setScreen(null);
-				}
-			});
+			EverHandler handler = EverHandler.of(Minecraft.getInstance().player);
+			handler.stopDrinking();
+			if (mc.screen instanceof UseScreen) {
+				mc.setScreen(null);
+			}
 		});
 	}
 

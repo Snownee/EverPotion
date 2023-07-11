@@ -1,27 +1,22 @@
 {
-"item.everpotion.core": "EverPotion Core",
-"item.everpotion.unlock_slot": "Slot Unlock",
-"item.everpotion.unlock_slot.1": "Tier 1 Slot Unlock",
-"item.everpotion.unlock_slot.2": "Tier 2 Slot Unlock",
-"item.everpotion.unlock_slot.3": "Tier 3 Slot Unlock",
-"item.everpotion.unlock_slot.4": "Tier 4 Slot Unlock",
-
-"tip.everpotion.potionType.lingering": "Tip Arrow",
-"tip.everpotion.potionType.splash": "Splash",
-"tip.everpotion.force": "Force applying",
-"tip.everpotion.emptySlot": "Click here or press Sneak+%s to change cores",
-
-"msg.everpotion.maxLevel": "You have unlocked all the slots!",
-"msg.everpotion.tooLow": "You have unlocked the tiered slot!",
-"msg.everpotion.tooHigh": "You must unlock previous slots first!",
-"msg.everpotion.noHandler": "You don't have ability to use EverPotion!",
-"msg.everpotion.noSlots": "You don't have any slots!",
-"msg.everpotion.locked": "Locked",
-"msg.everpotion.newSlot": "You've unlocked a new slot! Press %s to use.",
-
-"container.everpotion.main": "Change Cores",
-
-"gui.everpotion.keygroup": "EverPotion",
-
-"keybind.everpotion.use": "Open"
+  "item.everpotion.core": "EverPotion Core",
+  "item.everpotion.unlock_slot": "Slot Unlock",
+  "item.everpotion.unlock_slot.1": "Tier 1 Slot Unlock",
+  "item.everpotion.unlock_slot.2": "Tier 2 Slot Unlock",
+  "item.everpotion.unlock_slot.3": "Tier 3 Slot Unlock",
+  "item.everpotion.unlock_slot.4": "Tier 4 Slot Unlock",
+  "tip.everpotion.potionType.lingering": "Tip Arrow",
+  "tip.everpotion.potionType.splash": "Splash",
+  "tip.everpotion.force": "Force applying",
+  "tip.everpotion.emptySlot": "Click here or press Sneak+%s to change cores",
+  "msg.everpotion.maxLevel": "You have unlocked all the slots!",
+  "msg.everpotion.tooLow": "You have unlocked the tiered slot!",
+  "msg.everpotion.tooHigh": "You must unlock previous slots first!",
+  "msg.everpotion.noSlots": "You don't have any slots!",
+  "msg.everpotion.locked": "Locked",
+  "msg.everpotion.newSlot": "You've unlocked a new slot! Press %s to use.",
+  "container.everpotion.main": "Change cores",
+  "keybind.everpotion.use": "Open",
+  "gui.everpotion.keygroup": "EverPotion",
+  "gui.everpotion.use.title": "Use EverPotion core"
 }
