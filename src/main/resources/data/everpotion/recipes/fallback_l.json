@@ -1,20 +1,15 @@
 {
   "type": "everpotion:fallback",
-  "left": {
-    "item": "minecraft:lingering_potion"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 12,
-  "output": {
-    "item": "everpotion:core"
-  },
-  "conditions": [
+  "item_in": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "item": "minecraft:lingering_potion"
     },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "level_cost": 12,
+  "conditions": [
     {
       "module": "everpotion:fallback_recipe",
       "type": "kiwi:is_loaded"

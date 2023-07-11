@@ -1,7 +1,6 @@
 package snownee.everpotion.menu;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,7 +19,7 @@ public class PlaceMenu extends AbstractContainerMenu {
 	private final EverHandler handler;
 
 	public PlaceMenu(int id, Inventory playerInventory) {
-		super(CoreModule.MAIN, id);
+		super(CoreModule.MAIN.get(), id);
 		Player player = playerInventory.player;
 		handler = player.getCapability(EverCapabilities.HANDLER).orElse(null);
 		if (handler == null) {
@@ -93,7 +92,7 @@ public class PlaceMenu extends AbstractContainerMenu {
 	public enum ContainerProvider implements MenuProvider {
 		INSTANCE;
 
-		private static final Component TITLE = new TranslatableComponent("container.everpotion.main");
+		private static final Component TITLE = Component.translatable("container.everpotion.main");
 
 		@Override
 		public PlaceMenu createMenu(int windowId, Inventory playerInventory, Player player) {

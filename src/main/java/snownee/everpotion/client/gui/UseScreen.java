@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.CoreModule;
@@ -32,10 +31,10 @@ import snownee.everpotion.network.COpenContainerPacket;
 
 public class UseScreen extends Screen {
 
-	private static final Component TITLE = new TranslatableComponent("gui.everpotion.use.title");
-	private EverHandler handler;
+	private static final Component TITLE = Component.translatable("gui.everpotion.use.title");
 	private final float[] scales = new float[4];
 	private final String[] names = new String[4];
+	private EverHandler handler;
 	private boolean closing;
 	private float openTick;
 	private int clickIndex = -1;
@@ -106,11 +105,11 @@ public class UseScreen extends Screen {
 		} else {
 			Cache cache = handler.caches[clickIndex];
 			if (cache == null && clickIndex < handler.getSlots()) {
-				Component tooltip = new TranslatableComponent("tip.everpotion.emptySlot", ClientHandler.kbUse.getTranslatedKeyMessage());
+				Component tooltip = Component.translatable("tip.everpotion.emptySlot", ClientHandler.kbUse.getTranslatedKeyMessage());
 				renderTooltip(matrix, tooltip, mouseX, mouseY);
 			}
 			if (cache != null && oClickIndex != clickIndex) {
-				ClientHandler.playSound(CoreModule.HOVER_SOUND);
+				ClientHandler.playSound(CoreModule.HOVER_SOUND.get());
 			}
 		}
 
@@ -196,8 +195,7 @@ public class UseScreen extends Screen {
 		buffer.vertex(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
 		buffer.vertex(matrix4f, xCenter - hd, yCenter, 0.0F).color(r, g, b, a).endVertex();
 		buffer.vertex(matrix4f, xCenter, yCenter - hd, 0.0F).color(r, g, b, a).endVertex();
-		buffer.end();
-		BufferUploader.end(buffer);
+		BufferUploader.drawWithShader(buffer.end());
 
 		if (handler.drinkIndex == index) {
 			float h = hd * 2 * drinkTick / EverCommonConfig.drinkDelay - hd;
@@ -212,8 +210,7 @@ public class UseScreen extends Screen {
 				buffer.vertex(matrix4f, xCenter + hd, yCenter, 0.0F).color(1, 1, 1, ia).endVertex();
 			}
 			buffer.vertex(matrix4f, xCenter + hd - Math.abs(h), yCenter - h, 0.0F).color(1, 1, 1, ia).endVertex();
-			buffer.end();
-			BufferUploader.end(buffer);
+			BufferUploader.drawWithShader(buffer.end());
 		}
 
 		float hdshadow;
@@ -248,8 +245,7 @@ public class UseScreen extends Screen {
 		buffer.vertex(matrix4f, xCenter - hdshadow, yCenter, 0.0F).color(r, g, b, 0).endVertex();
 		buffer.vertex(matrix4f, xCenter - hdborder, yCenter, 0.0F).color(r, g, b, a).endVertex();
 		buffer.vertex(matrix4f, xCenter, yCenter - hdborder, 0.0F).color(r, g, b, a).endVertex();
-		buffer.end();
-		BufferUploader.end(buffer);
+		BufferUploader.drawWithShader(buffer.end());
 		RenderSystem.enableTexture();
 
 		refreshName(index);
@@ -291,8 +287,7 @@ public class UseScreen extends Screen {
 			buffer.vertex(matrix4f, right, bottom, 0).uv(sprite.getU1(), sprite.getV1()).endVertex();
 			buffer.vertex(matrix4f, right, top, 0).uv(sprite.getU1(), sprite.getV0()).endVertex();
 			buffer.vertex(matrix4f, left, top, 0).uv(sprite.getU0(), sprite.getV0()).endVertex();
-			buffer.end();
-			BufferUploader.end(buffer);
+			BufferUploader.drawWithShader(buffer.end());
 
 			matrix.translate(xCenter, yCenter + 10, 0);
 			matrix.scale(0.75f, 0.75f, 0.75f);

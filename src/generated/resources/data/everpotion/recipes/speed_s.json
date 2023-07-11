@@ -1,24 +1,32 @@
 {
-  "type": "everpotion:anvil",
-  "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:splash_potion",
-    "nbt": "{Potion:\"minecraft:strong_swiftness\"}"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 10,
-  "output": {
-    "effect": "speed",
-    "amplifier": 1,
-    "duration": 18,
-    "type": "splash"
-  },
+  "type": "lychee:anvil_crafting",
   "conditions": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "type": "forge:mod_loaded",
+      "modid": "lychee"
     }
-  ]
+  ],
+  "item_in": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "minecraft:splash_potion",
+      "nbt": "{Potion:\"minecraft:strong_swiftness\"}"
+    },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "item_out": {
+    "item": "everpotion:core",
+    "lychee:tag": {
+      "Effect": {
+        "Amplifier": 1,
+        "Duration": 1800,
+        "Id": 1,
+        "forge:id": "minecraft:speed"
+      },
+      "Type": 1
+    }
+  },
+  "level_cost": 10
 }

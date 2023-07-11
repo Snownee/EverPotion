@@ -1,23 +1,32 @@
 {
-  "type": "everpotion:anvil",
-  "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:lingering_potion",
-    "nbt": "{Potion:\"minecraft:long_slowness\"}"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 12,
-  "output": {
-    "effect": "slowness",
-    "duration": 24,
-    "type": "lingering"
-  },
+  "type": "lychee:anvil_crafting",
   "conditions": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "type": "forge:mod_loaded",
+      "modid": "lychee"
     }
-  ]
+  ],
+  "item_in": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "minecraft:lingering_potion",
+      "nbt": "{Potion:\"minecraft:long_slowness\"}"
+    },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "item_out": {
+    "item": "everpotion:core",
+    "lychee:tag": {
+      "Effect": {
+        "Amplifier": 0,
+        "Duration": 4800,
+        "Id": 2,
+        "forge:id": "minecraft:slowness"
+      },
+      "Type": 2
+    }
+  },
+  "level_cost": 12
 }

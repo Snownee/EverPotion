@@ -1,23 +1,32 @@
 {
-  "type": "everpotion:anvil",
-  "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:potion",
-    "nbt": "{Potion:\"minecraft:luck\"}"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 8,
-  "output": {
-    "effect": "luck",
-    "duration": 60,
-    "type": "normal"
-  },
+  "type": "lychee:anvil_crafting",
   "conditions": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "type": "forge:mod_loaded",
+      "modid": "lychee"
     }
-  ]
+  ],
+  "item_in": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "minecraft:potion",
+      "nbt": "{Potion:\"minecraft:luck\"}"
+    },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "item_out": {
+    "item": "everpotion:core",
+    "lychee:tag": {
+      "Effect": {
+        "Amplifier": 0,
+        "Duration": 6000,
+        "Id": 26,
+        "forge:id": "minecraft:luck"
+      },
+      "Type": 0
+    }
+  },
+  "level_cost": 8
 }

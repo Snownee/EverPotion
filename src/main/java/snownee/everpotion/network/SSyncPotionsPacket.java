@@ -40,7 +40,7 @@ public class SSyncPotionsPacket extends PacketHandler {
 				handler.copyFrom(newHandler);
 			});
 			if (EverClientConfig.refillCompleteNotificationSound && filled) {
-				ClientHandler.playSound(CoreModule.FILL_COMPLETE_SOUND, 0.5F);
+				ClientHandler.playSound(CoreModule.FILL_COMPLETE_SOUND.get(), 0.5F);
 			}
 		});
 	}

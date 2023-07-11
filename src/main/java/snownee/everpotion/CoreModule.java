@@ -9,34 +9,32 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 import snownee.everpotion.cap.EverCapabilities;
 import snownee.everpotion.cap.EverCapabilityProvider;
 import snownee.everpotion.client.ClientHandler;
@@ -50,6 +48,7 @@ import snownee.everpotion.menu.PlaceMenu;
 import snownee.everpotion.network.SCancelPacket;
 import snownee.everpotion.network.SSyncPotionsPacket;
 import snownee.kiwi.AbstractModule;
+import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.loader.Platform;
 import snownee.kiwi.loader.event.ClientInitEvent;
@@ -61,20 +60,18 @@ import snownee.kiwi.schedule.impl.SimpleGlobalTask;
 @KiwiModule.Category("brewing")
 public class CoreModule extends AbstractModule {
 
-	public static CoreItem CORE = new CoreItem();
-
-	public static UnlockSlotItem UNLOCK_SLOT = new UnlockSlotItem();
-
-	public static EntityType<EverArrow> ARROW = EntityType.Builder.<EverArrow>of(EverArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("everpotion:arrow");
-
-	public static MenuType<PlaceMenu> MAIN = new MenuType<>(PlaceMenu::new);
-
-	public static SoundEvent FILL_COMPLETE_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "fill_complete"));
-	public static SoundEvent USE_NORMAL_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "use_normal"));
-	public static SoundEvent USE_SPLASH_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "use_splash"));
-	public static SoundEvent CHARGE_SHORT_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "charge_short"));
-	public static SoundEvent CHARGE_LONG_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "charge_long"));
-	public static SoundEvent HOVER_SOUND = new SoundEvent(new ResourceLocation(EverPotion.MODID, "hover"));
+	public static final ResourceLocation HANDLER_ID = new ResourceLocation(EverPotion.ID, "handler");
+	public static final TagKey<Item> INGREDIENT = itemTag(EverPotion.ID, "ingredient");
+	public static final KiwiGO<CoreItem> CORE = go(CoreItem::new);
+	public static final KiwiGO<UnlockSlotItem> UNLOCK_SLOT = go(UnlockSlotItem::new);
+	public static final KiwiGO<EntityType<EverArrow>> ARROW = go(() -> EntityType.Builder.<EverArrow>of(EverArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("everpotion:arrow"));
+	public static final KiwiGO<SoundEvent> FILL_COMPLETE_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "fill_complete")));
+	public static final KiwiGO<SoundEvent> USE_NORMAL_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "use_normal")));
+	public static final KiwiGO<SoundEvent> USE_SPLASH_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "use_splash")));
+	public static final KiwiGO<SoundEvent> CHARGE_SHORT_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "charge_short")));
+	public static final KiwiGO<SoundEvent> CHARGE_LONG_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "charge_long")));
+	public static final KiwiGO<SoundEvent> HOVER_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "hover")));
+	public static final KiwiGO<MenuType<PlaceMenu>> MAIN = go(() -> new MenuType<>(PlaceMenu::new));
 
 	public CoreModule() {
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -85,6 +82,13 @@ public class CoreModule extends AbstractModule {
 		eventBus.addListener(this::registerCap);
 	}
 
+	public static void sync(ServerPlayer player, boolean filled) {
+		if (player instanceof FakePlayer) {
+			return;
+		}
+		SSyncPotionsPacket.send(player, filled);
+	}
+
 	protected void registerCap(RegisterCapabilitiesEvent event) {
 		event.register(EverHandler.class);
 	}
@@ -92,11 +96,11 @@ public class CoreModule extends AbstractModule {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	protected void clientInit(ClientInitEvent event) {
-		ClientRegistry.registerKeyBinding(ClientHandler.kbUse);
-		MenuScreens.register(MAIN, PlaceScreen::new);
+		MenuScreens.register(MAIN.get(), PlaceScreen::new);
 		MinecraftForge.EVENT_BUS.addListener(ClientHandler::renderOverlay);
 		MinecraftForge.EVENT_BUS.addListener(ClientHandler::onKeyInput);
-		ItemProperties.register(CORE, new ResourceLocation("type"), (stack, world, entity, seed) -> {
+		MinecraftForge.EVENT_BUS.addListener(ClientHandler::registerKeyMapping);
+		ItemProperties.register(CORE.get(), new ResourceLocation("type"), (stack, world, entity, seed) -> {
 			return CoreItem.getPotionType(stack).ordinal();
 		});
 	}
@@ -107,8 +111,6 @@ public class CoreModule extends AbstractModule {
 		event.getDispatcher().register(builder);
 	}
 
-	public static final ResourceLocation HANDLER_ID = new ResourceLocation(EverPotion.MODID, "handler");
-
 	@SubscribeEvent
 	public void attachCapability(AttachCapabilitiesEvent<Entity> event) {
 		if (event.getObject() instanceof Player && !(event.getObject() instanceof FakePlayer)) {
@@ -117,7 +119,7 @@ public class CoreModule extends AbstractModule {
 	}
 
 	@SubscribeEvent
-	protected void onPlayerJoinWorld(EntityJoinWorldEvent event) {
+	protected void onPlayerJoinWorld(EntityJoinLevelEvent event) {
 		Entity entity = event.getEntity();
 		if (entity.level.isClientSide) {
 			return;
@@ -131,13 +133,6 @@ public class CoreModule extends AbstractModule {
 				return false;
 			}));
 		}
-	}
-
-	public static void sync(ServerPlayer player, boolean filled) {
-		if (player instanceof FakePlayer) {
-			return;
-		}
-		SSyncPotionsPacket.send(player, filled);
 	}
 
 	@SubscribeEvent
@@ -156,7 +151,7 @@ public class CoreModule extends AbstractModule {
 		if (!(event.getSource() instanceof EntityDamageSource)) {
 			return;
 		}
-		LivingEntity living = event.getEntityLiving();
+		LivingEntity living = event.getEntity();
 		living.getCapability(EverCapabilities.HANDLER).ifPresent(handler -> {
 			handler.stopDrinking();
 			if (living instanceof ServerPlayer) {
@@ -178,7 +173,7 @@ public class CoreModule extends AbstractModule {
 
 	@SubscribeEvent
 	public void onPlayerClone(PlayerEvent.Clone event) {
-		EverHandler newHandler = event.getPlayer().getCapability(EverCapabilities.HANDLER).orElse(null);
+		EverHandler newHandler = event.getEntity().getCapability(EverCapabilities.HANDLER).orElse(null);
 		Player original = event.getOriginal();
 		original.reviveCaps();
 		EverHandler oldHandler = original.getCapability(EverCapabilities.HANDLER).orElse(null);
@@ -188,23 +183,10 @@ public class CoreModule extends AbstractModule {
 		}
 	}
 
-	@SubscribeEvent(priority = EventPriority.LOW)
-	public void tempLoot(LivingDeathEvent event) {
-		if (EverCommonConfig.mobDropUnlockItem == 0 || event.getEntity().level.isClientSide) {
-			return;
-		}
-		Entity source = event.getSource().getEntity();
-		if (source instanceof Player && event.getEntity() instanceof Mob) {
-			if (event.getEntityLiving().getRandom().nextFloat() < EverCommonConfig.mobDropUnlockItem) {
-				event.getEntityLiving().spawnAtLocation(UNLOCK_SLOT);
-			}
-		}
-	}
-
 	@Override
 	public void gatherData(GatherDataEvent event) {
 		DataGenerator generator = event.getGenerator();
-		generator.addProvider(new EverAnvilRecipeProvider(generator));
+		generator.addProvider(event.includeServer(), new EverAnvilRecipeProvider(generator));
 	}
 
 }

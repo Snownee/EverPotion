@@ -6,9 +6,11 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,20 +22,22 @@ import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.crafting.CraftingModule;
-import snownee.everpotion.crafting.EverAnvilRecipe;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.kiwi.util.Util;
+import snownee.lychee.RecipeSerializers;
+import snownee.lychee.anvil_crafting.AnvilCraftingRecipe;
+import snownee.lychee.core.recipe.LycheeRecipe;
+import snownee.lychee.util.LUtil;
 
 public class EverAnvilRecipeBuilder implements FinishedRecipe {
 
+	private final ItemStack output;
+	protected List<ICondition> conditions = new ArrayList<>();
 	private Ingredient left;
 	private Ingredient right;
-	private int cost;
+	private int levelCost;
 	private int materialCost = 1;
-	private final ItemStack output;
 	private ResourceLocation id;
-	protected List<ICondition> conditions = new ArrayList<>();
 
 	public EverAnvilRecipeBuilder(ItemStack output) {
 		this.output = output;
@@ -48,14 +52,14 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 		if (effect == null) {
 			save = "water";
 		} else {
-			save = Util.trimRL(effect.getEffect().getRegistryName()).replace(':', '/');
+			save = Util.trimRL(Registry.MOB_EFFECT.getKey(effect.getEffect())).replace(':', '/');
 			if (type == PotionType.SPLASH) {
 				save += "_s";
 			} else if (type == PotionType.LINGERING) {
 				save += "_l";
 			}
 		}
-		return recipe(CoreModule.CORE.make(effect, type, charge)).save(new ResourceLocation(EverPotion.MODID, save));
+		return recipe(CoreModule.CORE.get().make(effect, type, charge)).save(new ResourceLocation(EverPotion.ID, save));
 	}
 
 	public EverAnvilRecipeBuilder save(ResourceLocation save) {
@@ -64,10 +68,7 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 	}
 
 	public void build(Consumer<FinishedRecipe> consumerIn) {
-		if (id == null) {
-			ResourceLocation reg = output.getItem().getRegistryName();
-			id = new ResourceLocation(reg.getNamespace(), getType().getRegistryName().getPath() + "/" + reg.getPath());
-		}
+		Preconditions.checkNotNull(id);
 		this.validate(id);
 		consumerIn.accept(this);
 	}
@@ -79,7 +80,7 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 	}
 
 	public EverAnvilRecipeBuilder levelCost(int cost) {
-		this.cost = cost;
+		this.levelCost = cost;
 		return this;
 	}
 
@@ -113,19 +114,32 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 
 	@Override
 	public void serializeRecipeData(JsonObject json) {
-		EverAnvilRecipe recipe = new EverAnvilRecipe(id, left, right, cost, materialCost, output);
-		getType().toJson(json, recipe);
+		JsonArray inputs = new JsonArray();
+		inputs.add(left.toJson());
+		inputs.add(right.toJson());
+		json.add("item_in", inputs);
+		JsonObject itemOut = new JsonObject();
+		itemOut.addProperty("item", Registry.ITEM.getKey(output.getItem()).toString());
+		if (output.hasTag()) {
+			itemOut.add("lychee:tag", LUtil.tagToJson(output.getTag()));
+		}
+		json.add("item_out", itemOut);
+		if (levelCost > 1) {
+			json.addProperty("level_cost", levelCost);
+		}
+		if (materialCost != 1) {
+			json.addProperty("material_cost", materialCost);
+		}
 		if (conditions.isEmpty())
 			return;
-
 		JsonArray conds = new JsonArray();
 		conditions.forEach(c -> conds.add(CraftingHelper.serialize(c)));
 		json.add("conditions", conds);
 	}
 
 	@Override
-	public EverAnvilRecipe.Serializer<EverAnvilRecipe> getType() {
-		return CraftingModule.SERIALIZER;
+	public LycheeRecipe.Serializer<AnvilCraftingRecipe> getType() {
+		return RecipeSerializers.ANVIL_CRAFTING;
 	}
 
 	@Override

@@ -1,23 +1,27 @@
 {
-  "type": "everpotion:anvil",
-  "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:splash_potion",
-    "nbt": "{Potion:\"minecraft:water\"}"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 10,
-  "output": {
-    "effect": "none",
-    "type": "splash",
-    "charge": 2.0
-  },
+  "type": "lychee:anvil_crafting",
   "conditions": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "type": "forge:mod_loaded",
+      "modid": "lychee"
     }
-  ]
+  ],
+  "item_in": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "minecraft:splash_potion",
+      "nbt": "{Potion:\"minecraft:water\"}"
+    },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "item_out": {
+    "item": "everpotion:core",
+    "lychee:tag": {
+      "Charge": 2.0,
+      "Type": 1
+    }
+  },
+  "level_cost": 10
 }

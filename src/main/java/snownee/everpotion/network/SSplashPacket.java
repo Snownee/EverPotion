@@ -1,6 +1,5 @@
 package snownee.everpotion.network;
 
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
@@ -13,6 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.PacketDistributor;
@@ -36,15 +36,15 @@ public class SSplashPacket extends PacketHandler {
 				return;
 			}
 
-			mc.level.playLocalSound(pos, CoreModule.USE_SPLASH_SOUND, SoundSource.PLAYERS, 1, 1, false);
-			if (mc.options.particles == ParticleStatus.MINIMAL) {
+			mc.level.playLocalSound(pos, CoreModule.USE_SPLASH_SOUND.get(), SoundSource.PLAYERS, 1, 1, false);
+			if (mc.options.particles().get() == ParticleStatus.MINIMAL) {
 				return;
 			}
 			Vec3 vec3 = Vec3.atBottomCenterOf(pos);
-			Random random = mc.level.random;
+			RandomSource random = mc.level.random;
 			float f3 = (float) (color >> 16 & 255) / 255.0F;
 			float f4 = (float) (color >> 8 & 255) / 255.0F;
-			float f5 = (float) (color >> 0 & 255) / 255.0F;
+			float f5 = (float) (color & 255) / 255.0F;
 			ParticleOptions particleoptions = instant ? ParticleTypes.INSTANT_EFFECT : ParticleTypes.EFFECT;
 
 			for (int j = 0; j < 100; ++j) {

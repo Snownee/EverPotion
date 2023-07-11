@@ -1,12 +1,13 @@
 package snownee.everpotion;
 
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import snownee.kiwi.loader.Platform;
 
-@Mod(EverPotion.MODID)
 @EventBusSubscriber
 public final class EverPotion {
 
-	public static final String MODID = "everpotion";
+	public static final String ID = "everpotion";
+
+	public static final boolean hasLychee = Platform.isModLoaded("lychee");
 
 }

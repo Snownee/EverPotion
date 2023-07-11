@@ -6,20 +6,20 @@ import com.mojang.math.Vector3f;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.renderer.entity.TippableArrowRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
-import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
 import net.minecraftforge.client.settings.KeyModifier;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.cap.EverCapabilities;
@@ -33,9 +33,10 @@ import snownee.kiwi.util.MathUtil;
 @OnlyIn(Dist.CLIENT)
 public final class ClientHandler {
 
-	public static void onItemColorsInit(ColorHandlerEvent.Item event) {
-		ItemColors colors = event.getItemColors();
-		colors.register((stack, i) -> {
+	public static final KeyMapping kbUse = new KeyMapping("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
+
+	public static void onItemColorsInit(RegisterColorHandlersEvent.Item event) {
+		event.register((stack, i) -> {
 			if (i == 0) {
 				MobEffectInstance effect = CoreItem.getEffectInstance(stack);
 				int rgb;
@@ -49,8 +50,8 @@ public final class ClientHandler {
 				return Mth.hsvToRgb(hsv.x(), hsv.y(), hsv.z());
 			}
 			return -1;
-		}, CoreModule.CORE);
-		colors.register((stack, i) -> {
+		}, CoreModule.CORE.get());
+		event.register((stack, i) -> {
 			if (i == 1) {
 				int tier = UnlockSlotItem.getTier(stack);
 				switch (tier) {
@@ -67,16 +68,14 @@ public final class ClientHandler {
 				}
 			}
 			return -1;
-		}, CoreModule.UNLOCK_SLOT);
+		}, CoreModule.UNLOCK_SLOT.get());
 	}
 
 	public static void registerRenderers(RegisterRenderers event) {
-		event.registerEntityRenderer(CoreModule.ARROW, TippableArrowRenderer::new);
+		event.registerEntityRenderer(CoreModule.ARROW.get(), TippableArrowRenderer::new);
 	}
 
-	public static final KeyMapping kbUse = new KeyMapping("keybind.everpotion.use", GLFW.GLFW_KEY_R, "gui.everpotion.keygroup");
-
-	public static void onKeyInput(KeyInputEvent event) {
+	public static void onKeyInput(InputEvent.Key event) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.player == null || mc.screen != null || mc.player.isSpectator()) {
 			return;
@@ -88,7 +87,7 @@ public final class ClientHandler {
 			}
 			if (mc.player.isShiftKeyDown()) {
 				if (handler.getSlots() == 0) {
-					mc.player.displayClientMessage(new TranslatableComponent("msg.everpotion.noSlots"), true);
+					mc.player.displayClientMessage(Component.translatable("msg.everpotion.noSlots"), true);
 					return;
 				}
 				COpenContainerPacket.I.sendToServer($ -> {
@@ -102,11 +101,15 @@ public final class ClientHandler {
 		}
 	}
 
-	public static void renderOverlay(RenderGameOverlayEvent.PreLayer event) {
+	public static void renderOverlay(RenderGuiOverlayEvent.Pre event) {
 		Minecraft mc = Minecraft.getInstance();
-		if (event.getOverlay() == ForgeIngameGui.CROSSHAIR_ELEMENT && mc.screen != null && mc.screen.getClass() == UseScreen.class) {
+		if (event.getOverlay() == VanillaGuiOverlay.CROSSHAIR.type() && mc.screen != null && mc.screen.getClass() == UseScreen.class) {
 			event.setCanceled(true);
 		}
+	}
+
+	public static void registerKeyMapping(RegisterKeyMappingsEvent event) {
+		event.register(ClientHandler.kbUse);
 	}
 
 	public static void playSound(SoundEvent soundEvent) {

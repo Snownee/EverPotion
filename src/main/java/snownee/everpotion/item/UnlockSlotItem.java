@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -75,14 +74,14 @@ public class UnlockSlotItem extends ModItem {
 
 	private static void sendMsg(Player player, String translationKey, Object... objects) {
 		if (player.level.isClientSide) {
-			player.displayClientMessage(new TranslatableComponent("msg.everpotion." + translationKey, objects), true);
+			player.displayClientMessage(Component.translatable("msg.everpotion." + translationKey, objects), true);
 		}
 	}
 
 	@Override
 	public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		if (NBTHelper.of(stack).getBoolean("Force")) {
-			tooltip.add(new TranslatableComponent("tip.everpotion.force").withStyle(ChatFormatting.RED));
+			tooltip.add(Component.translatable("tip.everpotion.force").withStyle(ChatFormatting.RED));
 		}
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 	}
@@ -116,7 +115,7 @@ public class UnlockSlotItem extends ModItem {
 
 	@Override
 	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-		if (this.allowdedIn(group)) {
+		if (this.allowedIn(group)) {
 			ItemStack stack = new ItemStack(this);
 			NBTHelper data = NBTHelper.of(stack);
 			for (int i = 0; i < 2; i++) {

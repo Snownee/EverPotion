@@ -198,10 +198,11 @@ dependencies {
     //runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
     // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
 	
-    implementation fg.deobf("curse.maven:jei-238222:4434393")
-    implementation fg.deobf("curse.maven:jade-324717:4082408")
-    implementation fg.deobf("curse.maven:kiwi-303657:3990351")
-	annotationProcessor "curse.maven:kiwi-303657:3990351"
+    implementation fg.deobf("curse.maven:jei-238222:4615177")
+    implementation fg.deobf("curse.maven:jade-324717:4433884")
+    implementation fg.deobf("curse.maven:lychee-567403:4547502")
+    implementation fg.deobf("curse.maven:kiwi-303657:4451128")
+	annotationProcessor "curse.maven:kiwi-303657:4451128"
 
     // Examples using mod jars from ./libs
     //implementation fg.deobf("libs:Kiwi-1.18-forge:5.2.4")
@@ -213,38 +214,10 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-// This block of code expands all the gradle properties in the specified resource targets.
-// It copies them into the targets and expands all the defined properties.
-def resourceTargets = ['META-INF/mods.toml', 'pack.mcmeta', "${mod_id}.mixins.json".toString()]
-def intoTargets = ["$rootDir/out/production/resources/", "$rootDir/out/production/${project.name}.main/", "$rootDir/bin/main/"]
-def replaceProperties = [mod_id: mod_id, mod_name: mod_name, mod_version: mod_version,
-        mod_authors: mod_authors, mod_description: mod_description,
-        minecraft_version_range: minecraft_version_range, forge_version_range: forge_version_range,
-        loader_version_range: loader_version_range]
 processResources {
     from ('src/main/java') {
         include '**/*.json'
     }
-/*
-    inputs.properties replaceProperties
-    replaceProperties.put 'project', project
-
-    filesMatching(resourceTargets) {
-        expand replaceProperties
-    }
-
-    intoTargets.each { target ->
-        if (file(target).exists()) {
-            copy {
-                from(sourceSets.main.resources) {
-                    include resourceTargets
-                    expand replaceProperties
-                }
-                into target
-            }
-        }
-    }
-*/
 }
 
 jar {

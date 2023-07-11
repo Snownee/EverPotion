@@ -1,0 +1,21 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "kiwi:is_loaded",
+          "module": "everpotion:slot_unlock_recipe"
+        }
+      ],
+      "recipe": {
+        "type": "minecraft:stonecutting",
+        "count": 1,
+        "ingredient": {
+          "item": "minecraft:echo_shard"
+        },
+        "result": "everpotion:unlock_slot"
+      }
+    }
+  ]
+}

@@ -19,7 +19,7 @@ import snownee.everpotion.handler.EverHandler;
 public class EverCommand {
 
 	public static LiteralArgumentBuilder<CommandSourceStack> init(CommandDispatcher<CommandSourceStack> commandDispatcher) {
-		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(EverPotion.MODID);
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(EverPotion.ID);
 
 		/* off */
 		builder
@@ -42,7 +42,7 @@ public class EverCommand {
 						.executes(ctx -> setAll(ctx, EntityArgument.getPlayers(ctx, "target"), 0))
 				)
 		)
-		
+
 		.then(Commands
 				.literal("level")
 				.requires(ctx -> ctx.hasPermission(2))

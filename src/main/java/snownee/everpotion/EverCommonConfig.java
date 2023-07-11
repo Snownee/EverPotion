@@ -39,8 +39,4 @@ public final class EverCommonConfig {
 	@Path("effects.showIcon")
 	public static boolean showIcon = true;
 
-	@Path("temp.mobDropUnlockItem")
-	@Range(min = 0, max = 1)
-	public static double mobDropUnlockItem = 0.005;
-
 }

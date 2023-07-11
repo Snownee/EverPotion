@@ -1,23 +1,32 @@
 {
-  "type": "everpotion:anvil",
-  "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:splash_potion",
-    "nbt": "{Potion:\"minecraft:long_regeneration\"}"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 10,
-  "output": {
-    "effect": "regeneration",
-    "duration": 18,
-    "type": "splash"
-  },
+  "type": "lychee:anvil_crafting",
   "conditions": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "type": "forge:mod_loaded",
+      "modid": "lychee"
     }
-  ]
+  ],
+  "item_in": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "minecraft:splash_potion",
+      "nbt": "{Potion:\"minecraft:long_regeneration\"}"
+    },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "item_out": {
+    "item": "everpotion:core",
+    "lychee:tag": {
+      "Effect": {
+        "Amplifier": 0,
+        "Duration": 1800,
+        "Id": 10,
+        "forge:id": "minecraft:regeneration"
+      },
+      "Type": 1
+    }
+  },
+  "level_cost": 10
 }

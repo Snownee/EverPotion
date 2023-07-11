@@ -2,9 +2,9 @@ package snownee.everpotion.handler;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import com.mojang.math.Vector3f;
+
+import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,14 +41,14 @@ import snownee.kiwi.util.NBTHelper;
 
 public class EverHandler extends ItemStackHandler {
 
-	private Player owner;
-	private int slots;
 	public final Cache[] caches = new Cache[4];
 	public int chargeIndex = -1;
 	public int drinkIndex = -1;
 	public int tipIndex = -1;
 	public int drinkTick;
 	public float acceleration;
+	private Player owner;
+	private int slots;
 
 	public EverHandler() {
 		this(null);
@@ -59,15 +59,26 @@ public class EverHandler extends ItemStackHandler {
 		this.owner = owner;
 	}
 
+	public static MobEffectInstance copyEffectWithSettings(MobEffectInstance effect) {
+		return new MobEffectInstance(effect.getEffect(), (int) (effect.getDuration() * EverCommonConfig.durationFactor), effect.getAmplifier(), EverCommonConfig.ambient, EverCommonConfig.showIcon, EverCommonConfig.showParticles);
+	}
+
 	@Override
 	public int getSlots() {
 		return slots;
 	}
 
+	public void setSlots(int slots) {
+		this.slots = Mth.clamp(slots, 0, EverCommonConfig.maxSlots);
+		drinkIndex = -1;
+		tipIndex = -1;
+		updateCharge();
+	}
+
 	@Override
 	protected void onContentsChanged(int slot) {
 		ItemStack stack = getStackInSlot(slot);
-		if (stack.getItem() == CoreModule.CORE) {
+		if (CoreModule.CORE.is(stack)) {
 			if (caches[slot] != null && caches[slot].matches(stack)) {
 				return;
 			}
@@ -131,21 +142,14 @@ public class EverHandler extends ItemStackHandler {
 		tipIndex = data.getInt("Tip", -1);
 	}
 
-	public void setSlots(int slots) {
-		this.slots = Mth.clamp(slots, 0, EverCommonConfig.maxSlots);
-		drinkIndex = -1;
-		tipIndex = -1;
-		updateCharge();
-	}
-
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		if (stack.getItem() != CoreModule.CORE || slot >= slots) {
+		if (!CoreModule.CORE.is(stack) || slot >= slots) {
 			return false;
 		}
 		MobEffect effect = CoreItem.getEffect(stack);
 		for (ItemStack stackIn : stacks) {
-			if (!stackIn.isEmpty() && stackIn.getItem() == CoreModule.CORE && CoreItem.getEffect(stackIn) == effect) {
+			if (!stackIn.isEmpty() && CoreModule.CORE.is(stackIn) && CoreItem.getEffect(stackIn) == effect) {
 				return false;
 			}
 		}
@@ -222,9 +226,9 @@ public class EverHandler extends ItemStackHandler {
 			if (cache.type == PotionType.LINGERING) {
 				ClientHandler.playSound(SoundEvents.UI_BUTTON_CLICK);
 			} else if (EverCommonConfig.drinkDelay < 40) {
-				ClientHandler.playSound(CoreModule.CHARGE_SHORT_SOUND);
+				ClientHandler.playSound(CoreModule.CHARGE_SHORT_SOUND.get());
 			} else {
-				ClientHandler.playSound(CoreModule.CHARGE_LONG_SOUND);
+				ClientHandler.playSound(CoreModule.CHARGE_LONG_SOUND.get());
 			}
 		}
 	}
@@ -249,7 +253,7 @@ public class EverHandler extends ItemStackHandler {
 		PotionType type = cache.type;
 		if (type == PotionType.NORMAL) {
 			doEffect(cache.effect, owner);
-			owner.level.playSound(null, owner, CoreModule.USE_NORMAL_SOUND, SoundSource.PLAYERS, 1, 1);
+			owner.level.playSound(null, owner, CoreModule.USE_NORMAL_SOUND.get(), SoundSource.PLAYERS, 1, 1);
 		} else if (type == PotionType.SPLASH) {
 			if (cache.effect == null) {
 				BlockPos pos = owner.blockPosition();
@@ -285,7 +289,7 @@ public class EverHandler extends ItemStackHandler {
 			if (effect.getEffect().isInstantenous()) {
 				effect.getEffect().applyInstantenousEffect(entity, owner, entity, effect.getAmplifier(), 1.0D);
 			} else {
-				entity.addEffect(copyEffectWithDuration(effect));
+				entity.addEffect(copyEffectWithSettings(effect));
 			}
 		}
 	}
@@ -320,7 +324,7 @@ public class EverHandler extends ItemStackHandler {
 	public AbstractArrow tryTipArrow(Level worldIn, ItemStack stack) {
 		if (!worldIn.isClientSide && tipIndex != -1 && caches[tipIndex].progress >= EverCommonConfig.tipArrowTimeCost && caches[tipIndex].effect != null) {
 			EverArrow arrow = new EverArrow(worldIn, owner);
-			arrow.addEffect(copyEffectWithDuration(caches[tipIndex].effect));
+			arrow.addEffect(copyEffectWithSettings(caches[tipIndex].effect));
 			caches[tipIndex].progress -= EverCommonConfig.tipArrowTimeCost;
 			updateCharge();
 			CoreModule.sync((ServerPlayer) owner, false);
@@ -329,14 +333,29 @@ public class EverHandler extends ItemStackHandler {
 		return null;
 	}
 
+	public void accelerate(float f) {
+		acceleration = Math.min(acceleration + f, 2);
+	}
+
+	public void setAll(int time) {
+		chargeIndex = -1;
+		for (int i = 0; i < caches.length; i++) {
+			if (caches[i] == null) {
+				continue;
+			}
+			caches[i].progress = time;
+		}
+		CoreModule.sync((ServerPlayer) owner, time == EverCommonConfig.refillTime);
+	}
+
 	public static final class Cache {
 		@Nullable
 		public final MobEffectInstance effect;
 		public final PotionType type;
-		public float progress;
 		public final int color;
 		public final ItemStack stack;
 		public final float speed;
+		public float progress;
 
 		private Cache(ItemStack stack) {
 			this.stack = stack;
@@ -355,25 +374,6 @@ public class EverHandler extends ItemStackHandler {
 		private boolean matches(ItemStack stack) {
 			return ItemStack.matches(this.stack, stack);
 		}
-	}
-
-	public void accelerate(float f) {
-		acceleration = Math.min(acceleration + f, 2);
-	}
-
-	public void setAll(int time) {
-		chargeIndex = -1;
-		for (int i = 0; i < caches.length; i++) {
-			if (caches[i] == null) {
-				continue;
-			}
-			caches[i].progress = time;
-		}
-		CoreModule.sync((ServerPlayer) owner, time == EverCommonConfig.refillTime);
-	}
-
-	public static MobEffectInstance copyEffectWithDuration(MobEffectInstance effect) {
-		return new MobEffectInstance(effect.getEffect(), (int) (effect.getDuration() * EverCommonConfig.durationFactor), effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon());
 	}
 
 }

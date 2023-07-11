@@ -1,23 +1,32 @@
 {
-  "type": "everpotion:anvil",
-  "left": {
-    "type": "forge:nbt",
-    "item": "minecraft:lingering_potion",
-    "nbt": "{Potion:\"minecraft:long_weakness\"}"
-  },
-  "right": {
-    "tag": "everpotion:ingredient"
-  },
-  "cost": 12,
-  "output": {
-    "effect": "weakness",
-    "duration": 24,
-    "type": "lingering"
-  },
+  "type": "lychee:anvil_crafting",
   "conditions": [
     {
-      "module": "everpotion:crafting",
-      "type": "kiwi:is_loaded"
+      "type": "forge:mod_loaded",
+      "modid": "lychee"
     }
-  ]
+  ],
+  "item_in": [
+    {
+      "type": "forge:partial_nbt",
+      "item": "minecraft:lingering_potion",
+      "nbt": "{Potion:\"minecraft:long_weakness\"}"
+    },
+    {
+      "tag": "everpotion:ingredient"
+    }
+  ],
+  "item_out": {
+    "item": "everpotion:core",
+    "lychee:tag": {
+      "Effect": {
+        "Amplifier": 0,
+        "Duration": 4800,
+        "Id": 18,
+        "forge:id": "minecraft:weakness"
+      },
+      "Type": 2
+    }
+  },
+  "level_cost": 12
 }
