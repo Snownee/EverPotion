@@ -1,7 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": { 
-    "layer0": "everpotion:item/unlock_slot",
-    "layer1": "everpotion:item/unlock_slot_overlay"
-  }
-}

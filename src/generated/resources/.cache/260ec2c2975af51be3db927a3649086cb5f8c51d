@@ -1,4 +1,4 @@
-// 1.19.2	2023-07-11T22:19:49.2032115	EverPotion Recipes
+// 1.19.2	2023-07-13T19:02:02.6223532	EverPotion Recipes
 950e36bf1afae4f3fcefc01247b535bcd8a62556 data/everpotion/recipes/fire_resistance.json
 7772c61f9938301734bc761d1ac2d1a9186b9c0f data/everpotion/recipes/fire_resistance_l.json
 0b9745e624dc54aa4dcf5488688aca996c681986 data/everpotion/recipes/fire_resistance_s.json
@@ -29,7 +29,6 @@ a9ab7a7c5ed3e1046b0122a31aaed7e2e7e56d1d data/everpotion/recipes/regeneration_l.
 06849137d6009d7c0612f7fef74ecb39ebffae52 data/everpotion/recipes/resistance.json
 959722693437b652e0c25672a357195d1c0b6ad5 data/everpotion/recipes/resistance_l.json
 324949ef931fb3d7b6b0c2639247776398635e56 data/everpotion/recipes/resistance_s.json
-8ea3315900bae1bc85334f62ffac088095180357 data/everpotion/recipes/slot_unlock.json
 8908659082995929c495f0e5e0e6efa021f0731a data/everpotion/recipes/slowness.json
 510df166b335aabe799b9fbacf3df0ccf36a9633 data/everpotion/recipes/slowness_l.json
 a1e469829b1ebc3d7efd6dcdc3a51dee3f8b4886 data/everpotion/recipes/slowness_s.json
@@ -49,3 +48,4 @@ d0e362fb59113e64c78c3e9d717acb9152791c08 data/everpotion/recipes/water_breathing
 11957fadf98647405ee1470b2f8f4fb937a59837 data/everpotion/recipes/weakness.json
 df2494b5edbdfaa67b20bd2a77101569b59741ed data/everpotion/recipes/weakness_l.json
 2bef726a548acd9ed677c2d14dbfeeb9afb32abc data/everpotion/recipes/weakness_s.json
+b13e6074214b7c6a5a2ce2023924ba724ad125a7 data/skillslots/recipes/slot_unlock.json

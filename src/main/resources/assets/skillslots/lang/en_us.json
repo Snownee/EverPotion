@@ -1,0 +1,19 @@
+{
+  "item.skillslots.unlock_slot": "Slot Unlock",
+  "item.skillslots.unlock_slot.1": "Tier 1 Slot Unlock",
+  "item.skillslots.unlock_slot.2": "Tier 2 Slot Unlock",
+  "item.skillslots.unlock_slot.3": "Tier 3 Slot Unlock",
+  "item.skillslots.unlock_slot.4": "Tier 4 Slot Unlock",
+  "tip.skillslots.force": "Force applying",
+  "tip.skillslots.emptySlot": "Click here or press Sneak+%s to change skills",
+  "msg.skillslots.maxLevel": "You have unlocked all the slots!",
+  "msg.skillslots.tooLow": "You have unlocked the tiered slot!",
+  "msg.skillslots.tooHigh": "You must unlock previous slots first!",
+  "msg.skillslots.noSlots": "You don't have any slots!",
+  "msg.skillslots.locked": "Locked",
+  "msg.skillslots.newSlot": "You've unlocked a new slot! Press %s to use.",
+  "container.skillslots.place": "Change skills",
+  "keybind.skillslots.use": "Open",
+  "gui.skillslots.keygroup": "Skill Slots",
+  "gui.skillslots.use.title": "Use skill"
+}

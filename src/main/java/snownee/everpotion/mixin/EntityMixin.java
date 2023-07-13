@@ -7,16 +7,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import snownee.everpotion.duck.EverPotionPlayer;
-import snownee.everpotion.handler.EverHandler;
+import snownee.skillslots.duck.SkillSlotsPlayer;
+import snownee.skillslots.SkillSlotsHandler;
 
 @Mixin(Entity.class)
 public class EntityMixin {
 
 	@Inject(method = "setRemoved", at = @At("HEAD"))
 	private void everpotion$setRemoved(Entity.RemovalReason removalReason, CallbackInfo ci) {
-		if (this instanceof EverPotionPlayer player) {
-			player.everpotion$getHandler().setOwner(null);
+		if (this instanceof SkillSlotsPlayer player) {
+			player.skillslots$getHandler().setOwner(null);
 		}
 	}
 
@@ -24,7 +24,7 @@ public class EntityMixin {
 	private void everpotion$unsetRemoved(CallbackInfo ci) {
 		Entity entity = (Entity) (Object) this;
 		if (entity instanceof Player player) {
-			EverHandler.of(player).setOwner(player);
+			SkillSlotsHandler.of(player).setOwner(player);
 		}
 	}
 }

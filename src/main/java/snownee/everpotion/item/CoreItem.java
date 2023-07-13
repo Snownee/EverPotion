@@ -28,7 +28,7 @@ import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
-import snownee.everpotion.menu.PlaceMenu;
+import snownee.skillslots.menu.PlaceMenu;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 import snownee.lychee.util.LUtil;

@@ -8,16 +8,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
-import snownee.everpotion.duck.EverPotionPlayer;
-import snownee.everpotion.handler.EverHandler;
+import snownee.skillslots.duck.SkillSlotsPlayer;
+import snownee.skillslots.SkillSlotsHandler;
 
 @Mixin(Player.class)
-public class PlayerMixin implements EverPotionPlayer {
+public class PlayerMixin implements SkillSlotsPlayer {
 
-	private final EverHandler everpotion$handler = new EverHandler((Player) (Object) this);
+	private final SkillSlotsHandler everpotion$handler = new SkillSlotsHandler((Player) (Object) this);
 
 	@Override
-	public @Nullable EverHandler everpotion$getHandler() {
+	public @Nullable SkillSlotsHandler skillslots$getHandler() {
 		return everpotion$handler;
 	}
 

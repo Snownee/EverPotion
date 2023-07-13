@@ -1,5 +1,7 @@
 package snownee.everpotion.mixin.client;
 
+import java.util.Objects;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,8 +21,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
-import snownee.everpotion.handler.EverHandler;
-import snownee.everpotion.handler.EverHandler.Cache;
+import snownee.skillslots.SkillSlotsHandler;
+import snownee.everpotion.skill.PotionCoreSkill;
 
 @Mixin(ItemRenderer.class)
 public abstract class ItemRendererMixin {
@@ -44,17 +46,15 @@ public abstract class ItemRendererMixin {
 		ItemStack offhand = player.getOffhandItem();
 		if (mainhand != stack && offhand != stack)
 			return;
-		EverHandler handler = EverHandler.of(player);
-		if (!handler.canUseSlot(handler.tipIndex, false))
-			return;
-		Cache cache = handler.caches[handler.tipIndex];
-		if (cache == null || cache.effect == null)
+		SkillSlotsHandler handler = SkillSlotsHandler.of(player);
+		PotionCoreSkill skill = PotionCoreSkill.findTipIndex(handler);
+		if (skill == null)
 			return;
 		RenderSystem.disableDepthTest();
 		RenderSystem.disableBlend();
 
 		MobEffectTextureManager textures = mc.getMobEffectTextures();
-		TextureAtlasSprite sprite = textures.get(cache.effect.getEffect());
+		TextureAtlasSprite sprite = textures.get(Objects.requireNonNull(skill.effect).getEffect());
 		RenderSystem.setShaderTexture(0, sprite.atlas().location());
 
 		float width = 9;

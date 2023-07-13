@@ -1,0 +1,24 @@
+{
+  "potion_charge_complete": {
+    "sounds": [
+      "skillslots:potion_charge_complete"
+    ]
+  },
+  "use_short": {
+    "sounds": [
+      "skillslots:use_short"
+    ]
+  },
+  "use_long": {
+    "sounds": [
+      "skillslots:use_long"
+    ]
+  },
+  "hover": {
+    "sounds": [
+      "skillslots:hover_0",
+      "skillslots:hover_1",
+      "skillslots:hover_2"
+    ]
+  }
+}

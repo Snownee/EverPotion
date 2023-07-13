@@ -3,11 +3,12 @@ package snownee.everpotion.datagen;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Maps;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
@@ -26,10 +27,11 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.PartialNBTIngredient;
 import snownee.everpotion.CoreModule;
-import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
 import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.lychee.Lychee;
+import snownee.skillslots.SkillSlots;
+import snownee.skillslots.SkillSlotsModule;
 
 public class EverAnvilRecipeProvider extends RecipeProvider {
 
@@ -85,12 +87,12 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 			}
 		}
 
-		SingleItemRecipeBuilder stonecutting = SingleItemRecipeBuilder.stonecutting(Ingredient.of(Items.ECHO_SHARD), CoreModule.UNLOCK_SLOT.get());
+		SingleItemRecipeBuilder stonecutting = SingleItemRecipeBuilder.stonecutting(Ingredient.of(Items.ECHO_SHARD), SkillSlotsModule.UNLOCK_SLOT.get());
 		stonecutting.unlockedBy(getHasName(Items.ECHO_SHARD), has(Items.ECHO_SHARD));
 		ConditionalRecipe.builder()
-				.addCondition(new ModuleLoadedCondition(new ResourceLocation(EverPotion.ID, "slot_unlock_recipe")))
+				.addCondition(new ModuleLoadedCondition(new ResourceLocation(SkillSlots.ID, "slot_unlock_recipe")))
 				.addRecipe(stonecutting::save)
-				.build(consumer, new ResourceLocation(EverPotion.ID, "slot_unlock"));
+				.build(consumer, new ResourceLocation(SkillSlots.ID, "slot_unlock"));
 	}
 
 	private void register(Potion potion, @Nullable MobEffectInstance effect, PotionType type, float charge, Consumer<FinishedRecipe> consumer) {

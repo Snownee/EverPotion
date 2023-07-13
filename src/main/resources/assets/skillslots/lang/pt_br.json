@@ -1,0 +1,19 @@
+{
+  "item.skillslots.unlock_slot": "Desbloqueio de Slot",
+  "item.skillslots.unlock_slot.1": "Desbloqueio de Slot Nível 1",
+  "item.skillslots.unlock_slot.2": "Desbloqueio de Slot Nível 2",
+  "item.skillslots.unlock_slot.3": "Desbloqueio de Slot Nível 3",
+  "item.skillslots.unlock_slot.4": "Desbloqueio de Slot Nível 4",
+  "tip.skillslots.force": "Aplicação Forçada",
+  "tip.skillslots.emptySlot": "Click here or press Sneak+%s to change skills",
+  "msg.skillslots.maxLevel": "Você desbloqueou todos os slots!",
+  "msg.skillslots.tooLow": "Você desbloqueou um slot nivelado!",
+  "msg.skillslots.tooHigh": "Você deve desbloquear os slots anteriores primeiro!",
+  "msg.skillslots.noSlots": "Você não tem slots!",
+  "msg.skillslots.locked": "Locked",
+  "msg.skillslots.newSlot": "You've unlocked a new slot! Press %s to use.",
+  "container.skillslots.place": "Mudificar Núcleos",
+  "keybind.skillslots.use": "Abrir",
+  "gui.skillslots.keygroup": "Skill Slots",
+  "gui.skillslots.use.title": "Use skill"
+}

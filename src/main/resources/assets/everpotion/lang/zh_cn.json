@@ -1,22 +1,5 @@
 {
   "item.everpotion.core": "药水核心",
-  "item.everpotion.unlock_slot": "解锁插槽",
-  "item.everpotion.unlock_slot.1": "解锁插槽1",
-  "item.everpotion.unlock_slot.2": "解锁插槽2",
-  "item.everpotion.unlock_slot.3": "解锁插槽3",
-  "item.everpotion.unlock_slot.4": "解锁插槽4",
   "tip.everpotion.potionType.lingering": "制作药箭",
-  "tip.everpotion.potionType.splash": "喷溅型",
-  "tip.everpotion.force": "强制生效",
-  "tip.everpotion.emptySlot": "点此或按下潜行+%s来更换核心",
-  "msg.everpotion.maxLevel": "你已经解锁了所有的插槽！",
-  "msg.everpotion.tooLow": "你已经解锁了该级别的插槽！",
-  "msg.everpotion.tooHigh": "你必须先解锁前级的插槽！",
-  "msg.everpotion.noSlots": "你还没有任何插槽！",
-  "msg.everpotion.locked": "锁定中",
-  "msg.everpotion.newSlot": "你解锁了新的插槽！按%s键查看。",
-  "container.everpotion.main": "更换核心",
-  "keybind.everpotion.use": "打开",
-  "gui.everpotion.keygroup": "永恒药水",
-  "gui.everpotion.use.title": "使用药水核心"
+  "tip.everpotion.potionType.splash": "喷溅型"
 }
