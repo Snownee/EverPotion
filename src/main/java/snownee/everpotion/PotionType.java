@@ -21,7 +21,7 @@ public enum PotionType {
 
 	public String getDescKey() {
 		if (descKey == null) {
-			descKey = "tip.everpotion.potionType." + toString();
+			descKey = "tip.everpotion.potionType." + this;
 		}
 		return descKey;
 	}
@@ -35,14 +35,11 @@ public enum PotionType {
 	}
 
 	public static PotionType valueOf(byte b) {
-		switch (b) {
-		case 1:
-			return SPLASH;
-		case 2:
-			return LINGERING;
-		default:
-			return NORMAL;
-		}
+		return switch (b) {
+			case 1 -> SPLASH;
+			case 2 -> LINGERING;
+			default -> NORMAL;
+		};
 	}
 
 	@Override

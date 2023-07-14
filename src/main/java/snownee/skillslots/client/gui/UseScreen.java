@@ -104,7 +104,7 @@ public class UseScreen extends Screen {
 			clickIndex = out ? -2 : -1;
 		} else {
 			Skill skill = handler.skills.get(clickIndex);
-			if (skill.isEmpty() && clickIndex < handler.getContainerSize()) {
+			if (skill.isEmpty() && clickIndex < handler.getContainerSize() && SkillSlotsCommonConfig.playerCustomizable) {
 				Component tooltip = Component.translatable("tip.skillslots.emptySlot", SkillSlotsClient.kbUse.getTranslatedKeyMessage());
 				renderTooltip(matrix, tooltip, mouseX, mouseY);
 			}
@@ -307,8 +307,10 @@ public class UseScreen extends Screen {
 		}
 		Skill skill = handler.skills.get(clickIndex);
 		if (skill.isEmpty()) {
-			COpenContainerPacket.I.sendToServer($ -> {
-			});
+			if (SkillSlotsCommonConfig.playerCustomizable) {
+				COpenContainerPacket.I.sendToServer($ -> {
+				});
+			}
 			return true;
 		}
 		startUse(clickIndex);

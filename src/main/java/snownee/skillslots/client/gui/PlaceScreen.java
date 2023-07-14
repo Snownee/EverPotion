@@ -8,6 +8,8 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import snownee.skillslots.menu.PlaceMenu;
 
 // from HopperScreen
@@ -30,8 +32,8 @@ public class PlaceScreen extends AbstractContainerScreen<PlaceMenu> {
 	}
 
 	/**
-     * Draws the background layer of this container (behind the items).
-     */
+	 * Draws the background layer of this container (behind the items).
+	 */
 	@Override
 	protected void renderBg(PoseStack matrix, float partialTicks, int mouseX, int mouseY) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
@@ -42,4 +44,12 @@ public class PlaceScreen extends AbstractContainerScreen<PlaceMenu> {
 		this.blit(matrix, i, j, 0, 0, this.imageWidth, this.imageHeight);
 	}
 
+	@Override
+	protected void slotClicked(Slot slotIn, int slotId, int mouseButton, ClickType type) {
+		if (slotIn == menu.close && menu.getCarried().isEmpty()) {
+			onClose();
+			return;
+		}
+		super.slotClicked(slotIn, slotId, mouseButton, type);
+	}
 }

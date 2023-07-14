@@ -9,17 +9,14 @@ import net.minecraft.server.level.ServerPlayer;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
 import snownee.kiwi.network.PacketHandler;
-import snownee.skillslots.SkillSlotsClientConfig;
 import snownee.skillslots.SkillSlotsHandler;
-import snownee.skillslots.SkillSlotsModule;
-import snownee.skillslots.client.SkillSlotsClient;
 import snownee.skillslots.skill.Skill;
 
 @KiwiPacket(value = "sync_slots", dir = Direction.PLAY_TO_CLIENT)
 public class SSyncSlotsPacket extends PacketHandler {
 	public static SSyncSlotsPacket I;
 
-	public static void send(ServerPlayer player, boolean filled) {
+	public static void send(ServerPlayer player) {
 		SkillSlotsHandler handler = SkillSlotsHandler.of(player);
 		handler.dirty = false;
 		I.send(player, buf -> {
@@ -33,7 +30,6 @@ public class SSyncSlotsPacket extends PacketHandler {
 			buf.writeByte(handler.chargeIndex);
 			buf.writeBitSet(handler.toggles);
 			buf.writeFloat(handler.acceleration);
-			buf.writeBoolean(filled);
 		});
 	}
 
@@ -50,14 +46,9 @@ public class SSyncSlotsPacket extends PacketHandler {
 		newHandler.chargeIndex = buf.readByte();
 		newHandler.toggles = buf.readBitSet();
 		newHandler.acceleration = buf.readFloat();
-		boolean filled = buf.readBoolean();
 		return executor.apply(() -> {
 			SkillSlotsHandler handler = SkillSlotsHandler.of(Minecraft.getInstance().player);
 			handler.copyFrom(newHandler);
-			if (SkillSlotsClientConfig.chargeCompleteNotificationSound && filled) {
-				// FIXME per skill sound
-				SkillSlotsClient.playSound(SkillSlotsModule.POTION_CHARGE_COMPLETE_SOUND.get(), 0.5F);
-			}
 		});
 	}
 

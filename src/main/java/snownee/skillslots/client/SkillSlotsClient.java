@@ -14,6 +14,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.ItemLike;
+import snownee.skillslots.SkillSlotsCommonConfig;
 import snownee.skillslots.SkillSlotsHandler;
 import snownee.skillslots.SkillSlotsModule;
 import snownee.skillslots.client.gui.UseScreen;
@@ -50,7 +51,7 @@ public final class SkillSlotsClient {
 		}
 		while (kbUse.consumeClick()) {
 			SkillSlotsHandler handler = SkillSlotsHandler.of(mc.player);
-			if (mc.player.isShiftKeyDown()) {
+			if (SkillSlotsCommonConfig.playerCustomizable && mc.player.isShiftKeyDown()) {
 				if (handler.getContainerSize() == 0) {
 					mc.player.displayClientMessage(Component.translatable("msg.skillslots.noSlots"), true);
 					return;

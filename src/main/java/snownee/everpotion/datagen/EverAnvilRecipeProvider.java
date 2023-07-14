@@ -13,25 +13,19 @@ import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.data.recipes.RecipeProvider;
-import net.minecraft.data.recipes.SingleItemRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.PartialNBTIngredient;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.PotionType;
-import snownee.kiwi.recipe.ModuleLoadedCondition;
 import snownee.lychee.Lychee;
-import snownee.skillslots.SkillSlots;
-import snownee.skillslots.SkillSlotsModule;
 
 public class EverAnvilRecipeProvider extends RecipeProvider {
 
@@ -87,12 +81,12 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 			}
 		}
 
-		SingleItemRecipeBuilder stonecutting = SingleItemRecipeBuilder.stonecutting(Ingredient.of(Items.ECHO_SHARD), SkillSlotsModule.UNLOCK_SLOT.get());
-		stonecutting.unlockedBy(getHasName(Items.ECHO_SHARD), has(Items.ECHO_SHARD));
-		ConditionalRecipe.builder()
-				.addCondition(new ModuleLoadedCondition(new ResourceLocation(SkillSlots.ID, "slot_unlock_recipe")))
-				.addRecipe(stonecutting::save)
-				.build(consumer, new ResourceLocation(SkillSlots.ID, "slot_unlock"));
+//		SingleItemRecipeBuilder stonecutting = SingleItemRecipeBuilder.stonecutting(Ingredient.of(Items.ECHO_SHARD), SkillSlotsModule.UNLOCK_SLOT.get());
+//		stonecutting.unlockedBy(getHasName(Items.ECHO_SHARD), has(Items.ECHO_SHARD));
+//		ConditionalRecipe.builder()
+//				.addCondition(new ModuleLoadedCondition(new ResourceLocation(SkillSlots.ID, "slot_unlock_recipe")))
+//				.addRecipe(stonecutting::save)
+//				.build(consumer, new ResourceLocation(SkillSlots.ID, "slot_unlock"));
 	}
 
 	private void register(Potion potion, @Nullable MobEffectInstance effect, PotionType type, float charge, Consumer<FinishedRecipe> consumer) {

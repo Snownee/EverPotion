@@ -75,8 +75,10 @@ public class Skill {
 				}
 			}
 			case ENTITY -> {
-				ServerboundInteractPacket.createInteractionPacket(entityHit.getEntity(), player.isSecondaryUseActive(), InteractionHand.MAIN_HAND).handle(serverPlayer.connection);
-				result = InteractionResult.CONSUME;
+				if (!level.isClientSide) {
+					ServerboundInteractPacket.createInteractionPacket(entityHit.getEntity(), player.isSecondaryUseActive(), InteractionHand.MAIN_HAND).handle(serverPlayer.connection);
+					result = InteractionResult.CONSUME;
+				}
 			}
 			case MISS -> {
 			}

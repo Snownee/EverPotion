@@ -14,6 +14,8 @@ public final class SkillSlotsCommonConfig {
 	@Comment("Damaging mobs can speed up refilling")
 	public static double damageAcceleration = 1;
 	public static boolean interruptedOnHurt;
+	public static boolean playChargeCompleteSound = true;
+	public static boolean playerCustomizable = true;
 
 	@Path("slots.maxSlots")
 	@Range(min = 1, max = 4)

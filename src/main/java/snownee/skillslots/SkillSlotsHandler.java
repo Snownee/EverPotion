@@ -12,13 +12,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import snownee.everpotion.CoreModule;
-import snownee.everpotion.skill.PotionCoreSkill;
 import snownee.kiwi.util.MathUtil;
 import snownee.skillslots.client.SkillSlotsClient;
 import snownee.skillslots.duck.SkillSlotsPlayer;
@@ -60,16 +60,6 @@ public class SkillSlotsHandler extends SimpleContainer {
 		return ((SkillSlotsPlayer) player).skillslots$getHandler();
 	}
 
-	public static Skill createCache(ItemStack stack) {
-		if (stack.isEmpty()) {
-			return Skill.EMPTY;
-		}
-		if (CoreModule.CORE.is(stack)) {
-			return new PotionCoreSkill(stack);
-		}
-		return new Skill(stack);
-	}
-
 	@Override
 	public int getContainerSize() {
 		return slots;
@@ -93,7 +83,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 			if (ItemStack.matches(stack, skills.get(i).item)) {
 				continue;
 			}
-			Skill skill = createCache(stack);
+			Skill skill = SkillSlots.createSkill(stack);
 			skills.set(i, skill);
 			toggles.clear(i);
 			if (owner != null && owner.level.isClientSide && !skill.isEmpty()) {
@@ -214,7 +204,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 		if (!stack.is(SkillSlotsModule.SKILL)) {
 			return false;
 		}
-		Skill skill = createCache(stack);
+		Skill skill = SkillSlots.createSkill(stack);
 		if (skill.isEmpty()) {
 			return false;
 		}
@@ -261,6 +251,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 			}
 			if (skill.progress == chargeDuration) {
 				updateCharge();
+				playChargeCompleteSound(skill);
 			}
 		}
 		if (useIndex != -1) {
@@ -280,7 +271,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 			}
 		}
 		if (dirty && owner instanceof ServerPlayer) {
-			SkillSlotsModule.sync((ServerPlayer) owner, false);
+			SkillSlotsModule.sync((ServerPlayer) owner);
 		}
 	}
 
@@ -349,9 +340,22 @@ public class SkillSlotsHandler extends SimpleContainer {
 			if (duration == 0) {
 				continue;
 			}
+			if (fill && skill.progress < duration) {
+				playChargeCompleteSound(skill);
+			}
 			skill.progress = fill ? duration : 0;
 		}
-		dirty = true;
+		updateCharge();
+	}
+
+	private void playChargeCompleteSound(Skill skill) {
+		if (owner.level.isClientSide || SkillSlotsCommonConfig.playChargeCompleteSound) {
+			return;
+		}
+		SoundEvent sound = skill.getChargeCompleteSound();
+		if (sound != null) {
+			owner.playNotifySound(sound, SoundSource.PLAYERS, 0.5F, 1);
+		}
 	}
 
 }

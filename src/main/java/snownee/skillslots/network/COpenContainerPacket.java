@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import snownee.skillslots.SkillSlotsCommonConfig;
 import snownee.skillslots.menu.PlaceMenu;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.PacketHandler;
@@ -15,6 +16,8 @@ public class COpenContainerPacket extends PacketHandler {
 
 	@Override
 	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
+		if (!SkillSlotsCommonConfig.playerCustomizable)
+			return null;
 		return executor.apply(() -> {
 			sender.openMenu(PlaceMenu.ContainerProvider.INSTANCE);
 		});

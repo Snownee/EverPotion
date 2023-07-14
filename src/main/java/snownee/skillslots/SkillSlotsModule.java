@@ -17,10 +17,12 @@ import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.loader.event.ClientInitEvent;
+import snownee.kiwi.loader.event.InitEvent;
 import snownee.skillslots.item.UnlockSlotItem;
 import snownee.skillslots.menu.PlaceMenu;
 import snownee.skillslots.network.SAbortUsingPacket;
 import snownee.skillslots.network.SSyncSlotsPacket;
+import snownee.skillslots.skill.Skill;
 import snownee.skillslots.util.ClientProxy;
 import snownee.skillslots.util.CommonProxy;
 
@@ -36,11 +38,11 @@ public class SkillSlotsModule extends AbstractModule {
 	public static final KiwiGO<SoundEvent> USE_SHORT_SOUND = go(() -> new SoundEvent(new ResourceLocation(SkillSlots.ID, "use_short")));
 	public static final KiwiGO<SoundEvent> USE_LONG_SOUND = go(() -> new SoundEvent(new ResourceLocation(SkillSlots.ID, "use_long")));
 
-	public static void sync(ServerPlayer player, boolean filled) {
+	public static void sync(ServerPlayer player) {
 		if (CommonProxy.isFakePlayer(player)) {
 			return;
 		}
-		SSyncSlotsPacket.send(player, filled);
+		SSyncSlotsPacket.send(player);
 	}
 
 	public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -48,7 +50,7 @@ public class SkillSlotsModule extends AbstractModule {
 	}
 
 	public static void playerLoggedIn(ServerPlayer player) {
-		sync(player, false);
+		sync(player);
 	}
 
 	public static void causeDamage(DamageSource source, LivingEntity target, float amount) {
@@ -77,6 +79,11 @@ public class SkillSlotsModule extends AbstractModule {
 		SkillSlotsHandler newHandler = SkillSlotsHandler.of(clone);
 		SkillSlotsHandler oldHandler = SkillSlotsHandler.of(original);
 		newHandler.copyFrom(oldHandler);
+	}
+
+	@Override
+	protected void init(InitEvent event) {
+		event.enqueueWork(() -> SkillSlots.SKILL_FACTORIES.add(Skill::new));
 	}
 
 	@Override

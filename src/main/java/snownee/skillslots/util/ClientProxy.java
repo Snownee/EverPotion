@@ -28,10 +28,10 @@ public class ClientProxy {
 	public static void init() {
 		IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		eventBus.addListener(ClientProxy::registerItemColors);
+		eventBus.addListener(ClientProxy::registerKeyMapping);
 
 		MinecraftForge.EVENT_BUS.addListener(ClientProxy::renderOverlay);
 		MinecraftForge.EVENT_BUS.addListener(ClientProxy::onKeyInput);
-		MinecraftForge.EVENT_BUS.addListener(ClientProxy::registerKeyMapping);
 	}
 
 	public static int pickItemColor(ItemStack stack, int fallback) {

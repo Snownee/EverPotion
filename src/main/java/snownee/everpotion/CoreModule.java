@@ -8,11 +8,14 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import snownee.everpotion.entity.EverArrow;
 import snownee.everpotion.item.CoreItem;
+import snownee.everpotion.skill.PotionCoreSkill;
 import snownee.everpotion.util.ClientProxy;
 import snownee.kiwi.AbstractModule;
 import snownee.kiwi.KiwiGO;
 import snownee.kiwi.KiwiModule;
 import snownee.kiwi.loader.event.ClientInitEvent;
+import snownee.kiwi.loader.event.InitEvent;
+import snownee.skillslots.SkillSlots;
 
 @KiwiModule
 public class CoreModule extends AbstractModule {
@@ -23,6 +26,11 @@ public class CoreModule extends AbstractModule {
 	public static final KiwiGO<EntityType<EverArrow>> ARROW = go(() -> EntityType.Builder.<EverArrow>of(EverArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20).build("everpotion:arrow"));
 	public static final KiwiGO<SoundEvent> USE_NORMAL_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "use_normal")));
 	public static final KiwiGO<SoundEvent> USE_SPLASH_SOUND = go(() -> new SoundEvent(new ResourceLocation(EverPotion.ID, "use_splash")));
+
+	@Override
+	protected void init(InitEvent event) {
+		event.enqueueWork(() -> SkillSlots.registerSkillFactory(item -> item.getItem() instanceof CoreItem ? new PotionCoreSkill(item) : null));
+	}
 
 	@Override
 	protected void clientInit(ClientInitEvent event) {
