@@ -4,10 +4,13 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.datafixers.util.Either;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -191,7 +194,18 @@ public class Skill {
 	}
 
 	@Nullable
-	public SoundEvent getChargeCompleteSound() {
-		return SkillSlotsModule.POTION_CHARGE_COMPLETE_SOUND.get();
+	public Either<SoundEvent, ResourceLocation> getChargeCompleteSound() {
+		CompoundTag tag = item.getTagElement("SkillSlots");
+		if (tag != null && tag.contains("ChargeCompleteSound", Tag.TAG_STRING)) {
+			String s = tag.getString("ChargeCompleteSound");
+			if (s.isEmpty()) {
+				return null;
+			}
+			ResourceLocation id = ResourceLocation.tryParse(s);
+			if (id != null) {
+				return Either.right(id);
+			}
+		}
+		return Either.left(SkillSlotsModule.POTION_CHARGE_COMPLETE_SOUND.get());
 	}
 }

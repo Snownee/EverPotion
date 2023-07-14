@@ -2,6 +2,8 @@ package snownee.everpotion.client;
 
 import java.util.function.IntUnaryOperator;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -23,7 +25,7 @@ import snownee.skillslots.client.SkillClientHandler;
 
 public class PotionCoreSkillClientHandler implements SkillClientHandler<PotionCoreSkill> {
 	@Override
-	public void renderGUI(PotionCoreSkill skill, PoseStack matrix, float xCenter, float yCenter, float scale, float alpha, Component name, int textColor) {
+	public void renderGUI(PotionCoreSkill skill, PoseStack matrix, float xCenter, float yCenter, float scale, float alpha, int textColor, MutableInt textYOffset) {
 		Font font = Minecraft.getInstance().font;
 		float yCenter2 = yCenter - 6 * (1 + 0.125f * scale);
 		if (skill.effect != null) {
@@ -47,14 +49,8 @@ public class PotionCoreSkillClientHandler implements SkillClientHandler<PotionCo
 			buffer.vertex(matrix4f, right, top, 0).uv(sprite.getU1(), sprite.getV0()).endVertex();
 			buffer.vertex(matrix4f, left, top, 0).uv(sprite.getU0(), sprite.getV0()).endVertex();
 			BufferUploader.drawWithShader(buffer.end());
-
-			matrix.translate(xCenter, yCenter + 10, 0);
-			matrix.scale(0.75f, 0.75f, 0.75f);
-			GuiComponent.drawCenteredString(matrix, font, name, 0, 0, textColor);
 		} else {
-			matrix.translate(xCenter, yCenter - 3, 0);
-			matrix.scale(0.75f, 0.75f, 0.75f);
-			GuiComponent.drawCenteredString(matrix, font, name, 0, 0, textColor);
+			textYOffset.subtract(13);
 		}
 	}
 

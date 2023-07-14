@@ -2,6 +2,8 @@ package snownee.skillslots.client.gui;
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
@@ -271,7 +273,13 @@ public class UseScreen extends Screen {
 		} else {
 			SkillClientHandler<Skill> handler = SkillSlotsClient.getClientHandler(skill);
 			if (handler != null) {
-				handler.renderGUI(skill, matrix, xCenter, yCenter, scales[index], openTick, name, textColor);
+				MutableInt textYOffset = new MutableInt(0);
+				handler.renderGUI(skill, matrix, xCenter, yCenter, scales[index], openTick, textColor, textYOffset);
+				if (textYOffset.getValue() != Integer.MIN_VALUE) {
+					matrix.translate(xCenter, yCenter + 10 + textYOffset.getValue(), 300);
+					matrix.scale(0.75f, 0.75f, 0.75f);
+					drawCenteredString(matrix, font, name, 0, 0, textColor);
+				}
 			}
 		}
 		matrix.popPose();

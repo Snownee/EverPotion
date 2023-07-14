@@ -1,11 +1,13 @@
 package snownee.skillslots.network;
 
+import java.util.BitSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
 import snownee.kiwi.network.PacketHandler;
@@ -35,20 +37,26 @@ public class SSyncSlotsPacket extends PacketHandler {
 
 	@Override
 	public CompletableFuture<FriendlyByteBuf> receive(Function<Runnable, CompletableFuture<FriendlyByteBuf>> executor, FriendlyByteBuf buf, ServerPlayer sender) {
-		SkillSlotsHandler newHandler = new SkillSlotsHandler();
 		int slots = buf.readByte();
-		newHandler.setSlots(slots);
+		ItemStack[] stacks = new ItemStack[slots];
+		float[] progresses = new float[slots];
 		for (int i = 0; i < slots; i++) {
-			newHandler.setItem(i, buf.readItem());
-			Skill skill = newHandler.skills.get(i);
-			skill.progress = buf.readFloat();
+			stacks[i] = buf.readItem();
+			progresses[i] = buf.readFloat();
 		}
-		newHandler.chargeIndex = buf.readByte();
-		newHandler.toggles = buf.readBitSet();
-		newHandler.acceleration = buf.readFloat();
+		int chargeIndex = buf.readByte();
+		BitSet toggles = buf.readBitSet();
+		float acceleration = buf.readFloat();
 		return executor.apply(() -> {
 			SkillSlotsHandler handler = SkillSlotsHandler.of(Minecraft.getInstance().player);
-			handler.copyFrom(newHandler);
+			handler.setSlots(slots);
+			for (int i = 0; i < slots; i++) {
+				handler.setItem(i, stacks[i]);
+				handler.skills.get(i).progress = progresses[i];
+			}
+			handler.chargeIndex = chargeIndex;
+			handler.toggles = toggles;
+			handler.acceleration = acceleration;
 		});
 	}
 

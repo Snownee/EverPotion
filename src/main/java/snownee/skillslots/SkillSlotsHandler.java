@@ -5,12 +5,15 @@ import java.util.BitSet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.math.Vector3f;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
@@ -351,9 +354,10 @@ public class SkillSlotsHandler extends SimpleContainer {
 		if (owner.level.isClientSide || !SkillSlotsCommonConfig.playChargeCompleteSound) {
 			return;
 		}
-		SoundEvent sound = skill.getChargeCompleteSound();
+		@Nullable Either<SoundEvent, ResourceLocation> sound = skill.getChargeCompleteSound();
 		if (sound != null) {
-			owner.playNotifySound(sound, SoundSource.PLAYERS, 0.5F, 1);
+			sound.ifLeft(s -> owner.playNotifySound(s, SoundSource.PLAYERS, 0.5F, 1));
+			sound.ifRight(s -> ((ServerPlayer) owner).connection.send(new ClientboundCustomSoundPacket(s, SoundSource.PLAYERS, owner.position(), 0.5F, 1, owner.level.getRandom().nextLong())));
 		}
 	}
 
