@@ -12,7 +12,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -40,7 +39,6 @@ public class UseScreen extends Screen {
 	private int useIndex = -1;
 	private float useTicks;
 	private float useTicksTotal;
-	private KeyMapping[] keyBindsHotbar;
 
 	public UseScreen() {
 		super(TITLE);
@@ -51,7 +49,6 @@ public class UseScreen extends Screen {
 		Objects.requireNonNull(minecraft);
 		Objects.requireNonNull(minecraft.player);
 		handler = SkillSlotsHandler.of(minecraft.player);
-		keyBindsHotbar = minecraft.options.keyHotbarSlots;
 	}
 
 	@Override
@@ -105,7 +102,7 @@ public class UseScreen extends Screen {
 		} else {
 			Skill skill = handler.skills.get(clickIndex);
 			if (skill.isEmpty() && clickIndex < handler.getContainerSize() && SkillSlotsCommonConfig.playerCustomizable) {
-				Component tooltip = Component.translatable("tip.skillslots.emptySlot", SkillSlotsClient.kbUse.getTranslatedKeyMessage());
+				Component tooltip = Component.translatable("tip.skillslots.emptySlot", SkillSlotsClient.kbOpen.getTranslatedKeyMessage());
 				renderTooltip(matrix, tooltip, mouseX, mouseY);
 			}
 			if (!skill.isEmpty() && oClickIndex != clickIndex) {
@@ -323,13 +320,13 @@ public class UseScreen extends Screen {
 			return false;
 		}
 		for (int i = 0; i < handler.getContainerSize(); i++) {
-			if (keyBindsHotbar[i].getKey().getValue() == key) {
+			if (SkillSlotsClient.kbUses[i].getKey().getValue() == key) {
 				startUse(i);
 				return true;
 			}
 		}
-		if (SkillSlotsClient.kbUse.getKeyModifier().isActive(null) && SkillSlotsClient.kbUse.getKey().getValue() == key) {
-			if (SkillSlotsClient.kbUse.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
+		if (SkillSlotsClient.kbOpen.getKey().getValue() == key) {
+			if (SkillSlotsClient.kbOpen.getKeyModifier() == KeyModifier.NONE && modifiers != 0) {
 				return false;
 			}
 			onClose();

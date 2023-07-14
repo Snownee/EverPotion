@@ -62,7 +62,7 @@ public class UnlockSlotItem extends ModItem {
 			stack.shrink(1);
 			handler.setSlots(tier);
 		} else if (tier > handler.getContainerSize()) {
-			sendMsg(playerIn, "newSlot", SkillSlotsClient.kbUse.getTranslatedKeyMessage());
+			sendMsg(playerIn, "newSlot", SkillSlotsClient.kbOpen.getTranslatedKeyMessage());
 		}
 		return InteractionResultHolder.sidedSuccess(stack, worldIn.isClientSide);
 	}

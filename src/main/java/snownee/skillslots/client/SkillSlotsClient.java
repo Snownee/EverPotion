@@ -24,9 +24,16 @@ import snownee.skillslots.skill.Skill;
 
 public final class SkillSlotsClient {
 
-	public static final KeyMapping kbUse = new KeyMapping("keybind.skillslots.use", GLFW.GLFW_KEY_R, "gui.skillslots.keygroup");
-
+	public static final KeyMapping kbOpen = new KeyMapping("keybind.skillslots.open", GLFW.GLFW_KEY_R, "gui.skillslots.keygroup");
+	// TODO key bind hint in the UI
+	public static final KeyMapping[] kbUses = new KeyMapping[SkillSlotsHandler.MAX_SLOTS];
 	private static final Map<Class<? extends Skill>, SkillClientHandler<?>> CLIENT_HANDLERS = Maps.newIdentityHashMap();
+
+	static {
+		for (int i = 0; i < kbUses.length; i++) {
+			kbUses[i] = new KeyMapping("keybind.skillslots.use." + (i + 1), GLFW.GLFW_KEY_UNKNOWN, "gui.skillslots.keygroup");
+		}
+	}
 
 	public static void registerItemColors(BiConsumer<ItemColor, ItemLike> consumer) {
 		consumer.accept((stack, i) -> {
@@ -49,17 +56,25 @@ public final class SkillSlotsClient {
 		if (mc.player == null || mc.screen != null || mc.player.isSpectator()) {
 			return;
 		}
-		while (kbUse.consumeClick()) {
-			SkillSlotsHandler handler = SkillSlotsHandler.of(mc.player);
+		SkillSlotsHandler handler = SkillSlotsHandler.of(mc.player);
+		while (kbOpen.consumeClick()) {
 			if (SkillSlotsCommonConfig.playerCustomizable && mc.player.isShiftKeyDown()) {
 				if (handler.getContainerSize() == 0) {
 					mc.player.displayClientMessage(Component.translatable("msg.skillslots.noSlots"), true);
-					return;
+					break;
 				}
 				COpenContainerPacket.I.sendToServer($ -> {
 				});
 			} else {
 				mc.setScreen(new UseScreen());
+			}
+		}
+		for (int i = 0; i < handler.getContainerSize(); i++) {
+			while (kbUses[i].consumeClick()) {
+				if (handler.canUseSlot(i)) {
+					handler.startUsing(i);
+					break;
+				}
 			}
 		}
 	}

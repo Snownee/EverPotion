@@ -2,6 +2,7 @@ package snownee.skillslots.util;
 
 import org.lwjgl.glfw.GLFW;
 
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.world.item.ItemStack;
@@ -10,6 +11,7 @@ import net.minecraftforge.client.event.RegisterColorHandlersEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
+import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -64,7 +66,11 @@ public class ClientProxy {
 	}
 
 	private static void registerKeyMapping(RegisterKeyMappingsEvent event) {
-		event.register(SkillSlotsClient.kbUse);
+		SkillSlotsClient.kbOpen.setKeyConflictContext(KeyConflictContext.IN_GAME);
+		event.register(SkillSlotsClient.kbOpen);
+		for (KeyMapping kbUse : SkillSlotsClient.kbUses) {
+			event.register(kbUse);
+		}
 	}
 
 	private static void registerItemColors(RegisterColorHandlersEvent.Item event) {

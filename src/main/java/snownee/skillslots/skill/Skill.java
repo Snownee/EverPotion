@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +16,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.InstrumentItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.context.UseOnContext;
@@ -138,10 +141,21 @@ public class Skill {
 	}
 
 	public int getUseDuration() {
+		CompoundTag tag = item.getTagElement("SkillSlots");
+		if (tag != null && tag.contains("UseDuration", Tag.TAG_INT)) {
+			return tag.getInt("UseDuration");
+		}
+		if (item.getItem() instanceof InstrumentItem) {
+			return 0;
+		}
 		return item.getUseDuration();
 	}
 
 	public boolean canBeToggled() {
+		CompoundTag tag = item.getTagElement("SkillSlots");
+		if (tag != null && tag.contains("CanBeToggled", Tag.TAG_BYTE)) {
+			return tag.getBoolean("CanBeToggled");
+		}
 		return false;
 	}
 
@@ -153,6 +167,9 @@ public class Skill {
 	}
 
 	public boolean canUse(Player player) {
+		if (getClass() == Skill.class && player.getCooldowns().isOnCooldown(item.getItem())) {
+			return false;
+		}
 		return progress >= getChargeDuration(player);
 	}
 

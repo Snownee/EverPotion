@@ -122,9 +122,9 @@ public class SkillSlotsHandler extends SimpleContainer {
 			}
 		}
 		if (chargeIndex != -1) {
+			chargeIndex = -1;
 			dirty = true;
 		}
-		chargeIndex = -1;
 	}
 
 	@Override
@@ -292,6 +292,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 		if (skill.getUseDuration() == 0) {
 			skill.finishUsing(owner, slot);
 		} else {
+			// TODO reduce player speed
 			useIndex = slot;
 		}
 		if (owner.level.isClientSide) {
@@ -304,7 +305,6 @@ public class SkillSlotsHandler extends SimpleContainer {
 			return;
 		}
 		Skill skill = skills.get(useIndex);
-		// abort sound?
 		skill.abortUsing(owner, useIndex);
 		useIndex = -1;
 		useTick = 0;
@@ -321,7 +321,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 		if (owner != null && useIndex == -1) {
 			Skill skill = skills.get(slot);
 			if (skill.canBeToggled()) {
-				return false;
+				return true;
 			}
 			return skill.canUse(owner);
 		}
@@ -334,7 +334,6 @@ public class SkillSlotsHandler extends SimpleContainer {
 	}
 
 	public void setAll(boolean fill) {
-		chargeIndex = -1;
 		for (Skill skill : skills) {
 			int duration = skill.getChargeDuration(owner);
 			if (duration == 0) {
@@ -349,7 +348,7 @@ public class SkillSlotsHandler extends SimpleContainer {
 	}
 
 	private void playChargeCompleteSound(Skill skill) {
-		if (owner.level.isClientSide || SkillSlotsCommonConfig.playChargeCompleteSound) {
+		if (owner.level.isClientSide || !SkillSlotsCommonConfig.playChargeCompleteSound) {
 			return;
 		}
 		SoundEvent sound = skill.getChargeCompleteSound();

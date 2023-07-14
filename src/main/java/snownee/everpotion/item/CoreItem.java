@@ -28,6 +28,7 @@ import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
+import snownee.skillslots.SkillSlotsCommonConfig;
 import snownee.skillslots.menu.PlaceMenu;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
@@ -130,7 +131,7 @@ public class CoreItem extends ModItem {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-		if (!worldIn.isClientSide) {
+		if (!worldIn.isClientSide && SkillSlotsCommonConfig.playerCustomizable) {
 			playerIn.openMenu(PlaceMenu.ContainerProvider.INSTANCE);
 		}
 		return InteractionResultHolder.success(playerIn.getItemInHand(handIn));
