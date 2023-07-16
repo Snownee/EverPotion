@@ -1,7 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "skillslots:item/unlock_slot",
-    "layer1": "skillslots:item/unlock_slot_overlay"
-  }
-}

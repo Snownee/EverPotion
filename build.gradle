@@ -171,6 +171,7 @@ repositories {
     //    name = "jei"
     //    url = "https://dvs1.progwml6.com/files/maven"
     //}
+    maven { url "https://api.modrinth.com/maven" }
     maven {
         url = "https://www.cursemaven.com"
 		content {
@@ -208,6 +209,7 @@ dependencies {
     implementation fg.deobf("curse.maven:lychee-567403:4547502")
     implementation fg.deobf("curse.maven:kiwi-303657:4451128")
 	annotationProcessor "curse.maven:kiwi-303657:4451128"
+    implementation fg.deobf("maven.modrinth:skill-slots:PRMMrbQp")
 
     // Examples using mod jars from ./libs
     //implementation fg.deobf("libs:Kiwi-1.18-forge:5.2.4")

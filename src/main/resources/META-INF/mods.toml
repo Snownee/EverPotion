@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="[42,)"
-license="MIT"
+license="ARR"
 
 [[mods]]
 modId="everpotion"
@@ -14,6 +14,13 @@ description="Refillable potions"
     modId="kiwi"
     mandatory=true
     versionRange="[8, 9)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.everpotion]]
+    modId="skillslots"
+    mandatory=true
+    versionRange="[1, 2)"
     ordering="NONE"
     side="BOTH"
 

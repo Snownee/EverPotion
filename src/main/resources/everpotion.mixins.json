@@ -4,9 +4,7 @@
   "compatibilityLevel": "JAVA_16",
   "refmap": "everpotion.refmap.json",
   "mixins": [
-    "EntityMixin",
-    "ArrowItemMixin",
-    "PlayerMixin"
+    "ArrowItemMixin"
   ],
   "client": [
     "client.ItemRendererMixin"

@@ -1,18 +1,6 @@
 {
   "replace": false,
   "values": [
-    "everpotion:core",
-    "ender_pearl",
-    "goat_horn",
-    "potion",
-    "splash_potion",
-    "lingering_potion",
-    "flint_and_steel",
-    "fire_charge",
-    "shears",
-    "snowball",
-    "egg",
-    "ender_eye",
-    "experience_bottle"
+    "everpotion:core"
   ]
 }
