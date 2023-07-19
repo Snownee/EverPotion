@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "everpotion",
+  "version": "${version}",
+
+  "name": "EverPotion",
+  "description": "Adds reusable potions.",
+  "authors": ["Snownee"],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/everpotion-fabric",
+    "sources": "https://github.com/Snownee/EverPotion",
+    "issues": "https://github.com/Snownee/EverPotion/issues"
+  },
+
+  "license": "ARR",
+
+  "entrypoints": {
+    "jei_mod_plugin": [
+      "snownee.everpotion.compat.JEIPlugin"
+    ],
+    "fabric-datagen": [
+      "snownee.everpotion.util.CommonProxy"
+    ]
+  },
+  "mixins": [ "everpotion.mixins.json" ],
+
+  "depends": {
+    "fabricloader": ">=0.14",
+    "java": ">=17",
+    "skillslots": ">=1"
+  },
+  "recommends": {
+    "lychee": ">=3.12"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/KzGQW7a"
+      }
+    }
+  }
+}

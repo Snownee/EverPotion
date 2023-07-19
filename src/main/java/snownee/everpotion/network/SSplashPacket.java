@@ -3,6 +3,7 @@ package snownee.everpotion.network;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.particle.Particle;
@@ -15,7 +16,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
 import snownee.everpotion.CoreModule;
 import snownee.kiwi.network.KiwiPacket;
 import snownee.kiwi.network.KiwiPacket.Direction;
@@ -65,7 +65,7 @@ public class SSplashPacket extends PacketHandler {
 	}
 
 	public static void send(Entity entity, int color, boolean instant) {
-		I.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity), buf -> {
+		I.send(PlayerLookup.tracking(entity), buf -> {
 			buf.writeBlockPos(entity.blockPosition());
 			buf.writeInt(color);
 			buf.writeBoolean(instant);

@@ -1,16 +1,23 @@
 {
   "type": "lychee:anvil_crafting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "lychee"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "lychee"
+      ]
     }
   ],
   "item_in": [
     {
-      "type": "forge:partial_nbt",
-      "item": "minecraft:lingering_potion",
-      "nbt": "{Potion:\"minecraft:long_poison\"}"
+      "base": {
+        "item": "minecraft:lingering_potion"
+      },
+      "fabric:type": "fabric:nbt",
+      "nbt": {
+        "Potion": "minecraft:long_poison"
+      },
+      "strict": false
     },
     {
       "tag": "everpotion:ingredient"
@@ -22,8 +29,7 @@
       "Effect": {
         "Amplifier": 0,
         "Duration": 1800,
-        "Id": 19,
-        "forge:id": "minecraft:poison"
+        "Id": 19
       },
       "Type": 2
     }

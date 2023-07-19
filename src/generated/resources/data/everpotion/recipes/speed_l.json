@@ -1,16 +1,23 @@
 {
   "type": "lychee:anvil_crafting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "lychee"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "lychee"
+      ]
     }
   ],
   "item_in": [
     {
-      "type": "forge:partial_nbt",
-      "item": "minecraft:lingering_potion",
-      "nbt": "{Potion:\"minecraft:strong_swiftness\"}"
+      "base": {
+        "item": "minecraft:lingering_potion"
+      },
+      "fabric:type": "fabric:nbt",
+      "nbt": {
+        "Potion": "minecraft:strong_swiftness"
+      },
+      "strict": false
     },
     {
       "tag": "everpotion:ingredient"
@@ -22,8 +29,7 @@
       "Effect": {
         "Amplifier": 1,
         "Duration": 1800,
-        "Id": 1,
-        "forge:id": "minecraft:speed"
+        "Id": 1
       },
       "Type": 2
     }

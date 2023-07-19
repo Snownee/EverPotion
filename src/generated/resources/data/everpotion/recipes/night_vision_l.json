@@ -1,16 +1,23 @@
 {
   "type": "lychee:anvil_crafting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "lychee"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "lychee"
+      ]
     }
   ],
   "item_in": [
     {
-      "type": "forge:partial_nbt",
-      "item": "minecraft:lingering_potion",
-      "nbt": "{Potion:\"minecraft:long_night_vision\"}"
+      "base": {
+        "item": "minecraft:lingering_potion"
+      },
+      "fabric:type": "fabric:nbt",
+      "nbt": {
+        "Potion": "minecraft:long_night_vision"
+      },
+      "strict": false
     },
     {
       "tag": "everpotion:ingredient"
@@ -23,8 +30,7 @@
       "Effect": {
         "Amplifier": 0,
         "Duration": 9600,
-        "Id": 16,
-        "forge:id": "minecraft:night_vision"
+        "Id": 16
       },
       "Type": 2
     }

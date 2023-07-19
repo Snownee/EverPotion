@@ -1,16 +1,23 @@
 {
   "type": "lychee:anvil_crafting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "lychee"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "lychee"
+      ]
     }
   ],
   "item_in": [
     {
-      "type": "forge:partial_nbt",
-      "item": "minecraft:potion",
-      "nbt": "{Potion:\"minecraft:long_weakness\"}"
+      "base": {
+        "item": "minecraft:potion"
+      },
+      "fabric:type": "fabric:nbt",
+      "nbt": {
+        "Potion": "minecraft:long_weakness"
+      },
+      "strict": false
     },
     {
       "tag": "everpotion:ingredient"
@@ -22,8 +29,7 @@
       "Effect": {
         "Amplifier": 0,
         "Duration": 4800,
-        "Id": 18,
-        "forge:id": "minecraft:weakness"
+        "Id": 18
       },
       "Type": 0
     }

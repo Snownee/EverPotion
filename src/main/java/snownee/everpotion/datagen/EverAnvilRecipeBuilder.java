@@ -4,21 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import net.fabricmc.fabric.api.resource.conditions.v1.ConditionJsonProvider;
+import net.fabricmc.fabric.api.resource.conditions.v1.DefaultResourceConditions;
 import net.minecraft.core.Registry;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
@@ -32,7 +31,7 @@ import snownee.lychee.util.LUtil;
 public class EverAnvilRecipeBuilder implements FinishedRecipe {
 
 	private final ItemStack output;
-	protected List<ICondition> conditions = new ArrayList<>();
+	protected List<ConditionJsonProvider> conditions = new ArrayList<>();
 	private Ingredient left;
 	private Ingredient right;
 	private int levelCost;
@@ -100,14 +99,14 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 	}
 
 	public EverAnvilRecipeBuilder whenModLoaded(String modid) {
-		return withCondition(new ModLoadedCondition(modid));
+		return withCondition(DefaultResourceConditions.allModsLoaded(modid));
 	}
 
 	public EverAnvilRecipeBuilder whenModuleLoaded(ResourceLocation moduleId) {
-		return withCondition(new ModuleLoadedCondition(moduleId));
+		return withCondition(ModuleLoadedCondition.provider(moduleId));
 	}
 
-	public EverAnvilRecipeBuilder withCondition(ICondition condition) {
+	public EverAnvilRecipeBuilder withCondition(ConditionJsonProvider condition) {
 		conditions.add(condition);
 		return this;
 	}
@@ -132,9 +131,7 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 		}
 		if (conditions.isEmpty())
 			return;
-		JsonArray conds = new JsonArray();
-		conditions.forEach(c -> conds.add(CraftingHelper.serialize(c)));
-		json.add("conditions", conds);
+		ConditionJsonProvider.write(json, conditions.toArray(ConditionJsonProvider[]::new));
 	}
 
 	@Override

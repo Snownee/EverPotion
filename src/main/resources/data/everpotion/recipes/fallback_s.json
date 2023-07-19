@@ -9,10 +9,10 @@
     }
   ],
   "level_cost": 10,
-  "conditions": [
+  "fabric:load_conditions": [
     {
       "module": "everpotion:fallback_recipe",
-      "type": "kiwi:is_loaded"
+      "condition": "kiwi:is_loaded"
     }
   ]
 }

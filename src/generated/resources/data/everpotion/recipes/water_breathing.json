@@ -1,16 +1,23 @@
 {
   "type": "lychee:anvil_crafting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "lychee"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "lychee"
+      ]
     }
   ],
   "item_in": [
     {
-      "type": "forge:partial_nbt",
-      "item": "minecraft:potion",
-      "nbt": "{Potion:\"minecraft:long_water_breathing\"}"
+      "base": {
+        "item": "minecraft:potion"
+      },
+      "fabric:type": "fabric:nbt",
+      "nbt": {
+        "Potion": "minecraft:long_water_breathing"
+      },
+      "strict": false
     },
     {
       "tag": "everpotion:ingredient"
@@ -22,8 +29,7 @@
       "Effect": {
         "Amplifier": 0,
         "Duration": 9600,
-        "Id": 13,
-        "forge:id": "minecraft:water_breathing"
+        "Id": 13
       },
       "Type": 0
     }

@@ -1,0 +1,33 @@
+{
+  "KiwiModule": [
+    {
+      "target": "snownee.everpotion.CoreModule"
+    },
+    {
+      "target": "snownee.everpotion.crafting.FallbackRecipeModule",
+      "data": {
+        "value": "fallback_recipe",
+        "dependencies": "lychee"
+      }
+    }
+  ],
+  "Optional": [
+    {
+      "target": "snownee.everpotion.crafting.FallbackRecipeModule"
+    }
+  ],
+  "KiwiConfig": [
+    {
+      "target": "snownee.everpotion.EverCommonConfig"
+    }
+  ],
+  "KiwiPacket": [
+    {
+      "target": "snownee.everpotion.network.SSplashPacket",
+      "data": {
+        "dir": "PLAY_TO_CLIENT",
+        "value": "splash"
+      }
+    }
+  ]
+}

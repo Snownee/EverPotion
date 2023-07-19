@@ -3,16 +3,17 @@ package snownee.everpotion.datagen;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 
+import net.fabricmc.fabric.api.datagen.v1.FabricDataGenerator;
+import net.fabricmc.fabric.api.datagen.v1.provider.FabricRecipeProvider;
+import net.fabricmc.fabric.api.recipe.v1.ingredient.DefaultCustomIngredients;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -22,17 +23,16 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.crafting.PartialNBTIngredient;
 import snownee.everpotion.CoreModule;
 import snownee.everpotion.PotionType;
 import snownee.lychee.Lychee;
 
-public class EverAnvilRecipeProvider extends RecipeProvider {
+public class EverAnvilRecipeProvider extends FabricRecipeProvider {
 
 	private static final Ingredient RIGHT = Ingredient.of(CoreModule.INGREDIENT);
 
 	public EverAnvilRecipeProvider(DataGenerator generatorIn) {
-		super(generatorIn);
+		super((FabricDataGenerator) generatorIn);
 	}
 
 	private static boolean accept(MobEffectInstance effect) {
@@ -58,7 +58,7 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 	}
 
 	@Override
-	protected void buildCraftingRecipes(Consumer<FinishedRecipe> consumer) {
+	protected void generateRecipes(Consumer<FinishedRecipe> consumer) {
 		register(Potions.WATER, null, PotionType.SPLASH, 2, consumer);
 		Map<MobEffect, Pair<MobEffectInstance, Potion>> effects = Maps.newHashMap();
 		for (Potion potion : Registry.POTION) {
@@ -91,7 +91,7 @@ public class EverAnvilRecipeProvider extends RecipeProvider {
 
 	private void register(Potion potion, @Nullable MobEffectInstance effect, PotionType type, float charge, Consumer<FinishedRecipe> consumer) {
 		ItemStack potionItem = PotionUtils.setPotion(new ItemStack(type.potionItem), potion);
-		Ingredient left = PartialNBTIngredient.of(type.potionItem, potionItem.getOrCreateTag());
+		Ingredient left = DefaultCustomIngredients.nbt(potionItem, false);
 		EverAnvilRecipeBuilder.coreRecipe(effect, type, charge).left(left).right(RIGHT).levelCost(type.level).whenModLoaded(Lychee.ID).build(consumer);
 	}
 

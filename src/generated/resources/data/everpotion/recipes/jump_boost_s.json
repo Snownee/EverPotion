@@ -1,16 +1,23 @@
 {
   "type": "lychee:anvil_crafting",
-  "conditions": [
+  "fabric:load_conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "lychee"
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "lychee"
+      ]
     }
   ],
   "item_in": [
     {
-      "type": "forge:partial_nbt",
-      "item": "minecraft:splash_potion",
-      "nbt": "{Potion:\"minecraft:strong_leaping\"}"
+      "base": {
+        "item": "minecraft:splash_potion"
+      },
+      "fabric:type": "fabric:nbt",
+      "nbt": {
+        "Potion": "minecraft:strong_leaping"
+      },
+      "strict": false
     },
     {
       "tag": "everpotion:ingredient"
@@ -22,8 +29,7 @@
       "Effect": {
         "Amplifier": 1,
         "Duration": 1800,
-        "Id": 8,
-        "forge:id": "minecraft:jump_boost"
+        "Id": 8
       },
       "Type": 1
     }
