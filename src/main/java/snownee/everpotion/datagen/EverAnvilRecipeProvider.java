@@ -3,9 +3,8 @@ package snownee.everpotion.datagen;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Maps;
 

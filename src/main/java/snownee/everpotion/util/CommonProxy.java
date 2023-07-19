@@ -21,7 +21,6 @@ public class CommonProxy {
 		if (Platform.isPhysicalClient()) {
 			ClientProxy.init();
 		}
-		new snownee.skillslots.util.CommonProxy();
 	}
 
 	public static Packet<?> getEntitySpawningPacket(Entity entity) {

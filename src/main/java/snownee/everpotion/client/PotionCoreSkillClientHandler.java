@@ -14,19 +14,15 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.MobEffectTextureManager;
-import net.minecraft.network.chat.Component;
 import snownee.everpotion.skill.PotionCoreSkill;
 import snownee.skillslots.client.SkillClientHandler;
 
 public class PotionCoreSkillClientHandler implements SkillClientHandler<PotionCoreSkill> {
 	@Override
 	public void renderGUI(PotionCoreSkill skill, PoseStack matrix, float xCenter, float yCenter, float scale, float alpha, int textColor, MutableInt textYOffset) {
-		Font font = Minecraft.getInstance().font;
 		float yCenter2 = yCenter - 6 * (1 + 0.125f * scale);
 		if (skill.effect != null) {
 			RenderSystem.setShaderColor(1, 1, 1, alpha);

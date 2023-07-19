@@ -31,7 +31,7 @@ public class ClientProxy {
 
 	public static void loadComplete() {
 		ItemProperties.register(CoreModule.CORE.get(), new ResourceLocation("type"), (stack, world, entity, seed) -> {
-			return CoreItem.getPotionType(stack).ordinal();
+			return CoreItem.getPotionType(stack).ordinal() * 0.1F;
 		});
 		SkillSlotsClient.registerClientHandler(PotionCoreSkill.class, new PotionCoreSkillClientHandler());
 	}

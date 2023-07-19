@@ -3,7 +3,8 @@ package snownee.everpotion.item;
 import java.util.List;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.Registry;
@@ -28,11 +29,11 @@ import snownee.everpotion.CoreModule;
 import snownee.everpotion.EverCommonConfig;
 import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
-import snownee.skillslots.SkillSlotsCommonConfig;
-import snownee.skillslots.menu.PlaceMenu;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
 import snownee.lychee.util.LUtil;
+import snownee.skillslots.SkillSlotsCommonConfig;
+import snownee.skillslots.menu.PlaceMenu;
 
 public class CoreItem extends ModItem {
 
@@ -107,6 +108,7 @@ public class CoreItem extends ModItem {
 			return;
 		}
 		if (!EverPotion.hasLychee) {
+			items.add(getDefaultInstance());
 			return;
 		}
 		RecipeType<? extends Recipe<?>> recipeType = Registry.RECIPE_TYPE.get(new ResourceLocation("lychee:anvil_crafting"));
@@ -137,4 +139,8 @@ public class CoreItem extends ModItem {
 		return InteractionResultHolder.success(playerIn.getItemInHand(handIn));
 	}
 
+	@Override
+	public ItemStack getDefaultInstance() {
+		return make(null, PotionType.SPLASH, 1);
+	}
 }
