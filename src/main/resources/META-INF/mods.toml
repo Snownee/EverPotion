@@ -27,7 +27,7 @@ description="Refillable potions"
 [[dependencies.everpotion]]
     modId="lychee"
     mandatory=false
-    versionRange="[3.11,)"
+    versionRange="[3.14,)"
     ordering="NONE"
     side="BOTH"
 

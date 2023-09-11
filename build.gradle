@@ -206,7 +206,7 @@ dependencies {
 	
     implementation fg.deobf("curse.maven:jei-238222:4615177")
     implementation fg.deobf("curse.maven:jade-324717:4433884")
-    implementation fg.deobf("curse.maven:lychee-567403:4547502")
+    implementation fg.deobf("curse.maven:lychee-567403:4721966")
     implementation fg.deobf("curse.maven:kiwi-303657:4451128")
 	annotationProcessor "curse.maven:kiwi-303657:4451128"
     implementation fg.deobf("maven.modrinth:skill-slots:oH1gv7r0")
