@@ -26,7 +26,7 @@ import snownee.kiwi.util.Util;
 import snownee.lychee.RecipeSerializers;
 import snownee.lychee.anvil_crafting.AnvilCraftingRecipe;
 import snownee.lychee.core.recipe.LycheeRecipe;
-import snownee.lychee.util.LUtil;
+import snownee.lychee.util.CommonProxy;
 
 public class EverAnvilRecipeBuilder implements FinishedRecipe {
 
@@ -120,7 +120,7 @@ public class EverAnvilRecipeBuilder implements FinishedRecipe {
 		JsonObject itemOut = new JsonObject();
 		itemOut.addProperty("item", Registry.ITEM.getKey(output.getItem()).toString());
 		if (output.hasTag()) {
-			itemOut.add("lychee:tag", LUtil.tagToJson(output.getTag()));
+			itemOut.add("lychee:tag", CommonProxy.tagToJson(output.getTag()));
 		}
 		json.add("item_out", itemOut);
 		if (levelCost > 1) {

@@ -30,7 +30,10 @@
     "skillslots": ">=1"
   },
   "recommends": {
-    "lychee": ">=3.12"
+    "lychee": ">=3.14"
+  },
+  "breaks": {
+    "lychee": "<3.14"
   },
 
   "custom": {

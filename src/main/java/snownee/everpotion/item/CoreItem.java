@@ -31,7 +31,7 @@ import snownee.everpotion.EverPotion;
 import snownee.everpotion.PotionType;
 import snownee.kiwi.item.ModItem;
 import snownee.kiwi.util.NBTHelper;
-import snownee.lychee.util.LUtil;
+import snownee.lychee.util.CommonProxy;
 import snownee.skillslots.SkillSlotsCommonConfig;
 import snownee.skillslots.menu.PlaceMenu;
 
@@ -113,7 +113,7 @@ public class CoreItem extends ModItem {
 		}
 		RecipeType<? extends Recipe<?>> recipeType = Registry.RECIPE_TYPE.get(new ResourceLocation("lychee:anvil_crafting"));
 		/* off */
-		items.addAll(LUtil.recipes(recipeType).stream()
+		items.addAll(CommonProxy.recipes(recipeType).stream()
 				.map(Recipe::getResultItem)
 				.filter(CoreModule.CORE::is)
 				.sorted((a, b) -> {
